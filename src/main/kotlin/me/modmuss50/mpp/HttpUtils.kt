@@ -1,32 +1,43 @@
 package me.modmuss50.mpp
 
 import kotlinx.serialization.json.Json
-import java.net.URI
-import java.net.http.HttpClient
-import java.net.http.HttpRequest
-import java.net.http.HttpResponse
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody
+import java.io.IOException
 
 object HttpUtils {
-    val httpClient: HttpClient = HttpClient.newHttpClient()
+    val httpClient = OkHttpClient()
 
-    inline fun <reified T> get(url: String): T {
+    inline fun <reified T> get(url: String, headers: Map<String, String>): T {
         return request(
-            HttpRequest.newBuilder()
-                .uri(URI.create(url)),
+            Request.Builder()
+                .url(url),
+            headers,
         )
     }
 
-    inline fun <reified T> post(url: String): T {
-        TODO("Write a multipart/form-data impl")
+    inline fun <reified T> post(url: String, body: RequestBody, headers: Map<String, String>): T {
         return request(
-            HttpRequest.newBuilder()
-                .uri(URI.create(url)),
+            Request.Builder()
+                .url(url)
+                .post(body),
+            headers,
         )
     }
 
-    inline fun <reified T> request(requestBuilder: HttpRequest.Builder): T {
+    inline fun <reified T> request(requestBuilder: Request.Builder, headers: Map<String, String>): T {
+        for ((name, value) in headers) {
+            requestBuilder.header(name, value)
+        }
+
         val request = requestBuilder.build()
-        val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
-        return Json.decodeFromString<T>(response.body())
+        httpClient.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) {
+                throw IOException("Unexpected code $response")
+            }
+
+            return Json.decodeFromString<T>(response.body!!.string())
+        }
     }
 }
