@@ -21,6 +21,7 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
 
     testImplementation(kotlin("test"))
+    testImplementation("io.javalin:javalin:5.6.1")
 }
 
 tasks.withType(KotlinCompile::class.java).all {

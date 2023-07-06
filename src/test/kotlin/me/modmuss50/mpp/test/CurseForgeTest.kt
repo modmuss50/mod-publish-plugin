@@ -14,13 +14,14 @@ class CurseForgeTest : IntegrationTest {
                 import me.modmuss50.mpp.platforms.curseforge.CurseForge
 
                 publishMods {
-                    file = tasks.jar.flatMap { it.archiveFile }
+                    file = tasks.jar.flatMap { it.archiveFile } // TODO is this really the best way?
                     changelog = "Hello!"
                     version = "1.0.0"
                     type = PublishOptions.ReleaseType.BETA
 
                     curseForge {
                         accessToken = "123"
+                        projectId = "123456"
                         minecraftVersions.add("1.20.1")
                     }
                 }
