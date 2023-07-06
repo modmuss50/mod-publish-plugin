@@ -8,7 +8,7 @@ import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.InputFiles
 
 // Contains options shared by each platform and the extension
-interface PlatformOptions {
+interface PublishOptions {
     @get:InputFile
     val file: RegularFileProperty
     @get:Input
@@ -20,7 +20,7 @@ interface PlatformOptions {
     @get:InputFiles
     val additionalFiles: ConfigurableFileCollection
 
-    fun from(other: PlatformOptions) {
+    fun from(other: PublishOptions) {
         file.set(other.file)
         version.set(other.version)
         changelog.set(other.changelog)

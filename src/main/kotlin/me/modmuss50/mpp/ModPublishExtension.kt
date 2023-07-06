@@ -4,7 +4,7 @@ import org.gradle.api.ExtensiblePolymorphicDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.provider.Property
 
-abstract class ModPublishExtension(val project: Project): PlatformOptions {
+abstract class ModPublishExtension(val project: Project): PublishOptions {
     abstract val allowNoneSemver: Property<Boolean>
     abstract val dryRun: Property<Boolean>
     abstract val maxRetries: Property<Int>

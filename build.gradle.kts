@@ -15,16 +15,22 @@ repositories {
 
 dependencies {
     implementation(gradleApi())
+    testImplementation(kotlin("test"))
 }
 
 tasks.withType(KotlinCompile::class.java).all {
     kotlinOptions {
         jvmTarget = "17"
+        freeCompilerArgs = listOf("-Xjvm-default=all")
     }
 }
 
 tasks.withType(JavaCompile::class.java).all {
     options.release = 17
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 gradlePlugin {
