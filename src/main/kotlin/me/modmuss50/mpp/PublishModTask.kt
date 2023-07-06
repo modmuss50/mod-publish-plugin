@@ -18,6 +18,11 @@ abstract class PublishModTask @Inject constructor(@Nested val platform: Platform
 
     @TaskAction
     fun publish() {
+        if (project.modPublishExtension.dryRun.get()) {
+            TODO("Check the file exists")
+            return
+        }
+
         val workQueue = workerExecutor.noIsolation()
         platform.publish(workQueue)
     }

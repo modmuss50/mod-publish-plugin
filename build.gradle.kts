@@ -3,7 +3,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     `java-gradle-plugin`
     `maven-publish`
-    id("org.jetbrains.kotlin.jvm") version "1.8.20"
+    kotlin("jvm") version "1.8.20"
+    kotlin("plugin.serialization") version "1.8.20"
     id("com.diffplug.spotless") version "6.18.0"
 }
 
@@ -16,6 +17,8 @@ repositories {
 
 dependencies {
     implementation(gradleApi())
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
+
     testImplementation(kotlin("test"))
 }
 
