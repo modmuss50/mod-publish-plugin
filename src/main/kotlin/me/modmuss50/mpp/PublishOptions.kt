@@ -11,12 +11,15 @@ import org.gradle.api.tasks.InputFiles
 interface PublishOptions {
     @get:InputFile
     val file: RegularFileProperty
+
     @get:Input
     val version: Property<String> // Should this use a TextResource?
     @get:Input
     val changelog: Property<String>
+
     @get:Input
     val type: Property<ReleaseType>
+
     @get:InputFiles
     val additionalFiles: ConfigurableFileCollection
 
@@ -31,6 +34,6 @@ interface PublishOptions {
     enum class ReleaseType {
         STABLE,
         BETA,
-        ALPHA
+        ALPHA,
     }
 }

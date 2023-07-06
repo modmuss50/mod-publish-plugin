@@ -8,7 +8,7 @@ import org.gradle.api.Project
 import org.gradle.configurationcache.extensions.capitalized
 
 @Suppress("unused")
-class MppPlugin: Plugin<Project> {
+class MppPlugin : Plugin<Project> {
     override fun apply(project: Project) {
         val extension = project.extensions.create("publishMods", ModPublishExtension::class.java, project)
 

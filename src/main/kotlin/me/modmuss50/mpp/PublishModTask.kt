@@ -8,7 +8,7 @@ import org.gradle.workers.WorkerExecutor
 import javax.inject.Inject
 
 @DisableCachingByDefault(because = "Re-upload mod each time")
-abstract class PublishModTask @Inject constructor(@Nested val platform: Platform): DefaultTask() {
+abstract class PublishModTask @Inject constructor(@Nested val platform: Platform) : DefaultTask() {
     @get:Inject
     protected abstract val workerExecutor: WorkerExecutor
 

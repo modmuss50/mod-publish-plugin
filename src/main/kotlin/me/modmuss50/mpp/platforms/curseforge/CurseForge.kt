@@ -9,7 +9,7 @@ import org.gradle.workers.WorkParameters
 import org.gradle.workers.WorkQueue
 import javax.inject.Inject
 
-interface CurseForgeOptions: PlatformOptions {
+interface CurseForgeOptions : PlatformOptions {
     @get:Input
     val minecraftVersions: ListProperty<String>
 
@@ -19,17 +19,16 @@ interface CurseForgeOptions: PlatformOptions {
     }
 }
 
-abstract class CurseForge @Inject constructor(name: String): Platform(name), CurseForgeOptions {
+abstract class CurseForge @Inject constructor(name: String) : Platform(name), CurseForgeOptions {
     override fun publish(queue: WorkQueue) {
         queue.submit(UploadWorkAction::class.java) {
             it.from(this)
         }
     }
 
-    interface UploadParams: WorkParameters, CurseForgeOptions {
-    }
+    interface UploadParams : WorkParameters, CurseForgeOptions
 
-    abstract class UploadWorkAction: WorkAction<UploadParams> {
+    abstract class UploadWorkAction : WorkAction<UploadParams> {
         override fun execute() {
             TODO("Not yet implemented")
         }

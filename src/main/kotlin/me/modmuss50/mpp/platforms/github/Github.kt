@@ -7,23 +7,22 @@ import org.gradle.workers.WorkParameters
 import org.gradle.workers.WorkQueue
 import javax.inject.Inject
 
-interface GithubOptions: PlatformOptions {
+interface GithubOptions : PlatformOptions {
     fun from(other: GithubOptions) {
         super.from(other)
     }
 }
 
-abstract class Github @Inject constructor(name: String): Platform(name), GithubOptions {
+abstract class Github @Inject constructor(name: String) : Platform(name), GithubOptions {
     override fun publish(queue: WorkQueue) {
         queue.submit(UploadWorkAction::class.java) {
             it.from(this)
         }
     }
 
-    interface UploadParams: WorkParameters, GithubOptions {
-    }
+    interface UploadParams : WorkParameters, GithubOptions
 
-    abstract class UploadWorkAction: WorkAction<UploadParams> {
+    abstract class UploadWorkAction : WorkAction<UploadParams> {
         override fun execute() {
             TODO("Not yet implemented")
         }

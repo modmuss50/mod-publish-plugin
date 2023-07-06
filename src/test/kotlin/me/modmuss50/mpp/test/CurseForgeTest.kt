@@ -1,10 +1,37 @@
 package me.modmuss50.mpp.test
 
-import org.junit.jupiter.api.Test
+import org.gradle.testkit.runner.TaskOutcome
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
-class CurseForgeTest {
+class CurseForgeTest : IntegrationTest {
     @Test
     fun name() {
-        TODO("Not yet implemented")
+        val result = gradleTest()
+            .buildScript(
+                """
+                import me.modmuss50.mpp.PublishOptions
+                import me.modmuss50.mpp.platforms.curseforge.CurseForge
+
+                publishMods {
+                    file = tasks.jar.flatMap { it.archiveFile }
+                    changelog = "Hello!"
+                    version = "1.0.0"
+                    type = PublishOptions.ReleaseType.BETA
+                
+                    maxRetries = 5
+                
+                    platforms {
+                        register("curseForge", CurseForge::class.java) {
+                            accessToken = "123"
+                            minecraftVersions.add("1.20.1")
+                        }
+                    }
+                }
+                """.trimIndent(),
+            )
+            .run("publishCurseForge")
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishCurseForge")!!.outcome)
     }
 }

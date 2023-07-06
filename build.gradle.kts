@@ -4,6 +4,7 @@ plugins {
     `java-gradle-plugin`
     `maven-publish`
     id("org.jetbrains.kotlin.jvm") version "1.8.20"
+    id("com.diffplug.spotless") version "6.18.0"
 }
 
 group = "me.modmuss50"
@@ -31,6 +32,12 @@ tasks.withType(JavaCompile::class.java).all {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+spotless {
+    kotlin {
+        ktlint()
+    }
 }
 
 gradlePlugin {

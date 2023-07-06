@@ -6,7 +6,7 @@ import org.gradle.api.tasks.Input
 import org.gradle.workers.WorkQueue
 import javax.inject.Inject
 
-interface PlatformOptions: PublishOptions {
+interface PlatformOptions : PublishOptions {
     @get:Input
     val accessToken: Property<String>
 
@@ -16,7 +16,7 @@ interface PlatformOptions: PublishOptions {
     }
 }
 
-abstract class Platform @Inject constructor(private val name: String): Named, PlatformOptions {
+abstract class Platform @Inject constructor(private val name: String) : Named, PlatformOptions {
     abstract fun publish(queue: WorkQueue)
 
     @Input
