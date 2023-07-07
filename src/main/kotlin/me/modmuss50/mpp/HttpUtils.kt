@@ -8,6 +8,7 @@ import java.io.IOException
 
 object HttpUtils {
     val httpClient = OkHttpClient()
+    val json = Json { ignoreUnknownKeys = true }
 
     inline fun <reified T> get(url: String, headers: Map<String, String>): T {
         return request(
@@ -37,7 +38,7 @@ object HttpUtils {
                 throw IOException("Unexpected code $response")
             }
 
-            return Json.decodeFromString<T>(response.body!!.string())
+            return json.decodeFromString<T>(response.body!!.string())
         }
     }
 }

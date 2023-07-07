@@ -1,0 +1,30 @@
+[
+  {
+    "id": 7499,
+    "gameVersionTypeID": 68441,
+    "name": "Fabric",
+    "slug": "fabric",
+    "apiVersion": ""
+  },
+  {
+    "id": 9990,
+    "gameVersionTypeID": 75125,
+    "name": "1.20.1",
+    "slug": "1-20-1",
+    "apiVersion": null
+  },
+  {
+    "id": 9970,
+    "gameVersionTypeID": 615,
+    "name": "1.20",
+    "slug": "1-20",
+    "apiVersion": ""
+  },
+  {
+    "id": 9559,
+    "gameVersionTypeID": 75125,
+    "name": "1.20-Snapshot",
+    "slug": "1-19-snapshot",
+    "apiVersion": ""
+  }
+]

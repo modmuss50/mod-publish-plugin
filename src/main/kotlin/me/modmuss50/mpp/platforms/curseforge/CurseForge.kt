@@ -19,14 +19,22 @@ interface CurseForgeOptions : PlatformOptions {
     @get:Input
     val minecraftVersions: ListProperty<String>
 
+    @get:Input
+    val apiEndpoint: Property<String>
+
     fun from(other: CurseForgeOptions) {
         super.from(other)
         projectId.set(other.projectId)
         minecraftVersions.set(other.minecraftVersions)
+        apiEndpoint.set(other.apiEndpoint)
     }
 }
 
 abstract class CurseForge @Inject constructor(name: String) : Platform(name), CurseForgeOptions {
+    init {
+        apiEndpoint.convention("https://minecraft.curseforge.com")
+    }
+
     override fun publish(queue: WorkQueue) {
         queue.submit(UploadWorkAction::class.java) {
             it.from(this)
@@ -38,7 +46,7 @@ abstract class CurseForge @Inject constructor(name: String) : Platform(name), Cu
     abstract class UploadWorkAction : WorkAction<UploadParams> {
         override fun execute() {
             with(parameters) {
-                val api = CurseForgeApi(accessToken.get())
+                val api = CurseForgeApi(accessToken.get(), apiEndpoint.get())
                 val availableGameVersions = api.getGameVersions()
 
                 val gameVersions = ArrayList<Int>()

@@ -42,6 +42,7 @@ interface IntegrationTest {
 
             runner.withProjectDir(projectDir)
             argument("--gradle-user-home", gradleHome.absolutePath)
+            argument("--stacktrace")
         }
 
         // Appends to an existing buildscript

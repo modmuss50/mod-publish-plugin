@@ -6,7 +6,9 @@ import kotlin.test.assertEquals
 
 class CurseForgeTest : IntegrationTest {
     @Test
-    fun name() {
+    fun uploadCurseForge() {
+        val server = MockWebServer(MockCurseForgeApi())
+
         val result = gradleTest()
             .buildScript(
                 """
@@ -23,6 +25,8 @@ class CurseForgeTest : IntegrationTest {
                         accessToken = "123"
                         projectId = "123456"
                         minecraftVersions.add("1.20.1")
+                        
+                        apiEndpoint = "${server.endpoint}"
                     }
                 }
                 """.trimIndent(),

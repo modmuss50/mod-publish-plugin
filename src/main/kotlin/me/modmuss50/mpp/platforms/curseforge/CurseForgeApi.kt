@@ -13,7 +13,7 @@ import java.nio.file.Path
 import kotlin.io.path.name
 
 // https://support.curseforge.com/en/support/solutions/articles/9000197321-curseforge-upload-api
-class CurseForgeApi(val accessToken: String, val baseUrl: String = "https://minecraft.curseforge.com") {
+class CurseForgeApi(private val accessToken: String, private val baseUrl: String) {
     @Serializable
     data class GameVersion(
         val id: Int,
