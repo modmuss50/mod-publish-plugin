@@ -63,7 +63,6 @@ abstract class CurseForge @Inject constructor(name: String) : Platform(name), Cu
                     changelog = changelog.get(),
                     changelogType = "markdown",
                     displayName = displayName.orNull,
-                    parentFileID = null,
                     gameVersions = gameVersions,
                     releaseType = CurseForgeApi.ReleaseType.valueOf(type.get()),
                     relations = CurseForgeApi.UploadFileRelations(projects = emptyList()), // TODO relations

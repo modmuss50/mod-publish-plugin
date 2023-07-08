@@ -1,6 +1,7 @@
 package me.modmuss50.mpp
 
 import me.modmuss50.mpp.platforms.curseforge.CurseForge
+import me.modmuss50.mpp.platforms.modrith.Modrith
 import org.gradle.api.Action
 import org.gradle.api.ExtensiblePolymorphicDomainObjectContainer
 import org.gradle.api.NamedDomainObjectProvider
@@ -27,6 +28,10 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
 
     fun curseForge(name: String = "curseForge", action: Action<CurseForge>): NamedDomainObjectProvider<CurseForge> {
         return platforms.register(name, CurseForge::class.java, action)
+    }
+
+    fun modrith(name: String = "modrith", action: Action<Modrith>): NamedDomainObjectProvider<Modrith> {
+        return platforms.register(name, Modrith::class.java, action)
     }
 }
 

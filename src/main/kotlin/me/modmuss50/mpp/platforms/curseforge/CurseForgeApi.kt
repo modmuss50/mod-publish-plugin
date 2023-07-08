@@ -48,9 +48,9 @@ class CurseForgeApi(private val accessToken: String, private val baseUrl: String
     @Serializable
     data class UploadFileMetadata(
         val changelog: String, // Can be HTML or markdown if changelogType is set.
-        val changelogType: String?, // Optional: defaults to text
-        val displayName: String?, // Optional: A friendly display name used on the site if provided.
-        val parentFileID: Int?, // Optional: The parent file of this file.
+        val changelogType: String? = null, // Optional: defaults to text
+        val displayName: String? = null, // Optional: A friendly display name used on the site if provided.
+        val parentFileID: Int? = null, // Optional: The parent file of this file.
         val gameVersions: List<Int>, // A list of supported game versions, see the Game Versions API for details. Not supported if parentFileID is provided.
         val releaseType: ReleaseType,
         val relations: UploadFileRelations,
