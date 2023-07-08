@@ -14,7 +14,7 @@ import java.nio.file.Path
 import kotlin.io.path.name
 
 // https://support.curseforge.com/en/support/solutions/articles/9000197321-curseforge-upload-api
-class CurseForgeApi(private val accessToken: String, private val baseUrl: String) {
+class CurseforgeApi(private val accessToken: String, private val baseUrl: String) {
     @Serializable
     data class GameVersion(
         val id: Int,

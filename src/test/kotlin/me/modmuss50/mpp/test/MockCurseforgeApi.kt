@@ -9,12 +9,12 @@ import io.javalin.http.BadRequestResponse
 import io.javalin.http.Context
 import io.javalin.http.UnauthorizedResponse
 import kotlinx.serialization.json.Json
-import me.modmuss50.mpp.platforms.curseforge.CurseForgeApi
+import me.modmuss50.mpp.platforms.curseforge.CurseforgeApi
 import java.io.BufferedReader
 
-class MockCurseForgeApi : MockWebServer.MockApi {
+class MockCurseforgeApi : MockWebServer.MockApi {
     val json = Json { ignoreUnknownKeys = true }
-    var lastMetadata: CurseForgeApi.UploadFileMetadata? = null
+    var lastMetadata: CurseforgeApi.UploadFileMetadata? = null
 
     override fun routes(): EndpointGroup {
         return EndpointGroup {

@@ -1,6 +1,6 @@
 package me.modmuss50.mpp
 
-import me.modmuss50.mpp.platforms.curseforge.CurseForge
+import me.modmuss50.mpp.platforms.curseforge.Curseforge
 import me.modmuss50.mpp.platforms.github.Github
 import me.modmuss50.mpp.platforms.modrith.Modrith
 import org.gradle.api.Plugin
@@ -12,8 +12,8 @@ class MppPlugin : Plugin<Project> {
     override fun apply(project: Project) {
         val extension = project.extensions.create("publishMods", ModPublishExtension::class.java, project)
 
-        extension.platforms.registerFactory(CurseForge::class.java) {
-            project.objects.newInstance(CurseForge::class.java, it)
+        extension.platforms.registerFactory(Curseforge::class.java) {
+            project.objects.newInstance(Curseforge::class.java, it)
         }
         extension.platforms.registerFactory(Github::class.java) {
             project.objects.newInstance(Github::class.java, it)

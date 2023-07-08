@@ -14,7 +14,7 @@ import org.gradle.workers.WorkQueue
 import javax.inject.Inject
 import kotlin.reflect.KClass
 
-interface CurseForgeOptions : PlatformOptions, PlatformDependencyContainer<CurseForgeDependency> {
+interface CurseforgeOptions : PlatformOptions, PlatformDependencyContainer<CurseForgeDependency> {
     @get:Input
     val projectId: Property<String>
 
@@ -24,7 +24,7 @@ interface CurseForgeOptions : PlatformOptions, PlatformDependencyContainer<Curse
     @get:Input
     val apiEndpoint: Property<String>
 
-    fun from(other: CurseForgeOptions) {
+    fun from(other: CurseforgeOptions) {
         super.from(other)
         fromDependencies(other)
         projectId.set(other.projectId)
@@ -41,7 +41,7 @@ interface CurseForgeDependency : PlatformDependency {
     val slug: Property<String>
 }
 
-abstract class CurseForge @Inject constructor(name: String) : Platform(name), CurseForgeOptions {
+abstract class Curseforge @Inject constructor(name: String) : Platform(name), CurseforgeOptions {
     init {
         apiEndpoint.convention("https://minecraft.curseforge.com")
     }
@@ -52,12 +52,12 @@ abstract class CurseForge @Inject constructor(name: String) : Platform(name), Cu
         }
     }
 
-    interface UploadParams : WorkParameters, CurseForgeOptions
+    interface UploadParams : WorkParameters, CurseforgeOptions
 
     abstract class UploadWorkAction : WorkAction<UploadParams> {
         override fun execute() {
             with(parameters) {
-                val api = CurseForgeApi(accessToken.get(), apiEndpoint.get())
+                val api = CurseforgeApi(accessToken.get(), apiEndpoint.get())
                 val availableGameVersions = api.getGameVersions()
 
                 val gameVersions = ArrayList<Int>()
@@ -75,19 +75,19 @@ abstract class CurseForge @Inject constructor(name: String) : Platform(name), Cu
                 }
 
                 val projectRelations = dependencies.get().map {
-                    CurseForgeApi.ProjectFileRelation(
+                    CurseforgeApi.ProjectFileRelation(
                         slug = it.slug.get(),
-                        type = CurseForgeApi.RelationType.valueOf(it.type.get()),
+                        type = CurseforgeApi.RelationType.valueOf(it.type.get()),
                     )
                 }
 
-                val metadata = CurseForgeApi.UploadFileMetadata(
+                val metadata = CurseforgeApi.UploadFileMetadata(
                     changelog = changelog.get(),
                     changelogType = "markdown",
                     displayName = displayName.orNull,
                     gameVersions = gameVersions,
-                    releaseType = CurseForgeApi.ReleaseType.valueOf(type.get()),
-                    relations = CurseForgeApi.UploadFileRelations(projects = projectRelations),
+                    releaseType = CurseforgeApi.ReleaseType.valueOf(type.get()),
+                    relations = CurseforgeApi.UploadFileRelations(projects = projectRelations),
                 )
 
                 val response = api.uploadFile(projectId.get(), file.path, metadata)
