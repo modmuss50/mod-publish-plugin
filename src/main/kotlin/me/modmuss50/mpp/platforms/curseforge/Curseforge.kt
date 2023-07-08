@@ -14,7 +14,7 @@ import org.gradle.workers.WorkQueue
 import javax.inject.Inject
 import kotlin.reflect.KClass
 
-interface CurseforgeOptions : PlatformOptions, PlatformDependencyContainer<CurseForgeDependency> {
+interface CurseforgeOptions : PlatformOptions, PlatformDependencyContainer<CurseforgeDependency> {
     @get:Input
     val projectId: Property<String>
 
@@ -32,11 +32,11 @@ interface CurseforgeOptions : PlatformOptions, PlatformDependencyContainer<Curse
         apiEndpoint.set(other.apiEndpoint)
     }
 
-    override val platformDependencyKClass: KClass<CurseForgeDependency>
-        get() = CurseForgeDependency::class
+    override val platformDependencyKClass: KClass<CurseforgeDependency>
+        get() = CurseforgeDependency::class
 }
 
-interface CurseForgeDependency : PlatformDependency {
+interface CurseforgeDependency : PlatformDependency {
     @get:Input
     val slug: Property<String>
 }
