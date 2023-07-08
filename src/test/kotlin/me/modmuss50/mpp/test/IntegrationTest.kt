@@ -43,6 +43,7 @@ interface IntegrationTest {
             runner.withProjectDir(projectDir)
             argument("--gradle-user-home", gradleHome.absolutePath)
             argument("--stacktrace")
+            argument("--warning-mode", "fail")
         }
 
         // Appends to an existing buildscript

@@ -3,7 +3,7 @@ package me.modmuss50.mpp.test
 import io.javalin.Javalin
 import io.javalin.apibuilder.EndpointGroup
 
-class MockWebServer(val api: MockApi) : AutoCloseable {
+class MockWebServer<T : MockWebServer.MockApi>(val api: T) : AutoCloseable {
     private val server: Javalin = Javalin.create()
         .routes(api.routes())
         .start(9082)

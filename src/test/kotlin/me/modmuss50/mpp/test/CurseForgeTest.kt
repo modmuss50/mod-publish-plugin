@@ -2,6 +2,7 @@ package me.modmuss50.mpp.test
 
 import org.gradle.testkit.runner.TaskOutcome
 import kotlin.test.Test
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
 class CurseForgeTest : IntegrationTest {
@@ -32,7 +33,12 @@ class CurseForgeTest : IntegrationTest {
                 """.trimIndent(),
             )
             .run("publishCurseForge")
+        server.close()
+
+        val metadata = server.api.lastMetadata!!
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishCurseForge")!!.outcome)
+        assertEquals(metadata.changelog, "Hello!")
+        assertContains(metadata.gameVersions, 9990)
     }
 }
