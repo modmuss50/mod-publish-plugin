@@ -14,6 +14,12 @@ interface GithubOptions : PlatformOptions {
 }
 
 abstract class Github @Inject constructor(name: String) : Platform(name), GithubOptions {
+    init {
+        // GitHub doesn't support mod loaders, I think this is cleaner than specifying it for each platform.
+        modLoaders.set(emptyList())
+        modLoaders.finalizeValue()
+    }
+
     override fun publish(queue: WorkQueue) {
         queue.submit(UploadWorkAction::class.java) {
             it.from(this)

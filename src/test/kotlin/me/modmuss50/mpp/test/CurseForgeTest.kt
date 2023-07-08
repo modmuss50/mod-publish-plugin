@@ -21,6 +21,7 @@ class CurseForgeTest : IntegrationTest {
                     changelog = "Hello!"
                     version = "1.0.0"
                     type = PublishOptions.ReleaseType.BETA
+                    modLoaders.add("fabric")
 
                     curseForge {
                         accessToken = "123"
@@ -39,6 +40,7 @@ class CurseForgeTest : IntegrationTest {
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishCurseForge")!!.outcome)
         assertEquals(metadata.changelog, "Hello!")
-        assertContains(metadata.gameVersions, 9990)
+        assertContains(metadata.gameVersions, 9990) // 1.20.1
+        assertContains(metadata.gameVersions, 7499) // Fabric
     }
 }

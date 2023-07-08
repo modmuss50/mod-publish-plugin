@@ -57,7 +57,11 @@ abstract class CurseForge @Inject constructor(name: String) : Platform(name), Cu
                     gameVersions.add(id)
                 }
 
-                // TODO add modloader to game versions
+                for (modLoader in modLoaders.get()) {
+                    val id = availableGameVersions.find { it.name.equals(modLoader, ignoreCase = true) }?.id
+                            ?: throw RuntimeException("Could not find mod loader: $modLoader")
+                    gameVersions.add(id)
+                }
 
                 val metadata = CurseForgeApi.UploadFileMetadata(
                     changelog = changelog.get(),

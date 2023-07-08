@@ -68,7 +68,7 @@ abstract class Modrith @Inject constructor(name: String) : Platform(name), Modri
                     dependencies = emptyList(), // TODO
                     gameVersions = minecraftVersions.get(),
                     versionType = ModrithApi.VersionType.valueOf(type.get()),
-                    loaders = emptyList(), // TODO
+                    loaders = modLoaders.get().map { it.lowercase() },
                     featured = featured.get(),
                     projectId = projectId.get(),
                     fileParts = files.keys.toList(),

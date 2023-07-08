@@ -2,6 +2,7 @@ package me.modmuss50.mpp
 
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
@@ -15,6 +16,7 @@ interface PublishOptions {
 
     @get:Input
     val version: Property<String> // Should this use a TextResource?
+
     @get:Input
     val changelog: Property<String>
 
@@ -25,6 +27,9 @@ interface PublishOptions {
     @get:Optional
     val displayName: Property<String>
 
+    @get:Input
+    val modLoaders: ListProperty<String>
+
     @get:InputFiles
     val additionalFiles: ConfigurableFileCollection
 
@@ -33,6 +38,7 @@ interface PublishOptions {
         version.set(other.version)
         changelog.set(other.changelog)
         type.set(other.type)
+        modLoaders.set(other.modLoaders)
         additionalFiles.setFrom(other.additionalFiles)
     }
 
