@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import me.modmuss50.mpp.HttpUtils
+import me.modmuss50.mpp.PlatformDependency
 import me.modmuss50.mpp.PublishOptions
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -86,6 +87,18 @@ class ModrithApi(private val accessToken: String, private val baseUrl: String) {
 
         @SerialName("embedded")
         EMBEDDED,
+        ;
+
+        companion object {
+            fun valueOf(type: PlatformDependency.DependencyType): DependencyType {
+                return when (type) {
+                    PlatformDependency.DependencyType.REQUIRED -> REQUIRED
+                    PlatformDependency.DependencyType.OPTIONAL -> OPTIONAL
+                    PlatformDependency.DependencyType.INCOMPATIBLE -> INCOMPATIBLE
+                    PlatformDependency.DependencyType.EMBEDDED -> EMBEDDED
+                }
+            }
+        }
     }
 
     private val headers: Map<String, String>

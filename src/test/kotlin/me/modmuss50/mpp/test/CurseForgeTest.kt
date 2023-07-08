@@ -28,6 +28,10 @@ class CurseForgeTest : IntegrationTest {
                         projectId = "123456"
                         minecraftVersions.add("1.20.1")
                         
+                        requires {
+                            slug = "fabric-api"
+                        }
+                        
                         apiEndpoint = "${server.endpoint}"
                     }
                 }
@@ -42,5 +46,6 @@ class CurseForgeTest : IntegrationTest {
         assertEquals(metadata.changelog, "Hello!")
         assertContains(metadata.gameVersions, 9990) // 1.20.1
         assertContains(metadata.gameVersions, 7499) // Fabric
+        assertEquals(metadata.relations.projects[0].slug, "fabric-api")
     }
 }

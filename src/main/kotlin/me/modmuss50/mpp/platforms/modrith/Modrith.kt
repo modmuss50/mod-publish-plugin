@@ -1,18 +1,22 @@
 package me.modmuss50.mpp.platforms.modrith
 
 import me.modmuss50.mpp.Platform
+import me.modmuss50.mpp.PlatformDependency
+import me.modmuss50.mpp.PlatformDependencyContainer
 import me.modmuss50.mpp.PlatformOptions
 import me.modmuss50.mpp.path
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Optional
 import org.gradle.workers.WorkAction
 import org.gradle.workers.WorkParameters
 import org.gradle.workers.WorkQueue
 import java.nio.file.Path
 import javax.inject.Inject
+import kotlin.reflect.KClass
 
-interface ModrithOptions : PlatformOptions {
+interface ModrithOptions : PlatformOptions, PlatformDependencyContainer<ModrithDependency> {
     @get:Input
     val projectId: Property<String>
 
@@ -27,11 +31,24 @@ interface ModrithOptions : PlatformOptions {
 
     fun from(other: ModrithOptions) {
         super.from(other)
+        fromDependencies(other)
         projectId.set(other.projectId)
         minecraftVersions.set(other.minecraftVersions)
         featured.set(other.featured)
         apiEndpoint.set(other.apiEndpoint)
     }
+
+    override val platformDependencyKClass: KClass<ModrithDependency>
+        get() = ModrithDependency::class
+}
+
+interface ModrithDependency : PlatformDependency {
+    @get:Input
+    val projectId: Property<String>
+
+    @get:Input
+    @get:Optional
+    val versionId: Property<String>
 }
 
 abstract class Modrith @Inject constructor(name: String) : Platform(name), ModrithOptions {
@@ -61,11 +78,19 @@ abstract class Modrith @Inject constructor(name: String) : Platform(name), Modri
                     files["file_$index"] = additionalFile.toPath()
                 }
 
+                val dependencies = dependencies.get().map {
+                    ModrithApi.Dependency(
+                        projectId = it.projectId.get(),
+                        versionId = it.versionId.orNull,
+                        dependencyType = ModrithApi.DependencyType.valueOf(it.type.get()),
+                    )
+                }
+
                 val metadata = ModrithApi.CreateVersion(
                     name = displayName.getOrElse(file.get().asFile.name),
                     versionNumber = version.get(),
                     changelog = changelog.orNull,
-                    dependencies = emptyList(), // TODO
+                    dependencies = dependencies,
                     gameVersions = minecraftVersions.get(),
                     versionType = ModrithApi.VersionType.valueOf(type.get()),
                     loaders = modLoaders.get().map { it.lowercase() },

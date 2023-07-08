@@ -28,6 +28,6 @@ class MppPlugin : Plugin<Project> {
     }
 
     private fun configureTask(project: Project, platform: Platform) {
-        val taskProvider = project.tasks.register("publish" + platform.name.capitalized(), PublishModTask::class.java, platform)
+        project.tasks.register("publish" + platform.name.capitalized(), PublishModTask::class.java, platform)
     }
 }

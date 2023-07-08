@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import me.modmuss50.mpp.HttpUtils
+import me.modmuss50.mpp.PlatformDependency
 import me.modmuss50.mpp.PublishOptions
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -76,6 +77,18 @@ class CurseForgeApi(private val accessToken: String, private val baseUrl: String
 
         @SerialName("tool")
         TOOL,
+        ;
+
+        companion object {
+            fun valueOf(type: PlatformDependency.DependencyType): RelationType {
+                return when (type) {
+                    PlatformDependency.DependencyType.REQUIRED -> REQUIRED_DEPENDENCY
+                    PlatformDependency.DependencyType.OPTIONAL -> OPTIONAL_DEPENDENCY
+                    PlatformDependency.DependencyType.INCOMPATIBLE -> INCOMPATIBLE
+                    PlatformDependency.DependencyType.EMBEDDED -> EMBEDDED_LIBRARY
+                }
+            }
+        }
     }
 
     @Serializable
