@@ -4,9 +4,11 @@ import me.modmuss50.mpp.Platform
 import me.modmuss50.mpp.PlatformDependency
 import me.modmuss50.mpp.PlatformDependencyContainer
 import me.modmuss50.mpp.PlatformOptions
+import me.modmuss50.mpp.PlatformOptionsInternal
 import me.modmuss50.mpp.path
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.workers.WorkAction
 import org.gradle.workers.WorkParameters
@@ -14,7 +16,7 @@ import org.gradle.workers.WorkQueue
 import javax.inject.Inject
 import kotlin.reflect.KClass
 
-interface CurseforgeOptions : PlatformOptions, PlatformDependencyContainer<CurseforgeDependency> {
+interface CurseforgeOptions : PlatformOptions, PlatformOptionsInternal<CurseforgeOptions>, PlatformDependencyContainer<CurseforgeDependency> {
     @get:Input
     val projectId: Property<String>
 
@@ -32,6 +34,14 @@ interface CurseforgeOptions : PlatformOptions, PlatformDependencyContainer<Curse
         apiEndpoint.set(other.apiEndpoint)
     }
 
+    fun from(other: Provider<CurseforgeOptions>) {
+        from(other.get())
+    }
+
+    override fun setInternalDefaults() {
+        apiEndpoint.convention("https://minecraft.curseforge.com")
+    }
+
     override val platformDependencyKClass: KClass<CurseforgeDependency>
         get() = CurseforgeDependency::class
 }
@@ -43,7 +53,7 @@ interface CurseforgeDependency : PlatformDependency {
 
 abstract class Curseforge @Inject constructor(name: String) : Platform(name), CurseforgeOptions {
     init {
-        apiEndpoint.convention("https://minecraft.curseforge.com")
+        setInternalDefaults()
     }
 
     override fun publish(queue: WorkQueue) {

@@ -9,14 +9,12 @@ import kotlin.test.assertEquals
 
 class CurseforgeTest : IntegrationTest {
     @Test
-    fun uploadCurseForge() {
+    fun uploadCurseforge() {
         val server = MockWebServer(MockCurseforgeApi())
 
         val result = gradleTest()
             .buildScript(
                 """
-                import me.modmuss50.mpp.PublishOptions
-                
                 publishMods {
                     file = tasks.jar.flatMap { it.archiveFile }
                     changelog = "Hello!"
@@ -48,5 +46,50 @@ class CurseforgeTest : IntegrationTest {
         assertContains(metadata.gameVersions, 9990) // 1.20.1
         assertContains(metadata.gameVersions, 7499) // Fabric
         assertEquals(metadata.relations.projects[0].slug, "fabric-api")
+    }
+
+    @Test
+    fun uploadCurseforgeWithOptions() {
+        val server = MockWebServer(MockCurseforgeApi())
+
+        val result = gradleTest()
+            .buildScript(
+                """
+                publishMods {
+                    changelog = "Hello!"
+                    version = "1.0.0"
+                    type = BETA
+                
+                    // Common options that can be re-used between diffrent curseforge tasks
+                    val curseforgeOptions = curseforgeOptions {
+                        accessToken = "123"
+                        minecraftVersions.add("1.20.1")
+                        apiEndpoint = "${server.endpoint}"
+                    }
+                
+                    curseforge("curseforgeFabric") {
+                        from(curseforgeOptions)
+                        file = tasks.jar.flatMap { it.archiveFile }
+                        projectId = "123456"
+                        modLoaders.add("fabric")
+                        requires {
+                            slug = "fabric-api"
+                        }
+                    }
+                    
+                    curseforge("curseforgeForge") {
+                        from(curseforgeOptions)
+                        file = tasks.jar.flatMap { it.archiveFile }
+                        projectId = "789123"
+                        modLoaders.add("forge")
+                    }
+                }
+                """.trimIndent(),
+            )
+            .run("publishMods")
+        server.close()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishCurseforgeFabric")!!.outcome)
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishCurseforgeForge")!!.outcome)
     }
 }

@@ -4,19 +4,22 @@ import me.modmuss50.mpp.Platform
 import me.modmuss50.mpp.PlatformDependency
 import me.modmuss50.mpp.PlatformDependencyContainer
 import me.modmuss50.mpp.PlatformOptions
+import me.modmuss50.mpp.PlatformOptionsInternal
 import me.modmuss50.mpp.path
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 import org.gradle.workers.WorkAction
 import org.gradle.workers.WorkParameters
 import org.gradle.workers.WorkQueue
+import org.jetbrains.annotations.ApiStatus
 import java.nio.file.Path
 import javax.inject.Inject
 import kotlin.reflect.KClass
 
-interface ModrithOptions : PlatformOptions, PlatformDependencyContainer<ModrithDependency> {
+interface ModrithOptions : PlatformOptions, PlatformOptionsInternal<ModrithOptions>, PlatformDependencyContainer<ModrithDependency> {
     @get:Input
     val projectId: Property<String>
 
@@ -29,6 +32,12 @@ interface ModrithOptions : PlatformOptions, PlatformDependencyContainer<ModrithD
     @get:Input
     val apiEndpoint: Property<String>
 
+    @ApiStatus.Internal
+    override fun setInternalDefaults() {
+        featured.convention(false)
+        apiEndpoint.convention("https://api.modrinth.com")
+    }
+
     fun from(other: ModrithOptions) {
         super.from(other)
         fromDependencies(other)
@@ -36,6 +45,10 @@ interface ModrithOptions : PlatformOptions, PlatformDependencyContainer<ModrithD
         minecraftVersions.set(other.minecraftVersions)
         featured.set(other.featured)
         apiEndpoint.set(other.apiEndpoint)
+    }
+
+    fun from(other: Provider<ModrithOptions>) {
+        from(other.get())
     }
 
     override val platformDependencyKClass: KClass<ModrithDependency>
@@ -53,8 +66,7 @@ interface ModrithDependency : PlatformDependency {
 
 abstract class Modrith @Inject constructor(name: String) : Platform(name), ModrithOptions {
     init {
-        featured.convention(false)
-        apiEndpoint.convention("https://api.modrinth.com")
+        setInternalDefaults()
     }
 
     override fun publish(queue: WorkQueue) {

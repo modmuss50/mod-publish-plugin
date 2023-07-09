@@ -59,7 +59,7 @@ interface IntegrationTest {
         fun run(task: String): BuildResult {
             argument(task)
             runner.withArguments(arguments)
-            return runner.build()
+            return runner.run()
         }
     }
 }

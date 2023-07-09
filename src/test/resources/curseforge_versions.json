@@ -26,5 +26,12 @@
     "name": "1.20-Snapshot",
     "slug": "1-19-snapshot",
     "apiVersion": ""
+  },
+  {
+    "id": 7498,
+    "gameVersionTypeID": 68441,
+    "name": "Forge",
+    "slug": "forge",
+    "apiVersion": ""
   }
 ]

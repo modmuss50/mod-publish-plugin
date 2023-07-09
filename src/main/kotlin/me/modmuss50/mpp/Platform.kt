@@ -22,6 +22,11 @@ interface PlatformOptions : PublishOptions {
     }
 }
 
+@ApiStatus.Internal
+interface PlatformOptionsInternal<T : PlatformOptions> {
+    fun setInternalDefaults()
+}
+
 interface PlatformDependencyContainer<T : PlatformDependency> {
     @get:Input
     val dependencies: ListProperty<T>
