@@ -5,6 +5,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
 import java.io.IOException
+import java.lang.RuntimeException
 
 object HttpUtils {
     val httpClient = OkHttpClient()
@@ -35,10 +36,37 @@ object HttpUtils {
         val request = requestBuilder.build()
         httpClient.newCall(request).execute().use { response ->
             if (!response.isSuccessful) {
-                throw IOException("Unexpected code $response")
+                throw HttpException(response.code, response.message)
             }
 
             return json.decodeFromString<T>(response.body!!.string())
         }
     }
+
+    /**
+     * Retry server errors
+     */
+    fun <T> retry(maxRetries: Int, message: String, closure: () -> T): T {
+        var exception: RuntimeException? = null
+        var count = 0
+
+        while (count < maxRetries) {
+            try {
+                return closure()
+            } catch (e: HttpException) {
+                if (e.code < 500 || e.code > 599) {
+                    throw e
+                }
+
+                // Only retry 5xx server errors
+                count++
+                exception = exception ?: RuntimeException(message)
+                exception.addSuppressed(e)
+            }
+        }
+
+        throw exception!!
+    }
+
+    class HttpException(val code: Int, message: String) : IOException(message)
 }

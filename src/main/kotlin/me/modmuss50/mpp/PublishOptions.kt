@@ -33,6 +33,9 @@ interface PublishOptions {
     @get:InputFiles
     val additionalFiles: ConfigurableFileCollection
 
+    @get:Input
+    val maxRetries: Property<Int>
+
     fun from(other: PublishOptions) {
         file.set(other.file)
         version.set(other.version)
@@ -40,6 +43,7 @@ interface PublishOptions {
         type.set(other.type)
         modLoaders.set(other.modLoaders)
         additionalFiles.setFrom(other.additionalFiles)
+        maxRetries.set(other.maxRetries)
     }
 
     enum class ReleaseType {

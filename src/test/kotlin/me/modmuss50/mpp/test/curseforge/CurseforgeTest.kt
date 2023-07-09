@@ -92,4 +92,31 @@ class CurseforgeTest : IntegrationTest {
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishCurseforgeFabric")!!.outcome)
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishCurseforgeForge")!!.outcome)
     }
+
+    @Test
+    fun dryRunCurseforge() {
+        val result = gradleTest()
+            .buildScript(
+                """
+                publishMods {
+                    file = tasks.jar.flatMap { it.archiveFile }
+                    changelog = "Hello!"
+                    version = "1.0.0"
+                    type = BETA
+                    modLoaders.add("fabric")
+                    
+                    dryRun = true
+                
+                    curseforge {
+                        accessToken = providers.environmentVariable("TEST_TOKEN_THAT_DOES_NOT_EXISTS")
+                        projectId = "123456"
+                        minecraftVersions.add("1.20.1")
+                    }
+                }
+                """.trimIndent(),
+            )
+            .run("publishCurseforge")
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishCurseforge")!!.outcome)
+    }
 }

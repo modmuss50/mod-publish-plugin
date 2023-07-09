@@ -21,7 +21,6 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
     val STABLE = PublishOptions.ReleaseType.STABLE
 
     abstract val dryRun: Property<Boolean>
-    abstract val maxRetries: Property<Int>
     val platforms: ExtensiblePolymorphicDomainObjectContainer<Platform> = project.objects.polymorphicDomainObjectContainer(Platform::class.java)
 
     init {

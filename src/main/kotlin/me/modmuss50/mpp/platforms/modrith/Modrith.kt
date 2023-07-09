@@ -1,5 +1,6 @@
 package me.modmuss50.mpp.platforms.modrith
 
+import me.modmuss50.mpp.HttpUtils
 import me.modmuss50.mpp.Platform
 import me.modmuss50.mpp.PlatformDependency
 import me.modmuss50.mpp.PlatformDependencyContainer
@@ -65,10 +66,6 @@ interface ModrithDependency : PlatformDependency {
 }
 
 abstract class Modrith @Inject constructor(name: String) : Platform(name), ModrithOptions {
-    init {
-        setInternalDefaults()
-    }
-
     override fun publish(queue: WorkQueue) {
         queue.submit(UploadWorkAction::class.java) {
             it.from(this)
@@ -112,7 +109,9 @@ abstract class Modrith @Inject constructor(name: String) : Platform(name), Modri
                     primaryFile = primaryFileKey,
                 )
 
-                val response = api.createVersion(metadata, files)
+                val response = HttpUtils.retry(maxRetries.get(), "Failed to create version") {
+                    api.createVersion(metadata, files)
+                }
             }
         }
     }

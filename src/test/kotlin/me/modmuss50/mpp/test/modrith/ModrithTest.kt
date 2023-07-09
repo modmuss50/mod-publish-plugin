@@ -85,4 +85,30 @@ class ModrithTest : IntegrationTest {
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrithFabric")!!.outcome)
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrithForge")!!.outcome)
     }
+
+    @Test
+    fun dryRunModrith() {
+        val result = gradleTest()
+            .buildScript(
+                """
+            publishMods {
+                file = tasks.jar.flatMap { it.archiveFile }
+                changelog = "Hello!"
+                version = "1.0.0"
+                type = STABLE
+                modLoaders.add("fabric")
+                dryRun = true
+
+                modrith {
+                    accessToken = providers.environmentVariable("TEST_TOKEN_THAT_DOES_NOT_EXISTS")
+                    projectId = "123456"
+                    minecraftVersions.add("1.20.1")
+                }
+            }
+                """.trimIndent(),
+            )
+            .run("publishModrith")
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrith")!!.outcome)
+    }
 }

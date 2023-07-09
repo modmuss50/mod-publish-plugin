@@ -7,12 +7,14 @@ import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Optional
 import org.gradle.workers.WorkQueue
 import org.jetbrains.annotations.ApiStatus
 import javax.inject.Inject
 import kotlin.reflect.KClass
 
 interface PlatformOptions : PublishOptions {
+    @get:Optional
     @get:Input
     val accessToken: Property<String>
 
@@ -82,6 +84,10 @@ interface PlatformDependency {
 
 abstract class Platform @Inject constructor(private val name: String) : Named, PlatformOptions {
     abstract fun publish(queue: WorkQueue)
+
+    init {
+        (this as PlatformOptionsInternal<*>).setInternalDefaults()
+    }
 
     @Input
     override fun getName(): String {

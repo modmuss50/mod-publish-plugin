@@ -1,5 +1,6 @@
 package me.modmuss50.mpp.platforms.curseforge
 
+import me.modmuss50.mpp.HttpUtils
 import me.modmuss50.mpp.Platform
 import me.modmuss50.mpp.PlatformDependency
 import me.modmuss50.mpp.PlatformDependencyContainer
@@ -52,10 +53,6 @@ interface CurseforgeDependency : PlatformDependency {
 }
 
 abstract class Curseforge @Inject constructor(name: String) : Platform(name), CurseforgeOptions {
-    init {
-        setInternalDefaults()
-    }
-
     override fun publish(queue: WorkQueue) {
         queue.submit(UploadWorkAction::class.java) {
             it.from(this)
@@ -68,7 +65,9 @@ abstract class Curseforge @Inject constructor(name: String) : Platform(name), Cu
         override fun execute() {
             with(parameters) {
                 val api = CurseforgeApi(accessToken.get(), apiEndpoint.get())
-                val availableGameVersions = api.getGameVersions()
+                val availableGameVersions = HttpUtils.retry(maxRetries.get(), "Failed to get game versions") {
+                    api.getGameVersions()
+                }
 
                 val gameVersions = ArrayList<Int>()
 
@@ -100,7 +99,9 @@ abstract class Curseforge @Inject constructor(name: String) : Platform(name), Cu
                     relations = CurseforgeApi.UploadFileRelations(projects = projectRelations),
                 )
 
-                val response = api.uploadFile(projectId.get(), file.path, metadata)
+                val response = HttpUtils.retry(maxRetries.get(), "Failed to upload file") {
+                    api.uploadFile(projectId.get(), file.path, metadata)
+                }
 
                 // TODO additional files.
             }
