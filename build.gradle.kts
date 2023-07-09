@@ -39,6 +39,10 @@ tasks.test {
     useJUnitPlatform()
 }
 
+java {
+    withSourcesJar()
+}
+
 spotless {
     kotlin {
         ktlint()

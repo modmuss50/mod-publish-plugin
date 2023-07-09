@@ -5,13 +5,14 @@ import me.modmuss50.mpp.platforms.github.Github
 import me.modmuss50.mpp.platforms.modrith.Modrith
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.reflect.TypeOf
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.configurationcache.extensions.capitalized
 
 @Suppress("unused")
 class MppPlugin : Plugin<Project> {
     override fun apply(project: Project) {
-        val extension = project.extensions.create("publishMods", ModPublishExtension::class.java, project)
+        val extension = project.extensions.create(TypeOf.typeOf(ModPublishExtension::class.java), "publishMods", ModPublishExtension::class.java, project)
 
         extension.platforms.registerFactory(Curseforge::class.java) {
             project.objects.newInstance(Curseforge::class.java, it)

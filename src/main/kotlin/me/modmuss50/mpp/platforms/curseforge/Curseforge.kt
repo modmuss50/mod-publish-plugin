@@ -103,7 +103,13 @@ abstract class Curseforge @Inject constructor(name: String) : Platform(name), Cu
                     api.uploadFile(projectId.get(), file.path, metadata)
                 }
 
-                // TODO additional files.
+                for (additionalFile in additionalFiles.files) {
+                    val additionalMetadata = metadata.copy(parentFileID = response.id)
+
+                    val additionalResponse = HttpUtils.retry(maxRetries.get(), "Failed to upload additional file") {
+                        api.uploadFile(projectId.get(), additionalFile.toPath(), additionalMetadata)
+                    }
+                }
             }
         }
     }

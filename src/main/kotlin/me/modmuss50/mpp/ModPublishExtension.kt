@@ -1,5 +1,7 @@
 package me.modmuss50.mpp
 
+import groovy.lang.Closure
+import groovy.lang.DelegatesTo
 import me.modmuss50.mpp.platforms.curseforge.Curseforge
 import me.modmuss50.mpp.platforms.curseforge.CurseforgeOptions
 import me.modmuss50.mpp.platforms.modrith.Modrith
@@ -28,14 +30,38 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
         maxRetries.convention(3)
 
         // Inherit the platform options from this extension.
-        // TODO we may need to do this in the platform factory
         platforms.whenObjectAdded {
             it.from(this)
         }
     }
 
-    fun curseforge(name: String = "curseforge", action: Action<Curseforge>): NamedDomainObjectProvider<Curseforge> {
+    fun curseforge(@DelegatesTo(value = Curseforge::class, strategy = Closure.DELEGATE_FIRST) closure: Closure<*>): NamedDomainObjectProvider<Curseforge> {
+        return curseforge {
+            closure.delegate = it
+            closure.call(it)
+        }
+    }
+
+    fun curseforge(action: Action<Curseforge>): NamedDomainObjectProvider<Curseforge> {
+        return curseforge("curseforge", action)
+    }
+
+    fun curseforge(name: String, @DelegatesTo(value = Curseforge::class, strategy = Closure.DELEGATE_FIRST) closure: Closure<*>): NamedDomainObjectProvider<Curseforge> {
+        return curseforge(name) {
+            closure.delegate = it
+            closure.call(it)
+        }
+    }
+
+    fun curseforge(name: String, action: Action<Curseforge>): NamedDomainObjectProvider<Curseforge> {
         return platforms.register(name, Curseforge::class.java, action)
+    }
+
+    fun curseforgeOptions(@DelegatesTo(value = Curseforge::class, strategy = Closure.DELEGATE_FIRST) closure: Closure<*>): Provider<CurseforgeOptions> {
+        return curseforgeOptions {
+            closure.delegate = it
+            closure.call(it)
+        }
     }
 
     fun curseforgeOptions(action: Action<CurseforgeOptions>): Provider<CurseforgeOptions> {
@@ -45,8 +71,33 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
         }
     }
 
-    fun modrith(name: String = "modrith", action: Action<Modrith>): NamedDomainObjectProvider<Modrith> {
+    fun modrith(@DelegatesTo(value = Modrith::class, strategy = Closure.DELEGATE_FIRST) closure: Closure<*>): NamedDomainObjectProvider<Modrith> {
+        return modrith {
+            closure.delegate = it
+            closure.call(it)
+        }
+    }
+
+    fun modrith(action: Action<Modrith>): NamedDomainObjectProvider<Modrith> {
+        return modrith("modrith", action)
+    }
+
+    fun modrith(name: String, @DelegatesTo(value = Modrith::class, strategy = Closure.DELEGATE_FIRST) closure: Closure<*>): NamedDomainObjectProvider<Modrith> {
+        return modrith(name) {
+            closure.delegate = it
+            closure.call(it)
+        }
+    }
+
+    fun modrith(name: String, action: Action<Modrith>): NamedDomainObjectProvider<Modrith> {
         return platforms.register(name, Modrith::class.java, action)
+    }
+
+    fun modrithOptions(@DelegatesTo(value = Modrith::class, strategy = Closure.DELEGATE_FIRST) closure: Closure<*>): Provider<ModrithOptions> {
+        return modrithOptions {
+            closure.delegate = it
+            closure.call(it)
+        }
     }
 
     fun modrithOptions(action: Action<ModrithOptions>): Provider<ModrithOptions> {
