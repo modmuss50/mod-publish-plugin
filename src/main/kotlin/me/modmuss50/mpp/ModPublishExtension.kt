@@ -10,7 +10,12 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import java.nio.file.Path
 
-abstract class ModPublishExtension(val project: Project) : PublishOptions {
+abstract class ModPublishExtension(project: Project) : PublishOptions {
+    // Removes the need to import the release type, a little gross tho?
+    val BETA = PublishOptions.ReleaseType.BETA
+    val ALPHA = PublishOptions.ReleaseType.ALPHA
+    val STABLE = PublishOptions.ReleaseType.STABLE
+
     abstract val dryRun: Property<Boolean>
     abstract val maxRetries: Property<Int>
     val platforms: ExtensiblePolymorphicDomainObjectContainer<Platform> = project.objects.polymorphicDomainObjectContainer(Platform::class.java)

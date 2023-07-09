@@ -101,10 +101,20 @@ class ModrithApi(private val accessToken: String, private val baseUrl: String) {
         }
     }
 
+    // There is a lot more to this response, however we dont need it.
+    @Serializable
+    data class CreateVersionResponse(
+        val id: String,
+        @SerialName("project_id")
+        val projectId: String,
+        @SerialName("author_id")
+        val authorId: String,
+    )
+
     private val headers: Map<String, String>
         get() = mapOf("Authorization" to accessToken)
 
-    fun createVersion(metadata: CreateVersion, files: Map<String, Path>) {
+    fun createVersion(metadata: CreateVersion, files: Map<String, Path>): CreateVersionResponse {
         val mediaType = "application/java-archive".toMediaTypeOrNull()
         val metadataJson = Json.encodeToString(metadata)
 

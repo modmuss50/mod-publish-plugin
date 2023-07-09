@@ -1,5 +1,7 @@
-package me.modmuss50.mpp.test
+package me.modmuss50.mpp.test.curseforge
 
+import me.modmuss50.mpp.test.IntegrationTest
+import me.modmuss50.mpp.test.MockWebServer
 import org.gradle.testkit.runner.TaskOutcome
 import kotlin.test.Test
 import kotlin.test.assertContains
@@ -16,10 +18,10 @@ class CurseforgeTest : IntegrationTest {
                 import me.modmuss50.mpp.PublishOptions
                 
                 publishMods {
-                    file = tasks.jar.flatMap { it.archiveFile } // TODO is this really the best way?
+                    file = tasks.jar.flatMap { it.archiveFile }
                     changelog = "Hello!"
                     version = "1.0.0"
-                    type = PublishOptions.ReleaseType.BETA
+                    type = BETA
                     modLoaders.add("fabric")
                 
                     curseforge {

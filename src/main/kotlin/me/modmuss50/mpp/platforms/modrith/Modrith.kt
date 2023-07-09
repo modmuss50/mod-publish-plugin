@@ -100,8 +100,7 @@ abstract class Modrith @Inject constructor(name: String) : Platform(name), Modri
                     primaryFile = primaryFileKey,
                 )
 
-                // TODO get response
-                api.createVersion(metadata, files)
+                val response = api.createVersion(metadata, files)
             }
         }
     }

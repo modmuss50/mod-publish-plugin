@@ -1,4 +1,4 @@
-package me.modmuss50.mpp.test
+package me.modmuss50.mpp.test.curseforge
 
 import io.javalin.apibuilder.ApiBuilder.before
 import io.javalin.apibuilder.ApiBuilder.get
@@ -10,6 +10,7 @@ import io.javalin.http.Context
 import io.javalin.http.UnauthorizedResponse
 import kotlinx.serialization.json.Json
 import me.modmuss50.mpp.platforms.curseforge.CurseforgeApi
+import me.modmuss50.mpp.test.MockWebServer
 import java.io.BufferedReader
 
 class MockCurseforgeApi : MockWebServer.MockApi {
@@ -55,7 +56,7 @@ class MockCurseforgeApi : MockWebServer.MockApi {
             throw BadRequestResponse("No file")
         }
 
-        lastMetadata = Json.decodeFromString(metadata)
+        lastMetadata = json.decodeFromString(metadata)
 
         context.result("""{"id": "20402"}""")
     }
