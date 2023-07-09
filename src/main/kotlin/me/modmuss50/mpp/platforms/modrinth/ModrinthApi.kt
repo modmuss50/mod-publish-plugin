@@ -1,4 +1,4 @@
-package me.modmuss50.mpp.platforms.modrith
+package me.modmuss50.mpp.platforms.modrinth
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -14,7 +14,7 @@ import java.nio.file.Path
 import kotlin.io.path.name
 
 // https://docs.modrinth.com/api-spec/#tag/versions/operation/createVersion
-class ModrithApi(private val accessToken: String, private val baseUrl: String) {
+class ModrinthApi(private val accessToken: String, private val baseUrl: String) {
     @Serializable
     enum class VersionType {
         @SerialName("alpha")

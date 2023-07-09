@@ -4,8 +4,8 @@ import groovy.lang.Closure
 import groovy.lang.DelegatesTo
 import me.modmuss50.mpp.platforms.curseforge.Curseforge
 import me.modmuss50.mpp.platforms.curseforge.CurseforgeOptions
-import me.modmuss50.mpp.platforms.modrith.Modrith
-import me.modmuss50.mpp.platforms.modrith.ModrithOptions
+import me.modmuss50.mpp.platforms.modrinth.Modrinth
+import me.modmuss50.mpp.platforms.modrinth.ModrinthOptions
 import org.gradle.api.Action
 import org.gradle.api.ExtensiblePolymorphicDomainObjectContainer
 import org.gradle.api.NamedDomainObjectProvider
@@ -71,37 +71,37 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
         }
     }
 
-    fun modrith(@DelegatesTo(value = Modrith::class, strategy = Closure.DELEGATE_FIRST) closure: Closure<*>): NamedDomainObjectProvider<Modrith> {
-        return modrith {
+    fun modrinth(@DelegatesTo(value = Modrinth::class, strategy = Closure.DELEGATE_FIRST) closure: Closure<*>): NamedDomainObjectProvider<Modrinth> {
+        return modrinth {
             closure.delegate = it
             closure.call(it)
         }
     }
 
-    fun modrith(action: Action<Modrith>): NamedDomainObjectProvider<Modrith> {
-        return modrith("modrith", action)
+    fun modrinth(action: Action<Modrinth>): NamedDomainObjectProvider<Modrinth> {
+        return modrinth("modrinth", action)
     }
 
-    fun modrith(name: String, @DelegatesTo(value = Modrith::class, strategy = Closure.DELEGATE_FIRST) closure: Closure<*>): NamedDomainObjectProvider<Modrith> {
-        return modrith(name) {
+    fun modrinth(name: String, @DelegatesTo(value = Modrinth::class, strategy = Closure.DELEGATE_FIRST) closure: Closure<*>): NamedDomainObjectProvider<Modrinth> {
+        return modrinth(name) {
             closure.delegate = it
             closure.call(it)
         }
     }
 
-    fun modrith(name: String, action: Action<Modrith>): NamedDomainObjectProvider<Modrith> {
-        return platforms.register(name, Modrith::class.java, action)
+    fun modrinth(name: String, action: Action<Modrinth>): NamedDomainObjectProvider<Modrinth> {
+        return platforms.register(name, Modrinth::class.java, action)
     }
 
-    fun modrithOptions(@DelegatesTo(value = Modrith::class, strategy = Closure.DELEGATE_FIRST) closure: Closure<*>): Provider<ModrithOptions> {
-        return modrithOptions {
+    fun modrinthOptions(@DelegatesTo(value = Modrinth::class, strategy = Closure.DELEGATE_FIRST) closure: Closure<*>): Provider<ModrinthOptions> {
+        return modrinthOptions {
             closure.delegate = it
             closure.call(it)
         }
     }
 
-    fun modrithOptions(action: Action<ModrithOptions>): Provider<ModrithOptions> {
-        return configureOptions(ModrithOptions::class) {
+    fun modrinthOptions(action: Action<ModrinthOptions>): Provider<ModrinthOptions> {
+        return configureOptions(ModrinthOptions::class) {
             it.from(this)
             action.execute(it)
         }

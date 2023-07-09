@@ -1,4 +1,4 @@
-package me.modmuss50.mpp.platforms.modrith
+package me.modmuss50.mpp.platforms.modrinth
 
 import me.modmuss50.mpp.HttpUtils
 import me.modmuss50.mpp.Platform
@@ -20,7 +20,7 @@ import java.nio.file.Path
 import javax.inject.Inject
 import kotlin.reflect.KClass
 
-interface ModrithOptions : PlatformOptions, PlatformOptionsInternal<ModrithOptions>, PlatformDependencyContainer<ModrithDependency> {
+interface ModrinthOptions : PlatformOptions, PlatformOptionsInternal<ModrinthOptions>, PlatformDependencyContainer<ModrinthDependency> {
     @get:Input
     val projectId: Property<String>
 
@@ -39,7 +39,7 @@ interface ModrithOptions : PlatformOptions, PlatformOptionsInternal<ModrithOptio
         apiEndpoint.convention("https://api.modrinth.com")
     }
 
-    fun from(other: ModrithOptions) {
+    fun from(other: ModrinthOptions) {
         super.from(other)
         fromDependencies(other)
         projectId.set(other.projectId)
@@ -48,15 +48,15 @@ interface ModrithOptions : PlatformOptions, PlatformOptionsInternal<ModrithOptio
         apiEndpoint.set(other.apiEndpoint)
     }
 
-    fun from(other: Provider<ModrithOptions>) {
+    fun from(other: Provider<ModrinthOptions>) {
         from(other.get())
     }
 
-    override val platformDependencyKClass: KClass<ModrithDependency>
-        get() = ModrithDependency::class
+    override val platformDependencyKClass: KClass<ModrinthDependency>
+        get() = ModrinthDependency::class
 }
 
-interface ModrithDependency : PlatformDependency {
+interface ModrinthDependency : PlatformDependency {
     @get:Input
     val projectId: Property<String>
 
@@ -65,19 +65,19 @@ interface ModrithDependency : PlatformDependency {
     val versionId: Property<String>
 }
 
-abstract class Modrith @Inject constructor(name: String) : Platform(name), ModrithOptions {
+abstract class Modrinth @Inject constructor(name: String) : Platform(name), ModrinthOptions {
     override fun publish(queue: WorkQueue) {
         queue.submit(UploadWorkAction::class.java) {
             it.from(this)
         }
     }
 
-    interface UploadParams : WorkParameters, ModrithOptions
+    interface UploadParams : WorkParameters, ModrinthOptions
 
     abstract class UploadWorkAction : WorkAction<UploadParams> {
         override fun execute() {
             with(parameters) {
-                val api = ModrithApi(accessToken.get(), apiEndpoint.get())
+                val api = ModrinthApi(accessToken.get(), apiEndpoint.get())
 
                 val primaryFileKey = "primaryFile"
                 val files = HashMap<String, Path>()
@@ -88,20 +88,20 @@ abstract class Modrith @Inject constructor(name: String) : Platform(name), Modri
                 }
 
                 val dependencies = dependencies.get().map {
-                    ModrithApi.Dependency(
+                    ModrinthApi.Dependency(
                         projectId = it.projectId.get(),
                         versionId = it.versionId.orNull,
-                        dependencyType = ModrithApi.DependencyType.valueOf(it.type.get()),
+                        dependencyType = ModrinthApi.DependencyType.valueOf(it.type.get()),
                     )
                 }
 
-                val metadata = ModrithApi.CreateVersion(
+                val metadata = ModrinthApi.CreateVersion(
                     name = displayName.getOrElse(file.get().asFile.name),
                     versionNumber = version.get(),
                     changelog = changelog.orNull,
                     dependencies = dependencies,
                     gameVersions = minecraftVersions.get(),
-                    versionType = ModrithApi.VersionType.valueOf(type.get()),
+                    versionType = ModrinthApi.VersionType.valueOf(type.get()),
                     loaders = modLoaders.get().map { it.lowercase() },
                     featured = featured.get(),
                     projectId = projectId.get(),

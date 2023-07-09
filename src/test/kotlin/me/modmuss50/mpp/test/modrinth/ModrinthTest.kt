@@ -1,4 +1,4 @@
-package me.modmuss50.mpp.test.modrith
+package me.modmuss50.mpp.test.modrinth
 
 import me.modmuss50.mpp.test.IntegrationTest
 import me.modmuss50.mpp.test.MockWebServer
@@ -6,10 +6,10 @@ import org.gradle.testkit.runner.TaskOutcome
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class ModrithTest : IntegrationTest {
+class ModrinthTest : IntegrationTest {
     @Test
-    fun uploadModrith() {
-        val server = MockWebServer(MockModrithApi())
+    fun uploadModrinth() {
+        val server = MockWebServer(MockModrinthApi())
 
         val result = gradleTest()
             .buildScript(
@@ -21,7 +21,7 @@ class ModrithTest : IntegrationTest {
                 type = STABLE
                 modLoaders.add("fabric")
             
-                modrith {
+                modrinth {
                     accessToken = "123"
                     projectId = "123456"
                     minecraftVersions.add("1.20.1")
@@ -35,15 +35,15 @@ class ModrithTest : IntegrationTest {
             }
                 """.trimIndent(),
             )
-            .run("publishModrith")
+            .run("publishModrinth")
         server.close()
 
-        assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrith")!!.outcome)
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinth")!!.outcome)
     }
 
     @Test
-    fun uploadModrithWithOptions() {
-        val server = MockWebServer(MockModrithApi())
+    fun uploadModrinthWithOptions() {
+        val server = MockWebServer(MockModrinthApi())
 
         val result = gradleTest()
             .buildScript(
@@ -53,15 +53,15 @@ class ModrithTest : IntegrationTest {
                     version = "1.0.0"
                     type = BETA
                 
-                    // Common options that can be re-used between diffrent modrith tasks
-                    val modrithOptions = modrithOptions {
+                    // Common options that can be re-used between diffrent modrinth tasks
+                    val modrinthOptions = modrinthOptions {
                         accessToken = "123"
                         minecraftVersions.add("1.20.1")
                         apiEndpoint = "${server.endpoint}"
                     }
                 
-                    modrith("modrithFabric") {
-                        from(modrithOptions)
+                    modrinth("modrinthFabric") {
+                        from(modrinthOptions)
                         file = tasks.jar.flatMap { it.archiveFile }
                         projectId = "123456"
                         modLoaders.add("fabric")
@@ -70,8 +70,8 @@ class ModrithTest : IntegrationTest {
                         }
                     }
                     
-                    modrith("modrithForge") {
-                        from(modrithOptions)
+                    modrinth("modrinthForge") {
+                        from(modrinthOptions)
                         file = tasks.jar.flatMap { it.archiveFile }
                         projectId = "789123"
                         modLoaders.add("forge")
@@ -82,12 +82,12 @@ class ModrithTest : IntegrationTest {
             .run("publishMods")
         server.close()
 
-        assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrithFabric")!!.outcome)
-        assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrithForge")!!.outcome)
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinthFabric")!!.outcome)
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinthForge")!!.outcome)
     }
 
     @Test
-    fun dryRunModrith() {
+    fun dryRunModrinth() {
         val result = gradleTest()
             .buildScript(
                 """
@@ -99,7 +99,7 @@ class ModrithTest : IntegrationTest {
                 modLoaders.add("fabric")
                 dryRun = true
 
-                modrith {
+                modrinth {
                     accessToken = providers.environmentVariable("TEST_TOKEN_THAT_DOES_NOT_EXISTS")
                     projectId = "123456"
                     minecraftVersions.add("1.20.1")
@@ -107,8 +107,8 @@ class ModrithTest : IntegrationTest {
             }
                 """.trimIndent(),
             )
-            .run("publishModrith")
+            .run("publishModrinth")
 
-        assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrith")!!.outcome)
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinth")!!.outcome)
     }
 }

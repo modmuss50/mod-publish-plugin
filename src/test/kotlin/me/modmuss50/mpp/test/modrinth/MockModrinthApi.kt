@@ -1,4 +1,4 @@
-package me.modmuss50.mpp.test.modrith
+package me.modmuss50.mpp.test.modrinth
 
 import io.javalin.apibuilder.ApiBuilder.before
 import io.javalin.apibuilder.ApiBuilder.path
@@ -9,10 +9,10 @@ import io.javalin.http.Context
 import io.javalin.http.UnauthorizedResponse
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import me.modmuss50.mpp.platforms.modrith.ModrithApi
+import me.modmuss50.mpp.platforms.modrinth.ModrinthApi
 import me.modmuss50.mpp.test.MockWebServer
 
-class MockModrithApi : MockWebServer.MockApi {
+class MockModrinthApi : MockWebServer.MockApi {
     val json = Json { ignoreUnknownKeys = true }
 
     override fun routes(): EndpointGroup {
@@ -36,7 +36,7 @@ class MockModrithApi : MockWebServer.MockApi {
         val data = context.formParam("data")
             ?: throw BadRequestResponse("No metadata")
 
-        val createVersion = json.decodeFromString<ModrithApi.CreateVersion>(data)
+        val createVersion = json.decodeFromString<ModrinthApi.CreateVersion>(data)
 
         for (filePart in createVersion.fileParts) {
             val file = context.uploadedFile(filePart)
@@ -45,7 +45,7 @@ class MockModrithApi : MockWebServer.MockApi {
 
         context.result(
             json.encodeToString(
-                ModrithApi.CreateVersionResponse(
+                ModrinthApi.CreateVersionResponse(
                     id = "hFdJG9fY",
                     projectId = createVersion.projectId,
                     authorId = "JZA4dW8o",

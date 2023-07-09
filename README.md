@@ -5,7 +5,7 @@ A modern Gradle plugin to publish mods to a range of destinations.
 Specify an exact version number to prevent unwanted breakages.
 
 ## Basic usage
-Basic example to publish a jar to CurseForge and Modrith:
+Basic example to publish a jar to CurseForge and Modrinth:
 ```gradle
 publishMods {
     file = jar.archiveFile
@@ -23,9 +23,9 @@ publishMods {
             slug = "fabric-api"
         }
     }
-    modrith {
+    modrinth {
         projectId = "abcdef"
-        accessToken = providers.environmentVariable("MODRITH_TOKEN")
+        accessToken = providers.environmentVariable("MODRINTH_TOKEN")
         minecraftVersions.add("1.20.1")
     }
 }
@@ -60,7 +60,7 @@ publishMods {
 ```
 
 ### Features
-- Supports CurseForge and Modrith
+- Supports CurseForge and Modrinth
 - Typesafe DSL to easily publish to multiple locations with minimal repetition 
 - Retry on failure
 - Dry run mode to try and increase confidence in your buildscript before releases.
