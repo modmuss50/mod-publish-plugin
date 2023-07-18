@@ -24,6 +24,8 @@ dependencies {
 
     testImplementation(kotlin("test"))
     testImplementation("io.javalin:javalin:5.6.1")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.9.3")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks.withType(KotlinCompile::class.java).all {
