@@ -2,24 +2,10 @@ name: Publish
 on: [workflow_dispatch] # Manual trigger
 
 jobs:
-  build:
-    name: Build
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v3
-      - uses: gradle/wrapper-validation-action@v1
-      - uses: actions/setup-java@v3
-        with:
-          distribution: temurin
-          java-version: 20
-      - name: Build
-        run: ./gradlew build --stacktrace --warning-mode fail
-
   publish:
     name: Publish
     runs-on: ubuntu-22.04
     environment: Production
-    needs: [build]
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-java@v3
