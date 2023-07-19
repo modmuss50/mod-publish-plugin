@@ -55,6 +55,13 @@ class CurseforgeTest : IntegrationTest {
         val result = gradleTest()
             .buildScript(
                 """
+                val fabricJar = tasks.register("fabricJar", Jar::class.java) {
+                    archiveClassifier = "fabric"
+                }
+                val forgeJar = tasks.register("forgeJar", Jar::class.java) {
+                    archiveClassifier = "forge"
+                }
+
                 publishMods {
                     changelog = "Hello!"
                     version = "1.0.0"
@@ -69,7 +76,7 @@ class CurseforgeTest : IntegrationTest {
                 
                     curseforge("curseforgeFabric") {
                         from(curseforgeOptions)
-                        file = tasks.jar.flatMap { it.archiveFile }
+                        file = fabricJar.flatMap { it.archiveFile }
                         projectId = "123456"
                         modLoaders.add("fabric")
                         requires {
@@ -79,7 +86,7 @@ class CurseforgeTest : IntegrationTest {
                     
                     curseforge("curseforgeForge") {
                         from(curseforgeOptions)
-                        file = tasks.jar.flatMap { it.archiveFile }
+                        file = forgeJar.flatMap { it.archiveFile }
                         projectId = "789123"
                         modLoaders.add("forge")
                     }
@@ -91,6 +98,8 @@ class CurseforgeTest : IntegrationTest {
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishCurseforgeFabric")!!.outcome)
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishCurseforgeForge")!!.outcome)
+        assertContains(server.api.files, "mpp-example-forge.jar")
+        assertContains(server.api.files, "mpp-example-fabric.jar")
     }
 
     @Test

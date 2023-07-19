@@ -16,6 +16,7 @@ import java.io.BufferedReader
 class MockCurseforgeApi : MockWebServer.MockApi {
     val json = Json { ignoreUnknownKeys = true }
     var lastMetadata: CurseforgeApi.UploadFileMetadata? = null
+    val files: ArrayList<String> = ArrayList()
 
     override fun routes(): EndpointGroup {
         return EndpointGroup {
@@ -57,6 +58,7 @@ class MockCurseforgeApi : MockWebServer.MockApi {
         }
 
         lastMetadata = json.decodeFromString(metadata)
+        files.add(file.filename())
 
         context.result("""{"id": "20402"}""")
     }

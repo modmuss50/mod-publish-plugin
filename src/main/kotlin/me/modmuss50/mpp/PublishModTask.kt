@@ -26,9 +26,19 @@ abstract class PublishModTask @Inject constructor(@Nested val platform: Platform
                 throw FileNotFoundException("$file not found")
             }
 
+            project.copy {
+                it.from(file)
+                it.into(project.buildDir.resolve("publishMods").resolve(name))
+            }
+
             for (additionalFile in platform.additionalFiles.files) {
                 if (!additionalFile.exists()) {
                     throw FileNotFoundException("$file not found")
+                }
+
+                project.copy {
+                    it.from(additionalFile)
+                    it.into(project.buildDir.resolve("publishMods").resolve(name))
                 }
             }
 
