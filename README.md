@@ -5,13 +5,16 @@ A modern Gradle plugin to publish mods to a range of destinations.
 Specify an exact version number to prevent unwanted breakages.
 
 ## Basic usage
-Basic example to publish a jar to CurseForge and Modrinth:
+
+Run the `publishMods` task to publish to all configured destinations
+
+Basic example to publish a jar to CurseForge and Modrinth from a Fabric project:
+
 ```gradle
 publishMods {
-    file = jar.archiveFile
+    file = remapJar.archiveFile
     changelog = "Hello!"
-    version = "1.0.0"
-    type = BETA
+    type = STABLE
     modLoaders.add("fabric")
 
     curseforge {
@@ -31,12 +34,11 @@ publishMods {
 }
 ```
 
-Example showing multiple curseforge destinations sharing common options
+Example showing multiple CurseForge destinations sharing common options. 
 
 ```gradle
 publishMods {
     changelog = file("changelog.md").text
-    version = "1.0.0"
 
     def options = curseforgeOptions {
         accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
@@ -59,6 +61,8 @@ publishMods {
 }
 ```
 
+Full reference of all options
+
 ### Features
 - Supports CurseForge and Modrinth
 - Typesafe DSL to easily publish to multiple locations with minimal repetition 
@@ -68,5 +72,4 @@ publishMods {
 
 ### Future plans
 - Github
-- Publish to Gradle plugin portal
 - Create some detailed documentation/working examples for Fabric and Forge + add some docs to the code.
