@@ -29,7 +29,13 @@ interface IntegrationTest {
             buildScript = File(projectDir, "build.gradle$ext")
 
             projectDir.mkdirs()
-            buildScript.writeText("") // Clear
+
+            // Clean up
+            File(projectDir, "build.gradle").delete()
+            File(projectDir, "build.gradle.kts").delete()
+            File(projectDir, "settings.gradle").delete()
+            File(projectDir, "settings.gradle.kts").delete()
+
             if (!groovy) {
                 buildScript(
                     """

@@ -4,6 +4,8 @@ import groovy.lang.Closure
 import groovy.lang.DelegatesTo
 import me.modmuss50.mpp.platforms.curseforge.Curseforge
 import me.modmuss50.mpp.platforms.curseforge.CurseforgeOptions
+import me.modmuss50.mpp.platforms.github.Github
+import me.modmuss50.mpp.platforms.github.GithubOptions
 import me.modmuss50.mpp.platforms.modrinth.Modrinth
 import me.modmuss50.mpp.platforms.modrinth.ModrinthOptions
 import org.gradle.api.Action
@@ -35,6 +37,8 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
             it.from(this)
         }
     }
+
+    // Curseforge
 
     fun curseforge(@DelegatesTo(value = Curseforge::class) closure: Closure<*>): NamedDomainObjectProvider<Curseforge> {
         return curseforge {
@@ -69,6 +73,8 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
         }
     }
 
+    // Modirth
+
     fun modrinth(@DelegatesTo(value = Modrinth::class) closure: Closure<*>): NamedDomainObjectProvider<Modrinth> {
         return modrinth {
             project.configure(it, closure)
@@ -101,6 +107,43 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
             action.execute(it)
         }
     }
+
+    // Github
+
+    fun github(@DelegatesTo(value = Github::class) closure: Closure<*>): NamedDomainObjectProvider<Github> {
+        return github {
+            project.configure(it, closure)
+        }
+    }
+
+    fun github(action: Action<Github>): NamedDomainObjectProvider<Github> {
+        return github("github", action)
+    }
+
+    fun github(name: String, @DelegatesTo(value = Github::class) closure: Closure<*>): NamedDomainObjectProvider<Github> {
+        return github(name) {
+            project.configure(it, closure)
+        }
+    }
+
+    fun github(name: String, action: Action<Github>): NamedDomainObjectProvider<Github> {
+        return platforms.register(name, Github::class.java, action)
+    }
+
+    fun githubOptions(@DelegatesTo(value = Github::class) closure: Closure<*>): Provider<GithubOptions> {
+        return githubOptions {
+            project.configure(it, closure)
+        }
+    }
+
+    fun githubOptions(action: Action<GithubOptions>): Provider<GithubOptions> {
+        return configureOptions(GithubOptions::class) {
+            it.from(this)
+            action.execute(it)
+        }
+    }
+
+    // Misc
 
     private fun <A : PlatformOptions, T : PlatformOptionsInternal<A>> configureOptions(klass: KClass<T>, action: Action<T>): Provider<T> {
         return project.provider {

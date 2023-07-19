@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "me.modmuss50"
-version = "0.0.3"
+version = "0.0.4"
 description = "The Mod Publish Plugin is a plugin for the Gradle build system to help upload artifacts to a range of common destinations."
 
 repositories {
@@ -22,6 +22,7 @@ dependencies {
     implementation(gradleApi())
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
+    implementation("org.kohsuke:github-api:1.315")
 
     testImplementation(kotlin("test"))
     testImplementation("io.javalin:javalin:5.6.1")

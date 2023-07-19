@@ -2,7 +2,9 @@
 A modern Gradle plugin to publish mods to a range of destinations.
 
 **Please note this plugin is still under development, breaking changes may be made at anytime!**
-Specify an exact version number to prevent unwanted breakages.
+Specify an exact version number to prevent unwanted breakages to your build script.
+
+Please make sure to report all issues, and any suggestions on this Github repo.
 
 ## Basic usage
 
@@ -30,6 +32,11 @@ publishMods {
         projectId = "abcdef"
         accessToken = providers.environmentVariable("MODRINTH_TOKEN")
         minecraftVersions.add("1.20.1")
+    }
+    github {
+        repository = "test/example"
+        accessToken = providers.environmentVariable("GITHUB_TOKEN")
+        commitish = "main"
     }
 }
 ```
@@ -64,12 +71,11 @@ publishMods {
 Full reference of all options
 
 ### Features
-- Supports CurseForge and Modrinth
+- Supports CurseForge, Modrinth and Github
 - Typesafe DSL to easily publish to multiple locations with minimal repetition 
 - Retry on failure
 - Dry run mode to try and increase confidence in your buildscript before releases.
 - Built with modern Gradle features
 
 ### Future plans
-- Github
 - Create some detailed documentation/working examples for Fabric and Forge + add some docs to the code.

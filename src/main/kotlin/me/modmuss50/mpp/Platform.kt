@@ -83,6 +83,7 @@ interface PlatformDependency {
 }
 
 abstract class Platform @Inject constructor(private val name: String) : Named, PlatformOptions {
+    @ApiStatus.Internal
     abstract fun publish(queue: WorkQueue)
 
     init {
