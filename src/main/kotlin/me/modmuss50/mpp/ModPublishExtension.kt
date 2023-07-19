@@ -36,10 +36,9 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
         }
     }
 
-    fun curseforge(@DelegatesTo(value = Curseforge::class, strategy = Closure.DELEGATE_FIRST) closure: Closure<*>): NamedDomainObjectProvider<Curseforge> {
+    fun curseforge(@DelegatesTo(value = Curseforge::class) closure: Closure<*>): NamedDomainObjectProvider<Curseforge> {
         return curseforge {
-            closure.delegate = it
-            closure.call(it)
+            project.configure(it, closure)
         }
     }
 
@@ -47,10 +46,9 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
         return curseforge("curseforge", action)
     }
 
-    fun curseforge(name: String, @DelegatesTo(value = Curseforge::class, strategy = Closure.DELEGATE_FIRST) closure: Closure<*>): NamedDomainObjectProvider<Curseforge> {
+    fun curseforge(name: String, @DelegatesTo(value = Curseforge::class) closure: Closure<*>): NamedDomainObjectProvider<Curseforge> {
         return curseforge(name) {
-            closure.delegate = it
-            closure.call(it)
+            project.configure(it, closure)
         }
     }
 
@@ -58,10 +56,9 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
         return platforms.register(name, Curseforge::class.java, action)
     }
 
-    fun curseforgeOptions(@DelegatesTo(value = Curseforge::class, strategy = Closure.DELEGATE_FIRST) closure: Closure<*>): Provider<CurseforgeOptions> {
+    fun curseforgeOptions(@DelegatesTo(value = Curseforge::class) closure: Closure<*>): Provider<CurseforgeOptions> {
         return curseforgeOptions {
-            closure.delegate = it
-            closure.call(it)
+            project.configure(it, closure)
         }
     }
 
@@ -72,10 +69,9 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
         }
     }
 
-    fun modrinth(@DelegatesTo(value = Modrinth::class, strategy = Closure.DELEGATE_FIRST) closure: Closure<*>): NamedDomainObjectProvider<Modrinth> {
+    fun modrinth(@DelegatesTo(value = Modrinth::class) closure: Closure<*>): NamedDomainObjectProvider<Modrinth> {
         return modrinth {
-            closure.delegate = it
-            closure.call(it)
+            project.configure(it, closure)
         }
     }
 
@@ -83,10 +79,9 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
         return modrinth("modrinth", action)
     }
 
-    fun modrinth(name: String, @DelegatesTo(value = Modrinth::class, strategy = Closure.DELEGATE_FIRST) closure: Closure<*>): NamedDomainObjectProvider<Modrinth> {
+    fun modrinth(name: String, @DelegatesTo(value = Modrinth::class) closure: Closure<*>): NamedDomainObjectProvider<Modrinth> {
         return modrinth(name) {
-            closure.delegate = it
-            closure.call(it)
+            project.configure(it, closure)
         }
     }
 
@@ -94,10 +89,9 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
         return platforms.register(name, Modrinth::class.java, action)
     }
 
-    fun modrinthOptions(@DelegatesTo(value = Modrinth::class, strategy = Closure.DELEGATE_FIRST) closure: Closure<*>): Provider<ModrinthOptions> {
+    fun modrinthOptions(@DelegatesTo(value = Modrinth::class) closure: Closure<*>): Provider<ModrinthOptions> {
         return modrinthOptions {
-            closure.delegate = it
-            closure.call(it)
+            project.configure(it, closure)
         }
     }
 

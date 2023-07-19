@@ -6,11 +6,11 @@ import org.intellij.lang.annotations.Language
 import java.io.File
 
 interface IntegrationTest {
-    fun gradleTest(): TestBuilder {
-        return TestBuilder()
+    fun gradleTest(groovy: Boolean = false): TestBuilder {
+        return TestBuilder(groovy)
     }
 
-    class TestBuilder {
+    class TestBuilder(val groovy: Boolean) {
         private val runner = GradleRunner.create()
             .withPluginClasspath()
             .forwardOutput()
@@ -23,22 +23,34 @@ interface IntegrationTest {
 
         init {
             val testDir = File("build/intergation_test")
+            val ext = if (groovy) { "" } else { ".kts" }
             gradleHome = File(testDir, "home")
             projectDir = File(testDir, "project")
-            buildScript = File(projectDir, "build.gradle.kts")
+            buildScript = File(projectDir, "build.gradle$ext")
 
             projectDir.mkdirs()
             buildScript.writeText("") // Clear
-            buildScript(
-                """
+            if (!groovy) {
+                buildScript(
+                    """
                 plugins {
                     java
-                    id("me.modmuss50.mod-publish-plugin") version "0.0.1"
+                    id("me.modmuss50.mod-publish-plugin")
                 }
-                """.trimIndent(),
-            )
+                    """.trimIndent(),
+                )
+            } else {
+                buildScript(
+                    """
+                plugins {
+                    id 'java'
+                    id 'me.modmuss50.mod-publish-plugin'
+                }
+                    """.trimIndent(),
+                )
+            }
 
-            File(projectDir, "settings.gradle.kts").writeText("rootProject.name = \"mpp-example\"")
+            File(projectDir, "settings.gradle$ext").writeText("rootProject.name = \"mpp-example\"")
 
             runner.withProjectDir(projectDir)
             argument("--gradle-user-home", gradleHome.absolutePath)
@@ -48,7 +60,7 @@ interface IntegrationTest {
 
         // Appends to an existing buildscript
         fun buildScript(@Language("gradle") script: String): TestBuilder {
-            buildScript.appendText(script)
+            buildScript.appendText(script + "\n")
             return this
         }
 
