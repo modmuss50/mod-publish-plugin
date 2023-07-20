@@ -117,8 +117,8 @@ class ModrinthTest : IntegrationTest {
         val server = MockWebServer(MockModrinthApi())
 
         val result = gradleTest()
-                .buildScript(
-                        """
+            .buildScript(
+                """
             publishMods {
                 file = tasks.jar.flatMap { it.archiveFile }
                 changelog = "Hello!"
@@ -135,8 +135,8 @@ class ModrinthTest : IntegrationTest {
                 }
             }
                 """.trimIndent(),
-                )
-                .run("publishModrinth")
+            )
+            .run("publishModrinth")
         server.close()
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinth")!!.outcome)

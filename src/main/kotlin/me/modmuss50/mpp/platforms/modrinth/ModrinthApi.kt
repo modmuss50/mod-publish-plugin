@@ -117,7 +117,7 @@ class ModrinthApi(private val accessToken: String, private val baseUrl: String) 
     @Serializable
     data class ErrorResponse(
         val error: String,
-        val description: String
+        val description: String,
     )
 
     private val headers: Map<String, String>
