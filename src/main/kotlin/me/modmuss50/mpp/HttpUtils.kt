@@ -68,5 +68,5 @@ object HttpUtils {
         throw exception!!
     }
 
-    class HttpException(val code: Int, message: String) : IOException(message)
+    class HttpException(val code: Int, message: String) : IOException("Request failed, status: $code message: $message")
 }
