@@ -36,7 +36,14 @@ class MockCurseforgeApi : MockWebServer.MockApi {
         val apiToken = context.header("X-Api-Token")
 
         if (apiToken != "123") {
-            throw UnauthorizedResponse("Invalid access token")
+            throw UnauthorizedResponse(
+                """
+                {
+                  "errorCode": 401,
+                  "errorMessage": "You must provide an API token using the `X-Api-Token` header, the `token` query string parameter, your email address and an API token using HTTP basic authentication."
+                }
+                """.trimIndent(),
+            )
         }
     }
 

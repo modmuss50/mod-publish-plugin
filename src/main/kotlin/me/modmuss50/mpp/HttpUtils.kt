@@ -4,10 +4,11 @@ import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
+import okhttp3.Response
 import java.io.IOException
 import java.lang.RuntimeException
 
-object HttpUtils {
+class HttpUtils(val exceptionFactory: HttpExceptionFactory = DefaultHttpExceptionFactory()) {
     val httpClient = OkHttpClient()
     val json = Json { ignoreUnknownKeys = true }
 
@@ -36,36 +37,48 @@ object HttpUtils {
         val request = requestBuilder.build()
         httpClient.newCall(request).execute().use { response ->
             if (!response.isSuccessful) {
-                throw HttpException(response.code, response.message)
+                throw exceptionFactory.createException(response)
             }
 
             return json.decodeFromString<T>(response.body!!.string())
         }
     }
 
-    /**
-     * Retry server errors
-     */
-    fun <T> retry(maxRetries: Int, message: String, closure: () -> T): T {
-        var exception: RuntimeException? = null
-        var count = 0
+    companion object {
+        /**
+         * Retry server errors
+         */
+        fun <T> retry(maxRetries: Int, message: String, closure: () -> T): T {
+            var exception: RuntimeException? = null
+            var count = 0
 
-        while (count < maxRetries) {
-            try {
-                return closure()
-            } catch (e: HttpException) {
-                if (e.code < 500 || e.code > 599) {
-                    throw e
+            while (count < maxRetries) {
+                try {
+                    return closure()
+                } catch (e: HttpException) {
+                    if (e.code < 500 || e.code > 599) {
+                        throw e
+                    }
+
+                    // Only retry 5xx server errors
+                    count++
+                    exception = exception ?: RuntimeException(message)
+                    exception.addSuppressed(e)
                 }
-
-                // Only retry 5xx server errors
-                count++
-                exception = exception ?: RuntimeException(message)
-                exception.addSuppressed(e)
             }
-        }
 
-        throw exception!!
+            throw exception!!
+        }
+    }
+
+    interface HttpExceptionFactory {
+        fun createException(response: Response): HttpException
+    }
+
+    private class DefaultHttpExceptionFactory : HttpExceptionFactory {
+        override fun createException(response: Response): HttpException {
+            return HttpException(response.code, response.message)
+        }
     }
 
     class HttpException(val code: Int, message: String) : IOException("Request failed, status: $code message: $message")

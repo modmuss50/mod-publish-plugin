@@ -10,11 +10,14 @@ import me.modmuss50.mpp.PublishOptions
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.Response
 import java.nio.file.Path
 import kotlin.io.path.name
 
 // https://support.curseforge.com/en/support/solutions/articles/9000197321-curseforge-upload-api
 class CurseforgeApi(private val accessToken: String, private val baseUrl: String) {
+    private val httpUtils = HttpUtils(exceptionFactory = CurseforgeHttpExceptionFactory())
+
     @Serializable
     data class GameVersion(
         val id: Int,
@@ -102,11 +105,17 @@ class CurseforgeApi(private val accessToken: String, private val baseUrl: String
         val id: Int,
     )
 
+    @Serializable
+    data class ErrorResponse(
+        val errorCode: Int,
+        val errorMessage: String,
+    )
+
     private val headers: Map<String, String>
         get() = mapOf("X-Api-Token" to accessToken)
 
     fun getGameVersions(): List<GameVersion> {
-        return HttpUtils.get("$baseUrl/api/game/versions", headers)
+        return httpUtils.get("$baseUrl/api/game/versions", headers)
     }
 
     fun uploadFile(projectId: String, path: Path, uploadMetadata: UploadFileMetadata): UploadFileResponse {
@@ -120,6 +129,15 @@ class CurseforgeApi(private val accessToken: String, private val baseUrl: String
             .addFormDataPart("metadata", metadataJson)
             .build()
 
-        return HttpUtils.post("$baseUrl/api/projects/$projectId/upload-file", requestBody, headers)
+        return httpUtils.post("$baseUrl/api/projects/$projectId/upload-file", requestBody, headers)
+    }
+
+    private class CurseforgeHttpExceptionFactory : HttpUtils.HttpExceptionFactory {
+        val json = Json { ignoreUnknownKeys = true }
+
+        override fun createException(response: Response): HttpUtils.HttpException {
+            val errorResponse = json.decodeFromString<ErrorResponse>(response.body!!.string())
+            return HttpUtils.HttpException(response.code, errorResponse.errorMessage)
+        }
     }
 }

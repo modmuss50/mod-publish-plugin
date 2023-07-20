@@ -15,6 +15,8 @@ import kotlin.io.path.name
 
 // https://docs.modrinth.com/api-spec/#tag/versions/operation/createVersion
 class ModrinthApi(private val accessToken: String, private val baseUrl: String) {
+    private val httpUtils = HttpUtils()
+
     @Serializable
     enum class VersionType {
         @SerialName("alpha")
@@ -126,6 +128,6 @@ class ModrinthApi(private val accessToken: String, private val baseUrl: String) 
             bodyBuilder.addFormDataPart(name, path.name, path.toFile().asRequestBody(mediaType))
         }
 
-        return HttpUtils.post("$baseUrl/version", bodyBuilder.build(), headers)
+        return httpUtils.post("$baseUrl/version", bodyBuilder.build(), headers)
     }
 }
