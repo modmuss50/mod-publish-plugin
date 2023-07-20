@@ -65,8 +65,19 @@ abstract class Curseforge @Inject constructor(name: String) : Platform(name), Cu
         override fun execute() {
             with(parameters) {
                 val api = CurseforgeApi(accessToken.get(), apiEndpoint.get())
+
+                val gameVersionTypes = HttpUtils.retry(maxRetries.get(), "Failed to get game version types") {
+                    api.getVersionTypes()
+                }.filter {
+                    it.slug.startsWith("minecraft") || it.slug == "java" || it.slug == "modloader"
+                }.map {
+                    it.id
+                }
+
                 val availableGameVersions = HttpUtils.retry(maxRetries.get(), "Failed to get game versions") {
                     api.getGameVersions()
+                }.filter {
+                    gameVersionTypes.contains(it.gameVersionTypeID)
                 }
 
                 val gameVersions = ArrayList<Int>()

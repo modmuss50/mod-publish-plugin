@@ -21,6 +21,13 @@ class CurseforgeApi(private val accessToken: String, private val baseUrl: String
     private val httpUtils = HttpUtils(exceptionFactory = CurseforgeHttpExceptionFactory())
 
     @Serializable
+    data class GameVersionType(
+        val id: Int,
+        val name: String,
+        val slug: String,
+    )
+
+    @Serializable
     data class GameVersion(
         val id: Int,
         val gameVersionTypeID: Int,
@@ -115,6 +122,10 @@ class CurseforgeApi(private val accessToken: String, private val baseUrl: String
 
     private val headers: Map<String, String>
         get() = mapOf("X-Api-Token" to accessToken)
+
+    fun getVersionTypes(): List<GameVersionType> {
+        return httpUtils.get("$baseUrl/api/game/version-types", headers)
+    }
 
     fun getGameVersions(): List<GameVersion> {
         return httpUtils.get("$baseUrl/api/game/versions", headers)

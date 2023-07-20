@@ -22,6 +22,9 @@ class MockCurseforgeApi : MockWebServer.MockApi {
         return EndpointGroup {
             path("api") {
                 before(this::authHandler)
+                path("game/version-types") {
+                    get(this::versionTypes)
+                }
                 path("game/versions") {
                     get(this::versions)
                 }
@@ -45,6 +48,11 @@ class MockCurseforgeApi : MockWebServer.MockApi {
                 """.trimIndent(),
             )
         }
+    }
+
+    private fun versionTypes(context: Context) {
+        val versions = readResource("curseforge_version_types.json")
+        context.result(versions)
     }
 
     private fun versions(context: Context) {
