@@ -45,7 +45,7 @@ class CurseforgeTest : IntegrationTest {
         assertEquals(metadata.changelog, "Hello!")
         assertContains(metadata.gameVersions, 9990) // 1.20.1
         assertContains(metadata.gameVersions, 7499) // Fabric
-        assertEquals(metadata.relations.projects[0].slug, "fabric-api")
+        assertEquals(metadata.relations!!.projects[0].slug, "fabric-api")
     }
 
     @Test
@@ -217,5 +217,38 @@ class CurseforgeTest : IntegrationTest {
 
         assertEquals(TaskOutcome.FAILED, result.task(":publishCurseforge")!!.outcome)
         result.output.contains("Request failed, status: 401 message: You must provide an API token using the `X-Api-Token` header")
+    }
+
+    @Test
+    fun uploadCurseforgeNoDeps() {
+        val server = MockWebServer(MockCurseforgeApi())
+
+        val result = gradleTest()
+            .buildScript(
+                """
+                publishMods {
+                    file = tasks.jar.flatMap { it.archiveFile }
+                    changelog = "Hello!"
+                    version = "1.0.0"
+                    type = BETA
+                    modLoaders.add("fabric")
+                
+                    curseforge {
+                        accessToken = "123"
+                        projectId = "123456"
+                        minecraftVersions.add("1.20.1")
+                        
+                        apiEndpoint = "${server.endpoint}"
+                    }
+                }
+                """.trimIndent(),
+            )
+            .run("publishCurseforge")
+        server.close()
+
+        val metadata = server.api.lastMetadata!!
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishCurseforge")!!.outcome)
+        assertEquals(metadata.relations, null)
     }
 }
