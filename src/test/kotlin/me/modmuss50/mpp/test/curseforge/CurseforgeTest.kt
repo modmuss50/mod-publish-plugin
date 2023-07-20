@@ -21,6 +21,7 @@ class CurseforgeTest : IntegrationTest {
                     version = "1.0.0"
                     type = BETA
                     modLoaders.add("fabric")
+                    displayName = "Test Upload"
                 
                     curseforge {
                         accessToken = "123"
@@ -43,6 +44,7 @@ class CurseforgeTest : IntegrationTest {
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishCurseforge")!!.outcome)
         assertEquals(metadata.changelog, "Hello!")
+        assertEquals(metadata.displayName, "Test Upload")
         assertContains(metadata.gameVersions, 9990) // 1.20.1
         assertContains(metadata.gameVersions, 7499) // Fabric
         assertEquals(metadata.relations!!.projects[0].slug, "fabric-api")

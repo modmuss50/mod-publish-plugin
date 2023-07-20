@@ -41,6 +41,7 @@ interface PublishOptions {
         version.set(other.version)
         changelog.set(other.changelog)
         type.set(other.type)
+        displayName.set(other.displayName)
         modLoaders.set(other.modLoaders)
         additionalFiles.setFrom(other.additionalFiles)
         maxRetries.set(other.maxRetries)
