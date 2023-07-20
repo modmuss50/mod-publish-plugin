@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "me.modmuss50"
-version = "0.0.7"
+version = "0.0.8"
 description = "The Mod Publish Plugin is a plugin for the Gradle build system to help upload artifacts to a range of common destinations."
 
 repositories {
