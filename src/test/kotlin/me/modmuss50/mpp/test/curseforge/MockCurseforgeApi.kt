@@ -14,7 +14,7 @@ import me.modmuss50.mpp.test.MockWebServer
 import java.io.BufferedReader
 
 class MockCurseforgeApi : MockWebServer.MockApi {
-    val json = Json { ignoreUnknownKeys = true }
+    val json = Json { ignoreUnknownKeys = true; explicitNulls = false }
     var lastMetadata: CurseforgeApi.UploadFileMetadata? = null
     val files: ArrayList<String> = ArrayList()
 

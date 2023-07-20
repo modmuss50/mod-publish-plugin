@@ -16,6 +16,8 @@ import kotlin.io.path.name
 
 // https://support.curseforge.com/en/support/solutions/articles/9000197321-curseforge-upload-api
 class CurseforgeApi(private val accessToken: String, private val baseUrl: String) {
+    val json = Json { explicitNulls = false }
+
     private val httpUtils = HttpUtils(exceptionFactory = CurseforgeHttpExceptionFactory())
 
     @Serializable
@@ -121,7 +123,7 @@ class CurseforgeApi(private val accessToken: String, private val baseUrl: String
     fun uploadFile(projectId: String, path: Path, uploadMetadata: UploadFileMetadata): UploadFileResponse {
         val mediaType = "application/java-archive".toMediaTypeOrNull()
         val fileBody = path.toFile().asRequestBody(mediaType)
-        val metadataJson = Json.encodeToString(uploadMetadata)
+        val metadataJson = json.encodeToString(uploadMetadata)
 
         val requestBody = MultipartBody.Builder()
             .setType(MultipartBody.FORM)
