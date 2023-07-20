@@ -16,7 +16,7 @@ import kotlin.io.path.name
 
 // https://support.curseforge.com/en/support/solutions/articles/9000197321-curseforge-upload-api
 class CurseforgeApi(private val accessToken: String, private val baseUrl: String) {
-    val json = Json { explicitNulls = false }
+    val json = Json
 
     private val httpUtils = HttpUtils(exceptionFactory = CurseforgeHttpExceptionFactory())
 
@@ -59,12 +59,12 @@ class CurseforgeApi(private val accessToken: String, private val baseUrl: String
         val parentFileID: Int? = null, // Optional: The parent file of this file.
         val gameVersions: List<Int>, // A list of supported game versions, see the Game Versions API for details. Not supported if parentFileID is provided.
         val releaseType: ReleaseType,
-        val relations: UploadFileRelations,
+        val relations: UploadFileRelations? = null,
     )
 
     @Serializable
     data class UploadFileRelations(
-        val projects: List<ProjectFileRelation>?,
+        val projects: List<ProjectFileRelation>,
     )
 
     enum class RelationType {

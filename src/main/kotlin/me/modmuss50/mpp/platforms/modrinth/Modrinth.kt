@@ -36,7 +36,7 @@ interface ModrinthOptions : PlatformOptions, PlatformOptionsInternal<ModrinthOpt
     @ApiStatus.Internal
     override fun setInternalDefaults() {
         featured.convention(false)
-        apiEndpoint.convention("https://api.modrinth.com")
+        apiEndpoint.convention("https://api.modrinth.com/v2")
     }
 
     fun from(other: ModrinthOptions) {

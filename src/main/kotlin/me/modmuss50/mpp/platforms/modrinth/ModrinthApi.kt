@@ -10,12 +10,13 @@ import me.modmuss50.mpp.PublishOptions
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.Response
 import java.nio.file.Path
 import kotlin.io.path.name
 
 // https://docs.modrinth.com/api-spec/#tag/versions/operation/createVersion
 class ModrinthApi(private val accessToken: String, private val baseUrl: String) {
-    private val httpUtils = HttpUtils()
+    private val httpUtils = HttpUtils(exceptionFactory = ModrinthHttpExceptionFactory())
 
     @Serializable
     enum class VersionType {
@@ -113,6 +114,12 @@ class ModrinthApi(private val accessToken: String, private val baseUrl: String) 
         val authorId: String,
     )
 
+    @Serializable
+    data class ErrorResponse(
+        val error: String,
+        val description: String
+    )
+
     private val headers: Map<String, String>
         get() = mapOf("Authorization" to accessToken)
 
@@ -129,5 +136,14 @@ class ModrinthApi(private val accessToken: String, private val baseUrl: String) 
         }
 
         return httpUtils.post("$baseUrl/version", bodyBuilder.build(), headers)
+    }
+
+    private class ModrinthHttpExceptionFactory : HttpUtils.HttpExceptionFactory {
+        val json = Json { ignoreUnknownKeys = true }
+
+        override fun createException(response: Response): HttpUtils.HttpException {
+            val errorResponse = json.decodeFromString<ModrinthApi.ErrorResponse>(response.body!!.string())
+            return HttpUtils.HttpException(response.code, errorResponse.description)
+        }
     }
 }

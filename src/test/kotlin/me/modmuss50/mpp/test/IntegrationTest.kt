@@ -36,6 +36,11 @@ interface IntegrationTest {
             File(projectDir, "settings.gradle").delete()
             File(projectDir, "settings.gradle.kts").delete()
 
+            // Create a fmj for modrith
+            val resources = File(projectDir, "src/main/resources")
+            resources.mkdirs()
+            File(resources, "fabric.mod.json").writeText("{}")
+
             if (!groovy) {
                 buildScript(
                     """

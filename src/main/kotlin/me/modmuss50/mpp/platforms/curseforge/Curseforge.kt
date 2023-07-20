@@ -90,18 +90,21 @@ abstract class Curseforge @Inject constructor(name: String) : Platform(name), Cu
                     )
                 }
 
+                val relations = if (projectRelations.isNotEmpty()) {
+                    CurseforgeApi.UploadFileRelations(
+                        projects = projectRelations,
+                    )
+                } else {
+                    null
+                }
+
                 val metadata = CurseforgeApi.UploadFileMetadata(
                     changelog = changelog.get(),
                     changelogType = "markdown",
                     displayName = displayName.orNull,
                     gameVersions = gameVersions,
                     releaseType = CurseforgeApi.ReleaseType.valueOf(type.get()),
-                    relations = CurseforgeApi.UploadFileRelations(
-                        projects = projectRelations.ifEmpty {
-                            // Must be null and not an empty array
-                            null
-                        },
-                    ),
+                    relations = relations,
                 )
 
                 val response = HttpUtils.retry(maxRetries.get(), "Failed to upload file") {

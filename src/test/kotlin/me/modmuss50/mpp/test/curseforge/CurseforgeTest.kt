@@ -45,7 +45,7 @@ class CurseforgeTest : IntegrationTest {
         assertEquals(metadata.changelog, "Hello!")
         assertContains(metadata.gameVersions, 9990) // 1.20.1
         assertContains(metadata.gameVersions, 7499) // Fabric
-        assertEquals(metadata.relations.projects!![0].slug, "fabric-api")
+        assertEquals(metadata.relations!!.projects[0].slug, "fabric-api")
     }
 
     @Test
@@ -249,6 +249,6 @@ class CurseforgeTest : IntegrationTest {
         val metadata = server.api.lastMetadata!!
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishCurseforge")!!.outcome)
-        assertEquals(metadata.relations.projects, null)
+        assertEquals(metadata.relations, null)
     }
 }

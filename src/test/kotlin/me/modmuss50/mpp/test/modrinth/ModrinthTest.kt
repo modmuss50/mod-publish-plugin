@@ -111,4 +111,34 @@ class ModrinthTest : IntegrationTest {
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinth")!!.outcome)
     }
+
+    @Test
+    fun uploadModrinthNoDeps() {
+        val server = MockWebServer(MockModrinthApi())
+
+        val result = gradleTest()
+                .buildScript(
+                        """
+            publishMods {
+                file = tasks.jar.flatMap { it.archiveFile }
+                changelog = "Hello!"
+                version = "1.0.0"
+                type = STABLE
+                modLoaders.add("fabric")
+            
+                modrinth {
+                    accessToken = "123"
+                    projectId = "123456"
+                    minecraftVersions.add("1.20.1")
+
+                    apiEndpoint = "${server.endpoint}"
+                }
+            }
+                """.trimIndent(),
+                )
+                .run("publishModrinth")
+        server.close()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinth")!!.outcome)
+    }
 }
