@@ -7,7 +7,6 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.InputFiles
-import org.gradle.api.tasks.Optional
 
 // Contains options shared by each platform and the extension
 interface PublishOptions {
@@ -24,7 +23,6 @@ interface PublishOptions {
     val type: Property<ReleaseType>
 
     @get:Input
-    @get:Optional
     val displayName: Property<String>
 
     @get:Input

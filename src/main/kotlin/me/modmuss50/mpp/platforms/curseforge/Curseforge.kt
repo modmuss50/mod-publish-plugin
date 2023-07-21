@@ -112,7 +112,7 @@ abstract class Curseforge @Inject constructor(name: String) : Platform(name), Cu
                 val metadata = CurseforgeApi.UploadFileMetadata(
                     changelog = changelog.get(),
                     changelogType = "markdown",
-                    displayName = displayName.orNull,
+                    displayName = displayName.get(),
                     gameVersions = gameVersions,
                     releaseType = CurseforgeApi.ReleaseType.valueOf(type.get()),
                     relations = relations,

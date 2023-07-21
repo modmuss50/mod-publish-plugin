@@ -43,11 +43,11 @@ class CurseforgeTest : IntegrationTest {
         val metadata = server.api.lastMetadata!!
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishCurseforge")!!.outcome)
-        assertEquals(metadata.changelog, "Hello!")
-        assertEquals(metadata.displayName, "Test Upload")
+        assertEquals("Hello!", metadata.changelog)
+        assertEquals("Test Upload", metadata.displayName)
         assertContains(metadata.gameVersions, 9990) // 1.20.1
         assertContains(metadata.gameVersions, 7499) // Fabric
-        assertEquals(metadata.relations!!.projects[0].slug, "fabric-api")
+        assertEquals("fabric-api", metadata.relations!!.projects[0].slug)
     }
 
     @Test
@@ -251,6 +251,7 @@ class CurseforgeTest : IntegrationTest {
         val metadata = server.api.lastMetadata!!
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishCurseforge")!!.outcome)
-        assertEquals(metadata.relations, null)
+        assertEquals(null, metadata.relations)
+        assertEquals("mpp-example 1.0.0", metadata.displayName)
     }
 }

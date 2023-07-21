@@ -96,7 +96,7 @@ abstract class Modrinth @Inject constructor(name: String) : Platform(name), Modr
                 }
 
                 val metadata = ModrinthApi.CreateVersion(
-                    name = displayName.getOrElse(file.get().asFile.name),
+                    name = displayName.get(),
                     versionNumber = version.get(),
                     changelog = changelog.orNull,
                     dependencies = dependencies,

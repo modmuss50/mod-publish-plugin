@@ -31,6 +31,7 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
         dryRun.convention(false)
         maxRetries.convention(3)
         version.convention(project.provider { project.version.toString() })
+        displayName.convention(version.map { "${project.name} $it" })
 
         // Inherit the platform options from this extension.
         platforms.whenObjectAdded {

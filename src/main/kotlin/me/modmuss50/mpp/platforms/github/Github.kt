@@ -59,7 +59,7 @@ abstract class Github @Inject constructor(name: String) : Platform(name), Github
 
                 val repo = connect().getRepository(repository.get())
                 val release = with(GHReleaseBuilder(repo, version.get())) {
-                    name(displayName.getOrElse(mainFile.name))
+                    name(displayName.get())
                     body(changelog.get())
                     prerelease(type.get() != PublishOptions.ReleaseType.STABLE)
                     commitish(commitish.get())
