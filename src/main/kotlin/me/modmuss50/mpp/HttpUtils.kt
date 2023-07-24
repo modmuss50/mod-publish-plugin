@@ -9,7 +9,16 @@ import java.io.IOException
 import java.lang.RuntimeException
 
 class HttpUtils(val exceptionFactory: HttpExceptionFactory = DefaultHttpExceptionFactory()) {
-    val httpClient = OkHttpClient()
+    val httpClient = OkHttpClient.Builder()
+        .addNetworkInterceptor { chain ->
+            chain.proceed(
+                chain.request()
+                    .newBuilder()
+                    .header("User-Agent", "modmuss50/mod-publish-plugin/${HttpUtils::class.java.`package`.implementationVersion}")
+                    .build(),
+            )
+        }
+        .build()
     val json = Json { ignoreUnknownKeys = true }
 
     inline fun <reified T> get(url: String, headers: Map<String, String>): T {

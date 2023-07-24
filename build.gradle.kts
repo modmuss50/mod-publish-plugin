@@ -49,6 +49,12 @@ java {
     withSourcesJar()
 }
 
+tasks.jar {
+    manifest {
+        attributes(mapOf("Implementation-Version" to version))
+    }
+}
+
 spotless {
     kotlin {
         ktlint()
