@@ -65,7 +65,7 @@ class HttpUtils(val exceptionFactory: HttpExceptionFactory = DefaultHttpExceptio
                 try {
                     return closure()
                 } catch (e: HttpException) {
-                    if (e.code < 500 || e.code > 599) {
+                    if (e.code / 100 != 5) {
                         throw e
                     }
 

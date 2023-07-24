@@ -1,6 +1,7 @@
 package me.modmuss50.mpp.test.modrinth
 
 import io.javalin.apibuilder.ApiBuilder.before
+import io.javalin.apibuilder.ApiBuilder.get
 import io.javalin.apibuilder.ApiBuilder.path
 import io.javalin.apibuilder.ApiBuilder.post
 import io.javalin.apibuilder.EndpointGroup
@@ -21,6 +22,9 @@ class MockModrinthApi : MockWebServer.MockApi {
                 before(this::authHandler)
                 post(this::createVersion)
             }
+            path("/project/{slug}/check") {
+                get(this::checkProject)
+            }
         }
     }
 
@@ -39,7 +43,7 @@ class MockModrinthApi : MockWebServer.MockApi {
         val createVersion = json.decodeFromString<ModrinthApi.CreateVersion>(data)
 
         for (filePart in createVersion.fileParts) {
-            val file = context.uploadedFile(filePart)
+            context.uploadedFile(filePart)
                 ?: throw BadRequestResponse("No file")
         }
 
@@ -51,6 +55,16 @@ class MockModrinthApi : MockWebServer.MockApi {
                     authorId = "JZA4dW8o",
                 ),
             ),
+        )
+    }
+
+    private fun checkProject(context: Context) {
+        context.result(
+            """
+        {
+            "id": "AABBCCDD"
+        }
+            """.trimIndent(),
         )
     }
 }

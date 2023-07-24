@@ -10,7 +10,7 @@ Please make sure to report all issues, and any suggestions on this Github repo!
 Add to your gradle plugins block:
 ```gradle
 plugins {
-  id "me.modmuss50.mod-publish-plugin" version "0.1.1"
+  id "me.modmuss50.mod-publish-plugin" version "0.2.0"
 }
 ```
 

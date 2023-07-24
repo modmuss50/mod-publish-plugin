@@ -27,7 +27,7 @@ class ModrinthTest : IntegrationTest {
                     minecraftVersions.add("1.20.1")
                     
                     requires {
-                        projectId = "P7dR8mSH"
+                        id = "P7dR8mSH"
                     }
                     
                     apiEndpoint = "${server.endpoint}"
@@ -66,7 +66,7 @@ class ModrinthTest : IntegrationTest {
                         projectId = "12345678"
                         modLoaders.add("fabric")
                         requires {
-                           projectId = "P7dR8mSH" // fabric-api
+                           id = "P7dR8mSH" // fabric-api
                         }
                     }
                     
@@ -171,5 +171,39 @@ class ModrinthTest : IntegrationTest {
 
         assertEquals(TaskOutcome.FAILED, result.task(":publishModrinth")!!.outcome)
         result.output.contains("invalid-id is not a valid Modrinth ID")
+    }
+
+    @Test
+    fun uploadModrinthSlugLookup() {
+        val server = MockWebServer(MockModrinthApi())
+
+        val result = gradleTest()
+            .buildScript(
+                """
+            publishMods {
+                file = tasks.jar.flatMap { it.archiveFile }
+                changelog = "Hello!"
+                version = "1.0.0"
+                type = STABLE
+                modLoaders.add("fabric")
+            
+                modrinth {
+                    accessToken = "123"
+                    projectId = "12345678"
+                    minecraftVersions.add("1.20.1")
+                    
+                    requires {
+                        slug = "fabric-api"
+                    }
+                    
+                    apiEndpoint = "${server.endpoint}"
+                }
+            }
+                """.trimIndent(),
+            )
+            .run("publishModrinth")
+        server.close()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinth")!!.outcome)
     }
 }

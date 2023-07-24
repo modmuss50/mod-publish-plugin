@@ -58,11 +58,19 @@ interface ModrinthOptions : PlatformOptions, PlatformOptionsInternal<ModrinthOpt
 
 interface ModrinthDependency : PlatformDependency {
     @get:Input
-    val projectId: Property<String>
+    @get:Optional
+    val id: Property<String>
 
     @get:Input
     @get:Optional
-    val versionId: Property<String>
+    val slug: Property<String>
+
+    @get:Input
+    @get:Optional
+    val version: Property<String>
+
+    @Deprecated("For removal", ReplaceWith("id"))
+    val projectId: Property<String> get() = id
 }
 
 abstract class Modrinth @Inject constructor(name: String) : Platform(name), ModrinthOptions {
@@ -87,13 +95,7 @@ abstract class Modrinth @Inject constructor(name: String) : Platform(name), Modr
                     files["file_$index"] = additionalFile.toPath()
                 }
 
-                val dependencies = dependencies.get().map {
-                    ModrinthApi.Dependency(
-                        projectId = it.projectId.get().modrinthId,
-                        versionId = it.versionId.orNull,
-                        dependencyType = ModrinthApi.DependencyType.valueOf(it.type.get()),
-                    )
-                }
+                val dependencies = dependencies.get().map { toApiDependency(it, api) }
 
                 val metadata = ModrinthApi.CreateVersion(
                     name = displayName.get(),
@@ -109,9 +111,43 @@ abstract class Modrinth @Inject constructor(name: String) : Platform(name), Modr
                     primaryFile = primaryFileKey,
                 )
 
-                val response = HttpUtils.retry(maxRetries.get(), "Failed to create version") {
+                HttpUtils.retry(maxRetries.get(), "Failed to create version") {
                     api.createVersion(metadata, files)
                 }
+            }
+        }
+
+        private fun toApiDependency(dependency: ModrinthDependency, api: ModrinthApi): ModrinthApi.Dependency {
+            with(dependency) {
+                var projectId: String? = null
+
+                // Use the project id if we have it
+                if (id.isPresent) {
+                    projectId = id.get().modrinthId
+                }
+
+                // Lookup the project ID from the slug
+                if (slug.isPresent) {
+                    // Don't allow a slug and id to both be specified
+                    if (projectId != null) {
+                        throw IllegalStateException("Modrinth dependency cannot specify both projectId and projectSlug")
+                    }
+
+                    projectId = HttpUtils.retry(parameters.maxRetries.get(), "Failed to lookup project id from slug: ${slug.get()}") {
+                        api.checkProject(slug.get())
+                    }.id
+                }
+
+                // Ensure we have an id
+                if (projectId == null) {
+                    throw IllegalStateException("Modrinth dependency has no configured projectId or projectSlug value")
+                }
+
+                return ModrinthApi.Dependency(
+                    projectId = projectId,
+                    versionId = version.orNull,
+                    dependencyType = ModrinthApi.DependencyType.valueOf(type.get()),
+                )
             }
         }
     }
@@ -120,7 +156,7 @@ abstract class Modrinth @Inject constructor(name: String) : Platform(name), Modr
 private val ID_REGEX = Regex("[0-9a-zA-Z]{8}")
 
 // Returns a validated ModrithID
-internal val String.modrinthId: String
+private val String.modrinthId: String
     get() {
         if (!this.matches(ID_REGEX)) {
             throw IllegalArgumentException("$this is not a valid Modrinth ID")

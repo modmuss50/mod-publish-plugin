@@ -2,6 +2,7 @@ package me.modmuss50.mpp.platforms.modrinth
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import me.modmuss50.mpp.HttpUtils
@@ -115,6 +116,11 @@ class ModrinthApi(private val accessToken: String, private val baseUrl: String) 
     )
 
     @Serializable
+    data class ProjectCheckResponse(
+        val id: String,
+    )
+
+    @Serializable
     data class ErrorResponse(
         val error: String,
         val description: String,
@@ -138,12 +144,20 @@ class ModrinthApi(private val accessToken: String, private val baseUrl: String) 
         return httpUtils.post("$baseUrl/version", bodyBuilder.build(), headers)
     }
 
+    fun checkProject(projectSlug: String): ProjectCheckResponse {
+        return httpUtils.get("$baseUrl/project/$projectSlug/check", headers)
+    }
+
     private class ModrinthHttpExceptionFactory : HttpUtils.HttpExceptionFactory {
         val json = Json { ignoreUnknownKeys = true }
 
         override fun createException(response: Response): HttpUtils.HttpException {
-            val errorResponse = json.decodeFromString<ModrinthApi.ErrorResponse>(response.body!!.string())
-            return HttpUtils.HttpException(response.code, errorResponse.description)
+            return try {
+                val errorResponse = json.decodeFromString<ErrorResponse>(response.body!!.string())
+                HttpUtils.HttpException(response.code, errorResponse.description)
+            } catch (e: SerializationException) {
+                HttpUtils.HttpException(response.code, "Unknown error")
+            }
         }
     }
 }

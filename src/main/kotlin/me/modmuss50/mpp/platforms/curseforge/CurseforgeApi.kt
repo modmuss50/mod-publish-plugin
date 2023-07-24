@@ -2,6 +2,7 @@ package me.modmuss50.mpp.platforms.curseforge
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import me.modmuss50.mpp.HttpUtils
@@ -149,8 +150,12 @@ class CurseforgeApi(private val accessToken: String, private val baseUrl: String
         val json = Json { ignoreUnknownKeys = true }
 
         override fun createException(response: Response): HttpUtils.HttpException {
-            val errorResponse = json.decodeFromString<ErrorResponse>(response.body!!.string())
-            return HttpUtils.HttpException(response.code, errorResponse.errorMessage)
+            return try {
+                val errorResponse = json.decodeFromString<ErrorResponse>(response.body!!.string())
+                HttpUtils.HttpException(response.code, errorResponse.errorMessage)
+            } catch (e: SerializationException) {
+                HttpUtils.HttpException(response.code, "Unknown error")
+            }
         }
     }
 }
