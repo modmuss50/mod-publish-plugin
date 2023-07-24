@@ -89,7 +89,7 @@ abstract class Modrinth @Inject constructor(name: String) : Platform(name), Modr
 
                 val dependencies = dependencies.get().map {
                     ModrinthApi.Dependency(
-                        projectId = it.projectId.get(),
+                        projectId = it.projectId.get().modrinthId,
                         versionId = it.versionId.orNull,
                         dependencyType = ModrinthApi.DependencyType.valueOf(it.type.get()),
                     )
@@ -104,7 +104,7 @@ abstract class Modrinth @Inject constructor(name: String) : Platform(name), Modr
                     versionType = ModrinthApi.VersionType.valueOf(type.get()),
                     loaders = modLoaders.get().map { it.lowercase() },
                     featured = featured.get(),
-                    projectId = projectId.get(),
+                    projectId = projectId.get().modrinthId,
                     fileParts = files.keys.toList(),
                     primaryFile = primaryFileKey,
                 )
@@ -116,3 +116,15 @@ abstract class Modrinth @Inject constructor(name: String) : Platform(name), Modr
         }
     }
 }
+
+private val ID_REGEX = Regex("[0-9a-zA-Z]{8}")
+
+// Returns a validated ModrithID
+internal val String.modrinthId: String
+    get() {
+        if (!this.matches(ID_REGEX)) {
+            throw IllegalArgumentException("$this is not a valid Modrinth ID")
+        }
+
+        return this
+    }
