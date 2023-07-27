@@ -1,0 +1,17 @@
+import { Callout } from 'nextra/components'
+
+<Callout type="error" emoji="️🚫">
+    This page has not been fully populated yet! Sorry.
+</Callout>
+
+```groovy
+publishMods {
+    // other options
+
+    modrinth {
+        projectId = "abcdef"
+        accessToken = providers.environmentVariable("MODRINTH_TOKEN")
+        minecraftVersions.add("1.20.1")
+    }
+}
+```

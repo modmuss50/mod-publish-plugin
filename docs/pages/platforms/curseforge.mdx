@@ -1,0 +1,21 @@
+import { Callout } from 'nextra/components'
+
+<Callout type="error" emoji="️🚫">
+    This page has not been fully populated yet! Sorry.
+</Callout>
+
+```groovy
+publishMods {
+    // other options
+
+    curseforge {
+        projectId = "123456"
+        accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
+        minecraftVersions.add("1.20.1")
+
+        requires {
+            slug = "fabric-api"
+        }
+    }
+}
+```

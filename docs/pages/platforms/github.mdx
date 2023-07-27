@@ -1,0 +1,17 @@
+import { Callout } from 'nextra/components'
+
+<Callout type="error" emoji="️🚫">
+    This page has not been fully populated yet! Sorry.
+</Callout>
+
+```groovy
+publishMods {
+    // other options
+
+    github {
+        repository = "test/example"
+        accessToken = providers.environmentVariable("GITHUB_TOKEN")
+        commitish = "main"
+    }
+}
+```

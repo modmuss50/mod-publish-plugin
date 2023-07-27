@@ -1,6 +1,6 @@
 import { Tabs, Tab } from 'nextra/components'
 
-# Getting started
+# Installing the plugin
  
 The plugin is hosted on the Gradle plugin portal, so can be easily added to your project by adding the following snippet to the top of your build.gradle file.
  
@@ -20,3 +20,62 @@ The plugin is hosted on the Gradle plugin portal, so can be easily added to your
     ```
   </Tab>
 </Tabs>
+
+# Configuring the plugin
+
+import { Callout } from 'nextra/components'
+
+<Callout type="info" emoji="ℹ️">
+    If you just want to see a working example, select a specific platform on the left.
+</Callout>
+
+By default, the plugin does nothing. First you must configure the basic platform-agnostic options within the `publishMods` extension block.
+
+```groovy
+publishMods {
+    changelog = "# Markdown changelog content"
+    type = STABLE
+}
+```
+
+## Input file
+
+Next you need to specify the input file and supported modloaders, this changes based on the mod loader you are using.
+
+- On Fabric uses the `remapJar` task
+- On Forge uses the `reobfJar` task
+
+### Fabric
+
+```groovy
+publishMods {
+    file = remapJar.archiveFile
+    modLoaders.add("fabric")
+}
+```
+
+### Forge
+
+```groovy
+publishMods {
+    file = reobfJar.archiveFile
+    modLoaders.add("forge")
+}
+```
+
+## Adding a platform
+
+Next you need to configure each platform that you wish to publish your mod to. The following shows a simple example for publishing a mod to curseforge.
+
+```groovy
+publishMods {
+    curseforge {
+        projectId = "123456"
+        accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
+        minecraftVersions.add("1.20.1")
+    }
+}
+```
+## Publishing
+
+Run the `publishMods` task to publish the mod to all the configured destinations.

@@ -7,7 +7,10 @@ Specify an exact version number to prevent unwanted breakages to your build scri
 Please make sure to report all issues, and any suggestions on this Github repo!
 
 ## Basic usage
+Visit the [docs site](https://modmuss50.github.io/mod-publish-plugin/) for more detailed instructions.
+
 Add to your gradle plugins block:
+
 ```gradle
 plugins {
   id "me.modmuss50.mod-publish-plugin" version "0.2.0"
@@ -44,52 +47,6 @@ publishMods {
 }
 ```
 
-Run the `publishMods` task to publish to all configured destinations
+Run the `publishMods` task to publish to all configured destinations.
 
-Example showing multiple CurseForge destinations sharing common options. 
-
-```gradle
-publishMods {
-    changelog = file("changelog.md").text
-
-    def options = curseforgeOptions {
-        accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
-        minecraftVersions.add("1.20.1")
-    }
-
-    curseforge("curseforgeFabric") {
-        from options
-        projectId = "123456"
-        type = STABLE
-        file = fabricJar.archiveFile
-    }
-
-    curseforge("curseforgeForge") {
-        from options
-        projectId = "7890123"
-        type = BETA
-        file = forgeJar.archiveFile
-    }
-}
-```
-
-Full reference of all options
-
-### Features
-- Supports CurseForge, Modrinth and Github
-- Typesafe DSL to easily publish to multiple locations with minimal repetition 
-- Retry on failure
-- Dry run mode to try and increase confidence in your buildscript before releases
-- Built with modern Gradle features
-- Mod loader independent 
-
-### Future plans
-- Create some detailed documentation/working examples for Fabric and Forge + add some docs to the code. (Waiting on the project to be a bit more stable first)
-
-### FAQ
-- Why use Kotlin?
-  - I wanted to explore using Kotlin for a larger project, as Gradle already includes Kotlin there should be little downside to the end user.
-- Why do I need to specify the minecraft versions for both CurseForge and Modrinth?
-  - Curseforge and Modrinth use different versioning for snapshots, thus they must be defined for each platform.
-- Feature x or platform y is not supported
-  - Please open an issue on this repo!
+Visit the [docs site](https://modmuss50.github.io/mod-publish-plugin/) for more detailed instructions.

@@ -6,7 +6,7 @@ const config: DocsThemeConfig = {
   project: {
     link: 'https://github.com/modmuss50/mod-publish-plugin',
   },
-  docsRepositoryBase: 'https://github.com/modmuss50/mod-publish-plugin/docs',
+  docsRepositoryBase: 'https://github.com/modmuss50/mod-publish-plugin/tree/main/docs',
   footer: {
     text: (
       <a href="https://nextra.site" target="_blank">
