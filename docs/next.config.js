@@ -14,6 +14,7 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  basePath: "/mod-publish-plugin"
 }
 
 module.exports = {

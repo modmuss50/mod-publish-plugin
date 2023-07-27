@@ -28,6 +28,8 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - run: npm i
         working-directory: ./docs
       - run: npm run build
