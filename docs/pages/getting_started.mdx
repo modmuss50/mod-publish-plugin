@@ -1,0 +1,22 @@
+import { Tabs, Tab } from 'nextra/components'
+
+# Getting started
+ 
+The plugin is hosted on the Gradle plugin portal, so can be easily added to your project by adding the following snippet to the top of your build.gradle file.
+ 
+<Tabs items={['Groovy', 'Kotlin']}>
+  <Tab>
+    ```groovy
+    plugins {
+        id "me.modmuss50.mod-publish-plugin" version "0.2.0"
+    }
+    ```
+  </Tab>
+  <Tab>
+    ```kotlin
+    plugins {
+        id("me.modmuss50.mod-publish-plugin") version "0.2.0"
+    }
+    ```
+  </Tab>
+</Tabs>

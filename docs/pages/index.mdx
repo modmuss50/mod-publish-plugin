@@ -1,0 +1,22 @@
+# Mod Publish Plugin
+
+A modern Gradle plugin to publish Minecraft mods to a range of destinations.
+
+### Features
+- Supports CurseForge, Modrinth and Github
+- Typesafe DSL to easily publish to multiple locations with minimal repetition 
+- Retry on failure
+- Dry run mode to try and increase confidence in your buildscript before releases
+- Built with modern Gradle features
+- Mod loader independent 
+
+### Future plans
+- Create some detailed documentation/working examples for Fabric and Forge + add some docs to the code. (Waiting on the project to be a bit more stable first)
+
+### FAQ
+- Why use Kotlin?
+  - I wanted to explore using Kotlin for a larger project, as Gradle already includes Kotlin there should be little downside to the end user.
+- Why do I need to specify the minecraft versions for both CurseForge and Modrinth?
+  - Curseforge and Modrinth use different versioning for snapshots, thus they must be defined for each platform.
+- Feature x or platform y is not supported
+  - Please open an issue on this repo!
