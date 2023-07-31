@@ -1,17 +1,59 @@
-import { Callout } from 'nextra/components'
-
-<Callout type="error" emoji="️🚫">
-    This page has not been fully populated yet! Sorry.
-</Callout>
-
+## Basic example
+See the following minimal example showing how to publish the `remapJar` task to Modrinth:
 ```groovy
 publishMods {
-    // other options
+    file = remapJar.archiveFile
+    changelog = "Changelog"
+    type = STABLE
+    modLoaders.add("fabric")
 
     modrinth {
-        projectId = "abcdef"
-        accessToken = providers.environmentVariable("MODRINTH_TOKEN")
+        accessToken = providers.environmentVariable("MODRINTH_API_KEY")
+        projectId = "12345678"
         minecraftVersions.add("1.20.1")
+    }
+}
+
+```
+## Multiple projects
+You can create multiple Modrinth destinations by providing a name like so:
+```groovy
+publishMods {
+    modrinth("modrinthProjectA") {
+        // Configure Modrinth settings for project A here
+    }
+
+    modrinth("modrinthProjectB") {
+        // Configure Modrinth settings for project B here
+    }
+}
+```
+## All options
+See the following example showing all the Modrinth specific options:
+```groovy
+publishMods {
+    modrinth {
+        accessToken = providers.environmentVariable("MODRINTH_API_KEY")
+        projectId = "12345678"
+        minecraftVersions.add("1.20.1")
+
+        // You can specify either the project id OR slug, but not both.
+        requires {
+            id = "12345678"
+            slug = "project-slug"
+        }
+        optional {
+            id = "12345678"
+            slug = "project-slug"
+        }
+        incompatible {
+            id = "12345678"
+            slug = "project-slug"
+        }
+        embeds {
+            id = "12345678"
+            slug = "project-slug"
+        }
     }
 }
 ```

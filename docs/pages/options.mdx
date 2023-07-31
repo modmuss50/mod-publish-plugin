@@ -1,0 +1,53 @@
+The mod publish plugin has a number of common options that are shared between all platforms.
+
+```groovy
+publishMods {
+    // Set the main file to be uploaded
+    file = jar.archiveFile
+
+    // Markdown changelog
+    changelog = "Example changelog"
+
+    // Defaults to the Gradle project version
+    version = "1.0.0"
+
+    // Specify the release type
+    type = STABLE
+    type = BETA
+    type = ALPHA
+
+    // The display name/release title, this defaults to the Gradle project name + version
+    displayName = "My Mod"
+
+    // A list of mod loaders the release supports
+    modLoaders.add("fabric")
+
+    // A ConfigurableFileCollection of addional files that are uploaded alongside the main file
+    additionalFiles.from(jar.archiveFile)
+
+    // The max number of times to retry on server error, defaults to 3.
+    maxRetries = 5
+}
+```
+
+Each platform inherits the above common options, and can all be individually configured. For example if you want to use a different file just for Github you could do the following:
+
+```groovy
+publishMods {
+    // Default file
+    file = jar.archiveFile
+
+    github {
+        // The githubJar is only used by the github publish task.
+        file = githubJar.archiveFile
+    }
+
+    curseforge {
+        // Default file used
+    }
+
+    modrinth {
+        // Default file used
+    }
+}
+```

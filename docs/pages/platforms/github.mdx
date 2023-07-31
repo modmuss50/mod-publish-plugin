@@ -1,16 +1,40 @@
-import { Callout } from 'nextra/components'
-
-<Callout type="error" emoji="️🚫">
-    This page has not been fully populated yet! Sorry.
-</Callout>
-
+## Basic example
+See the following minimal example showing how to publish the `remapJar` task to GitHub:
 ```groovy
 publishMods {
-    // other options
+    file = remapJar.archiveFile
+    changelog = "Changelog"
+    type = STABLE
+    modLoaders.add("fabric")
 
     github {
-        repository = "test/example"
         accessToken = providers.environmentVariable("GITHUB_TOKEN")
+        repository = "Example/MyMod"
+        commitish = "main" // This is the branch the release tag will be created from
+    }
+}
+
+```
+## Multiple projects
+You can create multiple GitHub destinations by providing a name like so:
+```groovy
+publishMods {
+    github("githubProjectA") {
+        // Configure github settings for project A here
+    }
+
+    github("githubProjectB") {
+        // Configure github settings for project B here
+    }
+}
+```
+## All options
+See the following example showing all the Github specific options:
+```groovy
+publishMods {
+    github {
+        accessToken = providers.environmentVariable("GITHUB_TOKEN")
+        repository = "Example/MyMod"
         commitish = "main"
     }
 }

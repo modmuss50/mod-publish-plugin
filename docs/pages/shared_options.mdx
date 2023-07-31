@@ -1,0 +1,46 @@
+If you wish to create multiple releases to the same platform you can create shared options. The following example shows how to use `curseforgeOptions` for a forge and fabric release.
+
+```groovy
+publishMods {
+    changelog = file("changelog.md").text
+
+    def options = curseforgeOptions {
+        accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
+        minecraftVersions.add("1.20.1")
+    }
+
+    curseforge("curseforgeFabric") {
+        from options
+        projectId = "123456"
+        type = STABLE
+        file = fabricJar.archiveFile
+    }
+
+    curseforge("curseforgeForge") {
+        from options
+        projectId = "7890123"
+        type = BETA
+        file = forgeJar.archiveFile
+    }
+}
+```
+
+The following example shows how the inheritance works, any option can be overridden without affecting the parent.
+
+```groovy
+publishMods {
+    changelog = "Changelog 1"
+
+    def options = curseforgeOptions {
+        // Automatically inherits properties from the parent block
+
+        changelog = "Changelog 2" // Overrides changelog 1
+    }
+
+    curseforge {
+        from options // Inherit properties from `options`
+
+        changelog = "Changelog 3" // Overrides changelog 2
+    }
+}
+```

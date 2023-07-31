@@ -1,20 +1,54 @@
-import { Callout } from 'nextra/components'
-
-<Callout type="error" emoji="️🚫">
-    This page has not been fully populated yet! Sorry.
-</Callout>
+## Basic example
+See the following minimal example showing how to publish the `remapJar` task to CurseForge:
 
 ```groovy
 publishMods {
-    // other options
+    file = remapJar.archiveFile
+    changelog = "Changelog"
+    type = STABLE
+    modLoaders.add("fabric")
 
     curseforge {
-        projectId = "123456"
+        accessToken = providers.environmentVariable("CURSEFORGE_API_KEY")
+        projectId = "308769"
+        minecraftVersions.add("1.20.1")
+    }
+}
+
+```
+## Multiple projects
+You can create multiple CurseForge destinations by providing a name like so:
+```groovy
+publishMods {
+    curseforge("curseforgeProjectA") {
+        // Configure curseforge settings for project A here
+    }
+
+    curseforge("curseforgeProjectB") {
+        // Configure curseforge settings for project B here
+    }
+}
+```
+## All options
+See the following example showing all the CurseForge specific options:
+```groovy
+publishMods {
+    curseforge {
         accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
+        projectId = "123456"
         minecraftVersions.add("1.20.1")
 
         requires {
-            slug = "fabric-api"
+            slug = "project-slug"
+        }
+        optional {
+            slug = "project-slug"
+        }
+        incompatible {
+            slug = "project-slug"
+        }
+        embeds {
+            slug = "project-slug"
         }
     }
 }
