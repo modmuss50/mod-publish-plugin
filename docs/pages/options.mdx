@@ -27,6 +27,11 @@ publishMods {
 
     // The max number of times to retry on server error, defaults to 3.
     maxRetries = 5
+
+    // When dry run is enabled the release assets will be saved to the build directory for testing.
+    dryRun = true
+    // You can always enable it when one of your API keys is not present.
+    dryRun = providers.environmentVariable("API_KEY").orElse(null).map { it == null}
 }
 ```
 
