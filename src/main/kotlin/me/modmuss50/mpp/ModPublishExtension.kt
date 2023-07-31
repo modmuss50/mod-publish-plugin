@@ -15,6 +15,7 @@ import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
+import java.lang.IllegalStateException
 import java.nio.file.Path
 import kotlin.reflect.KClass
 
@@ -30,7 +31,7 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
     init {
         dryRun.convention(false)
         maxRetries.convention(3)
-        version.convention(project.provider { project.version.toString() })
+        version.convention(project.provider(this::getProjectVersion))
         displayName.convention(version.map { "${project.name} $it" })
 
         // Inherit the platform options from this extension.
@@ -153,6 +154,17 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
             action.execute(options)
             return@provider options
         }
+    }
+
+    // Returns the project version as a string, or throws if not set.
+    private fun getProjectVersion(): String {
+        val version = project.version
+
+        if (version == Project.DEFAULT_VERSION) {
+            throw IllegalStateException("Gradle version is unspecified")
+        }
+
+        return version.toString()
     }
 }
 

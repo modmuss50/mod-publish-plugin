@@ -254,4 +254,39 @@ class CurseforgeTest : IntegrationTest {
         assertEquals(null, metadata.relations)
         assertEquals("mpp-example 1.0.0", metadata.displayName)
     }
+
+    // Test to ensure that a version is set
+    @Test
+    fun uploadCurseforgeNoVersionError() {
+        val server = MockWebServer(MockCurseforgeApi())
+
+        val result = gradleTest()
+            .buildScript(
+                """
+                publishMods {
+                    file = tasks.jar.flatMap { it.archiveFile }
+                    changelog = "Hello!"
+                    type = BETA
+                    modLoaders.add("fabric")
+                
+                    curseforge {
+                        accessToken = "abc"
+                        projectId = "123456"
+                        minecraftVersions.add("1.20.1")
+                        
+                        requires {
+                            slug = "fabric-api"
+                        }
+                        
+                        apiEndpoint = "${server.endpoint}"
+                    }
+                }
+                """.trimIndent(),
+            )
+            .run("publishCurseforge")
+        server.close()
+
+        assertEquals(TaskOutcome.FAILED, result.task(":publishCurseforge")!!.outcome)
+        result.output.contains("Gradle version is unspecified")
+    }
 }
