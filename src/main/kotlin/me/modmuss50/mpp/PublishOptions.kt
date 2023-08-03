@@ -44,10 +44,4 @@ interface PublishOptions {
         additionalFiles.setFrom(other.additionalFiles)
         maxRetries.set(other.maxRetries)
     }
-
-    enum class ReleaseType {
-        STABLE,
-        BETA,
-        ALPHA,
-    }
 }

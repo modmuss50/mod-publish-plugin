@@ -7,7 +7,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import me.modmuss50.mpp.HttpUtils
 import me.modmuss50.mpp.PlatformDependency
-import me.modmuss50.mpp.PublishOptions
+import me.modmuss50.mpp.ReleaseType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -32,11 +32,11 @@ class ModrinthApi(private val accessToken: String, private val baseUrl: String) 
         ;
 
         companion object {
-            fun valueOf(type: PublishOptions.ReleaseType): VersionType {
+            fun valueOf(type: ReleaseType): VersionType {
                 return when (type) {
-                    PublishOptions.ReleaseType.STABLE -> RELEASE
-                    PublishOptions.ReleaseType.BETA -> BETA
-                    PublishOptions.ReleaseType.ALPHA -> ALPHA
+                    ReleaseType.STABLE -> RELEASE
+                    ReleaseType.BETA -> BETA
+                    ReleaseType.ALPHA -> ALPHA
                 }
             }
         }
