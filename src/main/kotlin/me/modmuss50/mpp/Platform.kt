@@ -38,15 +38,15 @@ interface PlatformDependencyContainer<T : PlatformDependency> {
     }
 
     fun optional(action: Action<T>) {
-        addInternal(PlatformDependency.DependencyType.REQUIRED, action)
+        addInternal(PlatformDependency.DependencyType.OPTIONAL, action)
     }
 
     fun incompatible(action: Action<T>) {
-        addInternal(PlatformDependency.DependencyType.REQUIRED, action)
+        addInternal(PlatformDependency.DependencyType.INCOMPATIBLE, action)
     }
 
     fun embeds(action: Action<T>) {
-        addInternal(PlatformDependency.DependencyType.REQUIRED, action)
+        addInternal(PlatformDependency.DependencyType.EMBEDDED, action)
     }
 
     fun fromDependencies(other: PlatformDependencyContainer<T>) {
