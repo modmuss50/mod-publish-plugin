@@ -1,6 +1,9 @@
 package me.modmuss50.mpp.platforms.github
 
-import me.modmuss50.mpp.*
+import me.modmuss50.mpp.Platform
+import me.modmuss50.mpp.PlatformOptions
+import me.modmuss50.mpp.PlatformOptionsInternal
+import me.modmuss50.mpp.ReleaseType
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional

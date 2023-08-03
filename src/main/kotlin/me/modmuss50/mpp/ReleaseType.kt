@@ -5,7 +5,7 @@ import java.lang.IllegalArgumentException
 enum class ReleaseType {
     STABLE,
     BETA,
-    ALPHA;
+    ALPHA, ;
 
     companion object {
         @JvmStatic
@@ -14,7 +14,7 @@ enum class ReleaseType {
             try {
                 return ReleaseType.valueOf(upper)
             } catch (e: IllegalArgumentException) {
-                throw IllegalArgumentException("Invalid release type: ${upper}. Must be one of: STABLE, BETA, ALPHA")
+                throw IllegalArgumentException("Invalid release type: $upper. Must be one of: STABLE, BETA, ALPHA")
             }
         }
     }
