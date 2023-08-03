@@ -21,9 +21,9 @@ import kotlin.reflect.KClass
 
 abstract class ModPublishExtension(val project: Project) : PublishOptions {
     // Removes the need to import the release type, a little gross tho?
-    val BETA = PublishOptions.ReleaseType.BETA
-    val ALPHA = PublishOptions.ReleaseType.ALPHA
-    val STABLE = PublishOptions.ReleaseType.STABLE
+    val BETA = ReleaseType.BETA
+    val ALPHA = ReleaseType.ALPHA
+    val STABLE = ReleaseType.STABLE
 
     abstract val dryRun: Property<Boolean>
     val platforms: ExtensiblePolymorphicDomainObjectContainer<Platform> = project.objects.polymorphicDomainObjectContainer(Platform::class.java)

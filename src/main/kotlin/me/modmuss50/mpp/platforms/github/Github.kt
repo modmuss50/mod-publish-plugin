@@ -1,9 +1,6 @@
 package me.modmuss50.mpp.platforms.github
 
-import me.modmuss50.mpp.Platform
-import me.modmuss50.mpp.PlatformOptions
-import me.modmuss50.mpp.PlatformOptionsInternal
-import me.modmuss50.mpp.PublishOptions
+import me.modmuss50.mpp.*
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
@@ -61,7 +58,7 @@ abstract class Github @Inject constructor(name: String) : Platform(name), Github
                 val release = with(GHReleaseBuilder(repo, version.get())) {
                     name(displayName.get())
                     body(changelog.get())
-                    prerelease(type.get() != PublishOptions.ReleaseType.STABLE)
+                    prerelease(type.get() != ReleaseType.STABLE)
                     commitish(commitish.get())
                 }.create()
 

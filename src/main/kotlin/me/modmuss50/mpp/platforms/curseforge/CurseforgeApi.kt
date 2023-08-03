@@ -7,7 +7,6 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import me.modmuss50.mpp.HttpUtils
 import me.modmuss50.mpp.PlatformDependency
-import me.modmuss50.mpp.PublishOptions
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -49,11 +48,11 @@ class CurseforgeApi(private val accessToken: String, private val baseUrl: String
         ;
 
         companion object {
-            fun valueOf(type: PublishOptions.ReleaseType): ReleaseType {
+            fun valueOf(type: me.modmuss50.mpp.ReleaseType): ReleaseType {
                 return when (type) {
-                    PublishOptions.ReleaseType.STABLE -> RELEASE
-                    PublishOptions.ReleaseType.BETA -> BETA
-                    PublishOptions.ReleaseType.ALPHA -> ALPHA
+                    me.modmuss50.mpp.ReleaseType.STABLE -> RELEASE
+                    me.modmuss50.mpp.ReleaseType.BETA -> BETA
+                    me.modmuss50.mpp.ReleaseType.ALPHA -> ALPHA
                 }
             }
         }
