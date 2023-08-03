@@ -6,6 +6,7 @@ import me.modmuss50.mpp.PlatformDependency
 import me.modmuss50.mpp.PlatformDependencyContainer
 import me.modmuss50.mpp.PlatformOptions
 import me.modmuss50.mpp.PlatformOptionsInternal
+import me.modmuss50.mpp.PublishOptions
 import me.modmuss50.mpp.path
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
@@ -37,6 +38,11 @@ interface CurseforgeOptions : PlatformOptions, PlatformOptionsInternal<Curseforg
 
     fun from(other: Provider<CurseforgeOptions>) {
         from(other.get())
+    }
+
+    fun from(other: Provider<CurseforgeOptions>, publishOptions: Provider<PublishOptions>) {
+        from(other)
+        from(publishOptions.get())
     }
 
     override fun setInternalDefaults() {

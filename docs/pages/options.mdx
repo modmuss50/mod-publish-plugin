@@ -31,7 +31,7 @@ publishMods {
     // When dry run is enabled the release assets will be saved to the build directory for testing.
     dryRun = true
     // You can always enable it when one of your API keys is not present.
-    dryRun = providers.environmentVariable("API_KEY").orElse(null).map { it == null }
+    dryRun = providers.environmentVariable("API_KEY").getOrNull() == null
 }
 ```
 

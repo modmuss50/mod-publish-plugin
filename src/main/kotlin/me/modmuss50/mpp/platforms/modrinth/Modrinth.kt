@@ -6,6 +6,7 @@ import me.modmuss50.mpp.PlatformDependency
 import me.modmuss50.mpp.PlatformDependencyContainer
 import me.modmuss50.mpp.PlatformOptions
 import me.modmuss50.mpp.PlatformOptionsInternal
+import me.modmuss50.mpp.PublishOptions
 import me.modmuss50.mpp.path
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
@@ -50,6 +51,11 @@ interface ModrinthOptions : PlatformOptions, PlatformOptionsInternal<ModrinthOpt
 
     fun from(other: Provider<ModrinthOptions>) {
         from(other.get())
+    }
+
+    fun from(other: Provider<ModrinthOptions>, publishOptions: Provider<PublishOptions>) {
+        from(other)
+        from(publishOptions.get())
     }
 
     override val platformDependencyKClass: KClass<ModrinthDependency>

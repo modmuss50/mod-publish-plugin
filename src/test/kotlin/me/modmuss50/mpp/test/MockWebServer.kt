@@ -18,4 +18,14 @@ class MockWebServer<T : MockWebServer.MockApi>(val api: T) : AutoCloseable {
     interface MockApi {
         fun routes(): EndpointGroup
     }
+
+    class CombinedApi(val apis: List<MockApi>) : MockApi {
+        override fun routes(): EndpointGroup {
+            return EndpointGroup {
+                for (api in apis) {
+                    api.routes().addEndpoints()
+                }
+            }
+        }
+    }
 }

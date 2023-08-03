@@ -40,6 +40,21 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
         }
     }
 
+    fun publishOptions(@DelegatesTo(PublishOptions::class) closure: Closure<*>): Provider<PublishOptions> {
+        return publishOptions {
+            project.configure(it, closure)
+        }
+    }
+
+    fun publishOptions(action: Action<PublishOptions>): Provider<PublishOptions> {
+        return project.provider {
+            val options = project.objects.newInstance(PublishOptions::class.java)
+            options.from(this)
+            action.execute(options)
+            return@provider options
+        }
+    }
+
     // Curseforge
 
     fun curseforge(@DelegatesTo(value = Curseforge::class) closure: Closure<*>): NamedDomainObjectProvider<Curseforge> {
