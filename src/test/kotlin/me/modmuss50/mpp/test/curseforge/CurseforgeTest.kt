@@ -45,8 +45,8 @@ class CurseforgeTest : IntegrationTest {
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishCurseforge")!!.outcome)
         assertEquals("Hello!", metadata.changelog)
         assertEquals("Test Upload", metadata.displayName)
-        assertContains(metadata.gameVersions, 9990) // 1.20.1
-        assertContains(metadata.gameVersions, 7499) // Fabric
+        assertContains(metadata.gameVersions!!, 9990) // 1.20.1
+        assertContains(metadata.gameVersions!!, 7499) // Fabric
         assertEquals("fabric-api", metadata.relations!!.projects[0].slug)
     }
 
