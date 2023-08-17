@@ -7,9 +7,13 @@ import okhttp3.RequestBody
 import okhttp3.Response
 import java.io.IOException
 import java.lang.RuntimeException
+import java.time.Duration
 
-class HttpUtils(val exceptionFactory: HttpExceptionFactory = DefaultHttpExceptionFactory()) {
+class HttpUtils(val exceptionFactory: HttpExceptionFactory = DefaultHttpExceptionFactory(), timeout: Duration = Duration.ofSeconds(30)) {
     val httpClient = OkHttpClient.Builder()
+        .connectTimeout(timeout)
+        .readTimeout(timeout)
+        .writeTimeout(timeout)
         .addNetworkInterceptor { chain ->
             chain.proceed(
                 chain.request()
