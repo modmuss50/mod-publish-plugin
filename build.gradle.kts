@@ -77,13 +77,13 @@ gradlePlugin {
 }
 
 fun replaceVersion(path: String) {
-    var content = File(path).readText()
+    var content = project.file(path).readText()
 
     content = content.replace("(version \").*(\")".toRegex(), "version \"${project.version}\"")// project.version.toString())
 
     println(content)
 
-    File(path).writeText(content)
+    project.file(path).writeText(content)
 }
 
 replaceVersion("README.MD")
