@@ -4,14 +4,13 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.gradle.testkit.runner.TaskOutcome
 import java.io.File
-import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
  * Enable this test to publish real files, to the real sites! Create a options.json with all the tokens
  */
-@Ignore
+// @Ignore
 class ProductionTest : IntegrationTest {
     @Test
     fun run() {
@@ -39,11 +38,11 @@ class ProductionTest : IntegrationTest {
                         }
                     }
                     
-                    github {
-                        accessToken = "${options.githubToken}"
-                        repository = "${options.githubRepo}"
-                        commitish = "main"
-                    }
+//                    github {
+//                        accessToken = "${options.githubToken}"
+//                        repository = "${options.githubRepo}"
+//                        commitish = "main"
+//                    }
                     
                     modrinth {
                         accessToken = "${options.modrinthToken}"
@@ -57,6 +56,7 @@ class ProductionTest : IntegrationTest {
                     
                     discord {
                         username = "Great test mod"
+                        avatarUrl = "https://placekitten.com/500/500"
                         content = changelog.map { "## A new version of my mod has been uploaded:\n" + it }
                         webhookUrl = "${options.discordWebhook}"
                     }

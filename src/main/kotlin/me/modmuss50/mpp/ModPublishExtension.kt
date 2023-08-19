@@ -164,18 +164,22 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
 
     // Discord
 
+    fun discord(@DelegatesTo(value = DiscordWebhookTask::class) closure: Closure<*>): TaskProvider<DiscordWebhookTask> {
+        return discord("announceDiscord", closure)
+    }
+
     fun discord(action: Action<DiscordWebhookTask>): TaskProvider<DiscordWebhookTask> {
         return discord("announceDiscord", action)
     }
 
+    fun discord(name: String, @DelegatesTo(value = DiscordWebhookTask::class) closure: Closure<*>): TaskProvider<DiscordWebhookTask> {
+        return discord(name) {
+            project.configure(it, closure)
+        }
+    }
+
     fun discord(name: String, action: Action<DiscordWebhookTask>): TaskProvider<DiscordWebhookTask> {
         val task = project.tasks.register(name, DiscordWebhookTask::class.java) {
-            // By default, announce all the platforms.
-            it.publishResults.from(
-                platforms
-                    .map { platform -> project.tasks.getByName(platform.taskName) as PublishModTask }
-                    .map { task -> task.result },
-            )
             action.execute(it)
         }
 

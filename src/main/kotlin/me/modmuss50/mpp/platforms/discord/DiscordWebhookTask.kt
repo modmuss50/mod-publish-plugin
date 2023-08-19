@@ -3,6 +3,8 @@ package me.modmuss50.mpp.platforms.discord
 import me.modmuss50.mpp.CurseForgePublishResult
 import me.modmuss50.mpp.GithubPublishResult
 import me.modmuss50.mpp.ModrinthPublishResult
+import me.modmuss50.mpp.Platform
+import me.modmuss50.mpp.PublishModTask
 import me.modmuss50.mpp.PublishResult
 import me.modmuss50.mpp.modPublishExtension
 import org.gradle.api.DefaultTask
@@ -52,6 +54,21 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
         group = "publishing"
         username.convention("Mod Publish Plugin")
         content.convention(project.modPublishExtension.changelog)
+
+        // By default, announce all the platforms.
+        publishResults.from(
+            project.modPublishExtension.platforms
+                .map { platform -> project.tasks.getByName(platform.taskName) as PublishModTask }
+                .map { task -> task.result },
+        )
+    }
+
+    fun setPlatforms(vararg platforms: Platform) {
+        publishResults.setFrom(
+            platforms
+                .map { platform -> project.tasks.getByName(platform.taskName) as PublishModTask }
+                .map { task -> task.result },
+        )
     }
 
     @TaskAction

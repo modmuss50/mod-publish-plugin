@@ -8,14 +8,14 @@ The plugin is hosted on the Gradle plugin portal, so can be easily added to your
   <Tab>
     ```groovy
     plugins {
-        id "me.modmuss50.mod-publish-plugin" version "0.3.4"
+        id "me.modmuss50.mod-publish-plugin" version "0.4.0"
     }
     ```
   </Tab>
   <Tab>
     ```kotlin
     plugins {
-        id("me.modmuss50.mod-publish-plugin") version "0.3.4"
+        id("me.modmuss50.mod-publish-plugin") version "0.4.0"
     }
     ```
   </Tab>
@@ -43,7 +43,7 @@ publishMods {
 Next you need to specify the input file and supported modloaders, this changes based on the mod loader you are using.
 
 - On Fabric uses the `remapJar` task
-- On Forge uses the `reobfJar` task
+- On Forge uses the `jar` task
 
 ### Fabric
 
@@ -58,7 +58,7 @@ publishMods {
 
 ```groovy
 publishMods {
-    file = reobfJar.archiveFile
+    file = jar.archiveFile
     modLoaders.add("forge")
 }
 ```

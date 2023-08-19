@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "me.modmuss50"
-version = "0.3.4"
+version = "0.4.0"
 description = "The Mod Publish Plugin is a plugin for the Gradle build system to help upload artifacts to a range of common destinations."
 
 repositories {
@@ -75,3 +75,16 @@ gradlePlugin {
         tags = listOf("minecraft", )
     }
 }
+
+fun replaceVersion(path: String) {
+    var content = File(path).readText()
+
+    content = content.replace("(version \").*(\")".toRegex(), "version \"${project.version}\"")// project.version.toString())
+
+    println(content)
+
+    File(path).writeText(content)
+}
+
+replaceVersion("README.MD")
+replaceVersion("docs/pages/getting_started.mdx")

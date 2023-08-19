@@ -21,14 +21,16 @@ class MockCurseforgeApi : MockWebServer.MockApi {
     override fun routes(): EndpointGroup {
         return EndpointGroup {
             path("api") {
-                before(this::authHandler)
                 path("game/version-types") {
+                    before(this::authHandler)
                     get(this::versionTypes)
                 }
                 path("game/versions") {
+                    before(this::authHandler)
                     get(this::versions)
                 }
                 path("projects/{projectId}/upload-file") {
+                    before(this::authHandler)
                     post(this::uploadFile)
                 }
             }
