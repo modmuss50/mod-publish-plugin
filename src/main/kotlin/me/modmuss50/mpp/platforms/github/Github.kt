@@ -1,17 +1,19 @@
 package me.modmuss50.mpp.platforms.github
 
+import me.modmuss50.mpp.GithubPublishResult
 import me.modmuss50.mpp.Platform
 import me.modmuss50.mpp.PlatformOptions
 import me.modmuss50.mpp.PlatformOptionsInternal
+import me.modmuss50.mpp.PublishContext
 import me.modmuss50.mpp.PublishOptions
+import me.modmuss50.mpp.PublishResult
+import me.modmuss50.mpp.PublishWorkAction
+import me.modmuss50.mpp.PublishWorkParameters
 import me.modmuss50.mpp.ReleaseType
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
-import org.gradle.workers.WorkAction
-import org.gradle.workers.WorkParameters
-import org.gradle.workers.WorkQueue
 import org.kohsuke.github.GHReleaseBuilder
 import org.kohsuke.github.GitHub
 import javax.inject.Inject
@@ -54,17 +56,17 @@ interface GithubOptions : PlatformOptions, PlatformOptionsInternal<GithubOptions
 }
 
 abstract class Github @Inject constructor(name: String) : Platform(name), GithubOptions {
-    override fun publish(queue: WorkQueue) {
-        queue.submit(UploadWorkAction::class.java) {
+    override fun publish(context: PublishContext) {
+        context.submit(UploadWorkAction::class) {
             it.from(this)
         }
     }
 
-    interface UploadParams : WorkParameters, GithubOptions
+    interface UploadParams : PublishWorkParameters, GithubOptions
 
-    abstract class UploadWorkAction : WorkAction<UploadParams> {
+    abstract class UploadWorkAction : PublishWorkAction<UploadParams> {
         // TODO: Maybe look at moving away from using a large library for this.
-        override fun execute() {
+        override fun publish(): PublishResult {
             with(parameters) {
                 val mainFile = file.get().asFile
 
@@ -81,6 +83,12 @@ abstract class Github @Inject constructor(name: String) : Platform(name), Github
                 for (additionalFile in additionalFiles.files) {
                     release.uploadAsset(additionalFile, "application/java-archive")
                 }
+
+                return GithubPublishResult(
+                    repository = repository.get(),
+                    releaseId = release.id,
+                    url = release.htmlUrl.toString(),
+                )
             }
         }
 

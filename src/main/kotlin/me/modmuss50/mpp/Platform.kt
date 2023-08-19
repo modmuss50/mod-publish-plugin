@@ -8,7 +8,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
-import org.gradle.workers.WorkQueue
+import org.gradle.configurationcache.extensions.capitalized
 import org.jetbrains.annotations.ApiStatus
 import javax.inject.Inject
 import kotlin.reflect.KClass
@@ -84,7 +84,12 @@ interface PlatformDependency {
 
 abstract class Platform @Inject constructor(private val name: String) : Named, PlatformOptions {
     @ApiStatus.Internal
-    abstract fun publish(queue: WorkQueue)
+    abstract fun publish(context: PublishContext)
+
+    @get:ApiStatus.Internal
+    @get:Internal
+    val taskName: String
+        get() = "publish" + name.capitalized()
 
     init {
         (this as PlatformOptionsInternal<*>).setInternalDefaults()

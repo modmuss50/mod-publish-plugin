@@ -1,26 +1,34 @@
 package me.modmuss50.mpp.platforms.curseforge
 
+import me.modmuss50.mpp.CurseForgePublishResult
 import me.modmuss50.mpp.HttpUtils
 import me.modmuss50.mpp.Platform
 import me.modmuss50.mpp.PlatformDependency
 import me.modmuss50.mpp.PlatformDependencyContainer
 import me.modmuss50.mpp.PlatformOptions
 import me.modmuss50.mpp.PlatformOptionsInternal
+import me.modmuss50.mpp.PublishContext
 import me.modmuss50.mpp.PublishOptions
+import me.modmuss50.mpp.PublishResult
+import me.modmuss50.mpp.PublishWorkAction
+import me.modmuss50.mpp.PublishWorkParameters
 import me.modmuss50.mpp.path
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
-import org.gradle.workers.WorkAction
-import org.gradle.workers.WorkParameters
-import org.gradle.workers.WorkQueue
+import org.gradle.api.tasks.Optional
 import javax.inject.Inject
 import kotlin.reflect.KClass
 
 interface CurseforgeOptions : PlatformOptions, PlatformOptionsInternal<CurseforgeOptions>, PlatformDependencyContainer<CurseforgeDependency> {
     @get:Input
     val projectId: Property<String>
+
+    // Project slug, used by discord webhook to link to the uploaded file.
+    @get:Input
+    @get:Optional
+    val projectSlug: Property<String>
 
     @get:Input
     val minecraftVersions: ListProperty<String>
@@ -32,6 +40,7 @@ interface CurseforgeOptions : PlatformOptions, PlatformOptionsInternal<Curseforg
         super.from(other)
         fromDependencies(other)
         projectId.set(other.projectId)
+        projectSlug.set(other.projectSlug)
         minecraftVersions.set(other.minecraftVersions)
         apiEndpoint.set(other.apiEndpoint)
     }
@@ -59,16 +68,16 @@ interface CurseforgeDependency : PlatformDependency {
 }
 
 abstract class Curseforge @Inject constructor(name: String) : Platform(name), CurseforgeOptions {
-    override fun publish(queue: WorkQueue) {
-        queue.submit(UploadWorkAction::class.java) {
+    override fun publish(context: PublishContext) {
+        context.submit(UploadWorkAction::class) {
             it.from(this)
         }
     }
 
-    interface UploadParams : WorkParameters, CurseforgeOptions
+    interface UploadParams : PublishWorkParameters, CurseforgeOptions
 
-    abstract class UploadWorkAction : WorkAction<UploadParams> {
-        override fun execute() {
+    abstract class UploadWorkAction : PublishWorkAction<UploadParams> {
+        override fun publish(): PublishResult {
             with(parameters) {
                 val api = CurseforgeApi(accessToken.get(), apiEndpoint.get())
 
@@ -131,10 +140,16 @@ abstract class Curseforge @Inject constructor(name: String) : Platform(name), Cu
                 for (additionalFile in additionalFiles.files) {
                     val additionalMetadata = metadata.copy(parentFileID = response.id, gameVersions = null)
 
-                    val additionalResponse = HttpUtils.retry(maxRetries.get(), "Failed to upload additional file") {
+                    HttpUtils.retry(maxRetries.get(), "Failed to upload additional file") {
                         api.uploadFile(projectId.get(), additionalFile.toPath(), additionalMetadata)
                     }
                 }
+
+                return CurseForgePublishResult(
+                    projectId = projectId.get(),
+                    projectSlug = projectSlug.orNull,
+                    fileId = response.id,
+                )
             }
         }
     }

@@ -41,7 +41,8 @@ class MockGithubApi : MockWebServer.MockApi {
         context.result(
             """
             {
-            "upload_url": "http://localhost:${context.port()}/repos/${context.pathParam("owner")}/${context.pathParam("name")}/releases/1/assets{?name,label}"
+            "upload_url": "http://localhost:${context.port()}/repos/${context.pathParam("owner")}/${context.pathParam("name")}/releases/1/assets{?name,label}",
+            "html_url": "https://github.com"
             }
             """.trimIndent(),
         )

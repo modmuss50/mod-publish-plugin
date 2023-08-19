@@ -7,7 +7,6 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.reflect.TypeOf
 import org.gradle.api.tasks.TaskProvider
-import org.gradle.configurationcache.extensions.capitalized
 
 @Suppress("unused")
 class MppPlugin : Plugin<Project> {
@@ -38,6 +37,6 @@ class MppPlugin : Plugin<Project> {
     }
 
     private fun configureTask(project: Project, platform: Platform): TaskProvider<PublishModTask> {
-        return project.tasks.register("publish" + platform.name.capitalized(), PublishModTask::class.java, platform)
+        return project.tasks.register(platform.taskName, PublishModTask::class.java, platform)
     }
 }
