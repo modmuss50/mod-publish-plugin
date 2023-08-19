@@ -4,13 +4,14 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.gradle.testkit.runner.TaskOutcome
 import java.io.File
+import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
  * Enable this test to publish real files, to the real sites! Create a options.json with all the tokens
  */
-// @Ignore
+@Ignore
 class ProductionTest : IntegrationTest {
     @Test
     fun run() {
