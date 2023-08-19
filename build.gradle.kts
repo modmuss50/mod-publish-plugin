@@ -86,5 +86,5 @@ fun replaceVersion(path: String) {
     project.file(path).writeText(content)
 }
 
-replaceVersion("README.MD")
+replaceVersion("README.md")
 replaceVersion("docs/pages/getting_started.mdx")
