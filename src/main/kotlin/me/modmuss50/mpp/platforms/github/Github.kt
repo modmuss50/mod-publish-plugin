@@ -30,7 +30,6 @@ interface GithubOptions : PlatformOptions, PlatformOptionsInternal<GithubOptions
     val commitish: Property<String>
 
     @get:Input
-    @get:Optional
     val tagName: Property<String>
 
     @get:Input
@@ -38,6 +37,7 @@ interface GithubOptions : PlatformOptions, PlatformOptionsInternal<GithubOptions
     val apiEndpoint: Property<String>
 
     override fun setInternalDefaults() {
+        tagName.convention(version)
     }
 
     fun from(other: GithubOptions) {
@@ -74,7 +74,7 @@ abstract class Github @Inject constructor(name: String) : Platform(name), Github
                 val mainFile = file.get().asFile
 
                 val repo = connect().getRepository(repository.get())
-                val release = with(GHReleaseBuilder(repo, tagName.getOrElse(version.get()))) {
+                val release = with(GHReleaseBuilder(repo, tagName.get())) {
                     name(displayName.get())
                     body(changelog.get())
                     prerelease(type.get() != ReleaseType.STABLE)
