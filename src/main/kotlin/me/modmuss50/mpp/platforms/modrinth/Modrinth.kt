@@ -8,6 +8,8 @@ import me.modmuss50.mpp.PlatformOptions
 import me.modmuss50.mpp.PlatformOptionsInternal
 import me.modmuss50.mpp.PublishOptions
 import me.modmuss50.mpp.path
+import org.gradle.api.Action
+import org.gradle.api.Project
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
@@ -38,6 +40,33 @@ interface ModrinthOptions : PlatformOptions, PlatformOptionsInternal<ModrinthOpt
     override fun setInternalDefaults() {
         featured.convention(false)
         apiEndpoint.convention("https://api.modrinth.com/v2")
+    }
+
+    fun minecraftVersionRange(project: Project, action: Action<VersionRangeOptions>) {
+        val options = project.objects.newInstance(VersionRangeOptions::class.java)
+        options.includeSnapshots.convention(false)
+        action.execute(options)
+
+        val startId = options.start.get()
+        val endId = options.end.get()
+
+        minecraftVersions.addAll(
+            project.provider {
+                val versions = MinecraftApi().getVersions()
+                    .filter { it.type == "release" || options.includeSnapshots.get() }
+                    .map { it.id }
+                    .reversed()
+                val startIndex = versions.indexOf(startId)
+                val endIndex = versions.indexOf(endId)
+
+                if (startIndex == -1) throw IllegalArgumentException("Invalid start version $startId")
+                if (endIndex == -1) throw IllegalArgumentException("Invalid end version $endId")
+                if (startIndex > endIndex) throw IllegalArgumentException("Start version $startId must be before end version $endId")
+                if (startIndex == endIndex) throw IllegalArgumentException("Start version $startId cannot be the same as end version $endId")
+
+                versions.subList(startIndex, endIndex + 1)
+            },
+        )
     }
 
     fun from(other: ModrinthOptions) {
@@ -77,6 +106,23 @@ interface ModrinthDependency : PlatformDependency {
 
     @Deprecated("For removal", ReplaceWith("id"))
     val projectId: Property<String> get() = id
+}
+
+interface VersionRangeOptions {
+    /**
+     * The start version of the range (inclusive)
+     */
+    val start: Property<String>
+
+    /**
+     * The end version of the range (exclusive)
+     */
+    val end: Property<String>
+
+    /**
+     * Whether to include snapshot versions in the range
+     */
+    val includeSnapshots: Property<Boolean>
 }
 
 abstract class Modrinth @Inject constructor(name: String) : Platform(name), ModrinthOptions {
