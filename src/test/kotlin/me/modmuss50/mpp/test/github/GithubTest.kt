@@ -24,6 +24,7 @@ class GithubTest : IntegrationTest {
                             repository = "test/example"
                             commitish = "main"
                             apiEndpoint = "${server.endpoint}"
+                            tagName = "release/1.0.0"
                         }
                     }
                 """.trimIndent(),

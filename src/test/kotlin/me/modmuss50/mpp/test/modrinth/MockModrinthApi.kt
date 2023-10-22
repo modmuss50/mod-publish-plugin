@@ -15,6 +15,7 @@ import me.modmuss50.mpp.test.MockWebServer
 
 class MockModrinthApi : MockWebServer.MockApi {
     val json = Json { ignoreUnknownKeys = true }
+    var lastCreateVersion: ModrinthApi.CreateVersion? = null
 
     override fun routes(): EndpointGroup {
         return EndpointGroup {
@@ -41,6 +42,7 @@ class MockModrinthApi : MockWebServer.MockApi {
             ?: throw BadRequestResponse("No metadata")
 
         val createVersion = json.decodeFromString<ModrinthApi.CreateVersion>(data)
+        lastCreateVersion = createVersion
 
         for (filePart in createVersion.fileParts) {
             context.uploadedFile(filePart)

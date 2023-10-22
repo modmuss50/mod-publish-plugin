@@ -4,7 +4,9 @@ import me.modmuss50.mpp.test.IntegrationTest
 import me.modmuss50.mpp.test.MockWebServer
 import org.gradle.testkit.runner.TaskOutcome
 import kotlin.test.Test
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 
 class ModrinthTest : IntegrationTest {
     @Test
@@ -205,5 +207,86 @@ class ModrinthTest : IntegrationTest {
         server.close()
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinth")!!.outcome)
+    }
+
+    @Test
+    fun uploadModrinthMinecraftVersionRange() {
+        val mockModrinthApi = MockModrinthApi()
+        val server = MockWebServer(mockModrinthApi)
+
+        val result = gradleTest()
+            .buildScript(
+                """
+            publishMods {
+                file = tasks.jar.flatMap { it.archiveFile }
+                changelog = "Hello!"
+                version = "1.0.0"
+                type = STABLE
+                modLoaders.add("fabric")
+            
+                modrinth {
+                    accessToken = "123"
+                    projectId = "12345678"
+
+                    minecraftVersionRange(project) {
+                        start = "1.19.4"
+                        end = "1.20.2"
+                        includeSnapshots = true
+                    }
+
+                    apiEndpoint = "${server.endpoint}"
+                }
+            }
+                """.trimIndent(),
+            )
+            .run("publishModrinth")
+        server.close()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinth")!!.outcome)
+        val gameVersions = mockModrinthApi.lastCreateVersion!!.gameVersions
+        assertContains(gameVersions, "1.19.4")
+        assertContains(gameVersions, "1.20-pre1")
+        assertContains(gameVersions, "1.20.1")
+        assertContains(gameVersions, "1.20.2")
+    }
+
+    @Test
+    fun uploadModrinthMinecraftVersionRangeNoSnapshots() {
+        val mockModrinthApi = MockModrinthApi()
+        val server = MockWebServer(mockModrinthApi)
+
+        val result = gradleTest()
+            .buildScript(
+                """
+            publishMods {
+                file = tasks.jar.flatMap { it.archiveFile }
+                changelog = "Hello!"
+                version = "1.0.0"
+                type = STABLE
+                modLoaders.add("fabric")
+            
+                modrinth {
+                    accessToken = "123"
+                    projectId = "12345678"
+
+                    minecraftVersionRange(project) {
+                        start = "1.19.4"
+                        end = "1.20.2"
+                    }
+
+                    apiEndpoint = "${server.endpoint}"
+                }
+            }
+                """.trimIndent(),
+            )
+            .run("publishModrinth")
+        server.close()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinth")!!.outcome)
+        val gameVersions = mockModrinthApi.lastCreateVersion!!.gameVersions
+        assertContains(gameVersions, "1.19.4")
+        assertFalse(gameVersions.contains("1.20-pre1"))
+        assertContains(gameVersions, "1.20.1")
+        assertContains(gameVersions, "1.20.2")
     }
 }

@@ -30,10 +30,14 @@ interface GithubOptions : PlatformOptions, PlatformOptionsInternal<GithubOptions
     val commitish: Property<String>
 
     @get:Input
+    val tagName: Property<String>
+
+    @get:Input
     @get:Optional
     val apiEndpoint: Property<String>
 
     override fun setInternalDefaults() {
+        tagName.convention(version)
     }
 
     fun from(other: GithubOptions) {
@@ -41,6 +45,7 @@ interface GithubOptions : PlatformOptions, PlatformOptionsInternal<GithubOptions
         repository.set(other.repository)
         commitish.set(other.commitish)
         apiEndpoint.set(other.apiEndpoint)
+        tagName.set(other.tagName)
     }
 
     fun from(other: Provider<GithubOptions>) {
@@ -69,7 +74,7 @@ abstract class Github @Inject constructor(name: String) : Platform(name), Github
                 val mainFile = file.get().asFile
 
                 val repo = connect().getRepository(repository.get())
-                val release = with(GHReleaseBuilder(repo, version.get())) {
+                val release = with(GHReleaseBuilder(repo, tagName.get())) {
                     name(displayName.get())
                     body(changelog.get())
                     prerelease(type.get() != ReleaseType.STABLE)
