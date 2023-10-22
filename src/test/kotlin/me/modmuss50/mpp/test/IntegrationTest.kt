@@ -67,6 +67,7 @@ interface IntegrationTest {
             argument("--gradle-user-home", gradleHome.absolutePath)
             argument("--stacktrace")
             argument("--warning-mode", "fail")
+            argument("clean")
         }
 
         // Appends to an existing buildscript

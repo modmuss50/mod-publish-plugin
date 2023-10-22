@@ -13,7 +13,7 @@ Add to your gradle plugins block:
 
 ```gradle
 plugins {
-  id "me.modmuss50.mod-publish-plugin" version "0.3.5"
+  id "me.modmuss50.mod-publish-plugin" version "0.3.6"
 }
 ```
 
@@ -27,6 +27,7 @@ publishMods {
 
     curseforge {
         projectId = "123456"
+        projectSlug = "example-project" // Required for discord webhook
         accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
         minecraftVersions.add("1.20.1")
 
@@ -43,6 +44,10 @@ publishMods {
         repository = "test/example"
         accessToken = providers.environmentVariable("GITHUB_TOKEN")
         commitish = "main"
+    }
+
+    discord {
+        webhookUrl = providers.environmentVariable("DISCORD_WEBHOOK")
     }
 }
 ```

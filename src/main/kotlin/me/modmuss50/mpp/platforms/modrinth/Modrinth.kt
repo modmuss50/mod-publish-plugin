@@ -1,12 +1,17 @@
 package me.modmuss50.mpp.platforms.modrinth
 
 import me.modmuss50.mpp.HttpUtils
+import me.modmuss50.mpp.ModrinthPublishResult
 import me.modmuss50.mpp.Platform
 import me.modmuss50.mpp.PlatformDependency
 import me.modmuss50.mpp.PlatformDependencyContainer
 import me.modmuss50.mpp.PlatformOptions
 import me.modmuss50.mpp.PlatformOptionsInternal
+import me.modmuss50.mpp.PublishContext
 import me.modmuss50.mpp.PublishOptions
+import me.modmuss50.mpp.PublishResult
+import me.modmuss50.mpp.PublishWorkAction
+import me.modmuss50.mpp.PublishWorkParameters
 import me.modmuss50.mpp.path
 import org.gradle.api.Action
 import org.gradle.api.Project
@@ -15,9 +20,6 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
-import org.gradle.workers.WorkAction
-import org.gradle.workers.WorkParameters
-import org.gradle.workers.WorkQueue
 import org.jetbrains.annotations.ApiStatus
 import java.nio.file.Path
 import javax.inject.Inject
@@ -126,16 +128,16 @@ interface VersionRangeOptions {
 }
 
 abstract class Modrinth @Inject constructor(name: String) : Platform(name), ModrinthOptions {
-    override fun publish(queue: WorkQueue) {
-        queue.submit(UploadWorkAction::class.java) {
+    override fun publish(context: PublishContext) {
+        context.submit(UploadWorkAction::class) {
             it.from(this)
         }
     }
 
-    interface UploadParams : WorkParameters, ModrinthOptions
+    interface UploadParams : PublishWorkParameters, ModrinthOptions
 
-    abstract class UploadWorkAction : WorkAction<UploadParams> {
-        override fun execute() {
+    abstract class UploadWorkAction : PublishWorkAction<UploadParams> {
+        override fun publish(): PublishResult {
             with(parameters) {
                 val api = ModrinthApi(accessToken.get(), apiEndpoint.get())
 
@@ -163,9 +165,15 @@ abstract class Modrinth @Inject constructor(name: String) : Platform(name), Modr
                     primaryFile = primaryFileKey,
                 )
 
-                HttpUtils.retry(maxRetries.get(), "Failed to create version") {
+                val response = HttpUtils.retry(maxRetries.get(), "Failed to create version") {
                     api.createVersion(metadata, files)
                 }
+
+                return ModrinthPublishResult(
+                    id = response.id,
+                    projectId = response.projectId,
+                    title = announcementTitle.getOrElse("Download from Modrinth"),
+                )
             }
         }
 

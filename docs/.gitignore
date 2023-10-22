@@ -3,6 +3,7 @@
 
 # Folders
 !/pages
+!/public
 
 # Files
 !/.gitignore

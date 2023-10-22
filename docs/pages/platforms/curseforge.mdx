@@ -38,6 +38,13 @@ publishMods {
         projectId = "123456"
         minecraftVersions.add("1.20.1")
 
+        // Optionally set the announcement title used by the discord publisher
+        announcementTitle = "Download from CurseForge"
+
+        // When using the discord webhook you must also specify the project slug
+        // This is due to limitations in the CurseForge API.
+        projectSlug = "test-mod"
+
         requires {
             slug = "project-slug"
         }

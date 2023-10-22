@@ -4,8 +4,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     `java-gradle-plugin`
     `maven-publish`
-    kotlin("jvm") version "1.8.20"
-    kotlin("plugin.serialization") version "1.8.20"
+    embeddedKotlin("jvm")
+    embeddedKotlin("plugin.serialization")
     id("com.diffplug.spotless") version "6.18.0"
     id("com.gradle.plugin-publish") version "1.2.0"
 }
@@ -75,3 +75,16 @@ gradlePlugin {
         tags = listOf("minecraft", )
     }
 }
+
+fun replaceVersion(path: String) {
+    var content = project.file(path).readText()
+
+    content = content.replace("(version \").*(\")".toRegex(), "version \"${project.version}\"")// project.version.toString())
+
+    println(content)
+
+    project.file(path).writeText(content)
+}
+
+replaceVersion("README.md")
+replaceVersion("docs/pages/getting_started.mdx")

@@ -53,7 +53,14 @@ class HttpUtils(val exceptionFactory: HttpExceptionFactory = DefaultHttpExceptio
                 throw exceptionFactory.createException(response)
             }
 
-            return json.decodeFromString<T>(response.body!!.string())
+            var body = response.body!!.string()
+
+            if (body.isBlank()) {
+                // Bit of a hack, but handle empty body's as an empty string.
+                body = "\"\""
+            }
+
+            return json.decodeFromString<T>(body)
         }
     }
 
@@ -90,7 +97,7 @@ class HttpUtils(val exceptionFactory: HttpExceptionFactory = DefaultHttpExceptio
 
     private class DefaultHttpExceptionFactory : HttpExceptionFactory {
         override fun createException(response: Response): HttpException {
-            return HttpException(response.code, response.message)
+            return HttpException(response.code, response.body?.string() ?: response.message)
         }
     }
 
