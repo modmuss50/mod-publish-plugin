@@ -37,10 +37,22 @@ publishMods {
         projectId = "12345678"
         minecraftVersions.add("1.20.1")
 
+        // You can specify a range of Minecraft versions like so:
+        minecraftVersionRange(project) {
+            start = "1.19.4"
+            end = "1.20.2"
+
+            // Optionally include snapshot versions, defaults to false
+            includeSnapshots = true
+        }
+
         // You can specify either the project id OR slug, but not both.
         requires {
             id = "12345678"
             slug = "project-slug"
+
+            // You can optionally specify a version id for the dependency
+            version = "IIJJKKLL"
         }
         optional {
             id = "12345678"

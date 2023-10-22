@@ -13,11 +13,16 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.Response
 import java.nio.file.Path
+import java.time.Duration
 import kotlin.io.path.name
 
 // https://docs.modrinth.com/api-spec/#tag/versions/operation/createVersion
 class ModrinthApi(private val accessToken: String, private val baseUrl: String) {
-    private val httpUtils = HttpUtils(exceptionFactory = ModrinthHttpExceptionFactory())
+    private val httpUtils = HttpUtils(
+        exceptionFactory = ModrinthHttpExceptionFactory(),
+        // Increase the timeout as Modrinth can be slow
+        timeout = Duration.ofSeconds(60),
+    )
 
     @Serializable
     enum class VersionType {
