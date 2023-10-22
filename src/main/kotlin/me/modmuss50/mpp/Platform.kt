@@ -5,6 +5,7 @@ import org.gradle.api.Named
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
@@ -60,7 +61,11 @@ interface PlatformDependencyContainer<T : PlatformDependency> {
 
     @get:ApiStatus.Internal
     @get:Inject
-    val internalObjectFactory: ObjectFactory
+    val objectFactory: ObjectFactory
+
+    @get:ApiStatus.Internal
+    @get:Inject
+    val providerFactory: ProviderFactory
 
     @get:ApiStatus.OverrideOnly
     @get:Internal
@@ -68,7 +73,7 @@ interface PlatformDependencyContainer<T : PlatformDependency> {
 
     @Internal
     fun addInternal(type: PlatformDependency.DependencyType, action: Action<T>) {
-        val dep = internalObjectFactory.newInstance(platformDependencyKClass.java)
+        val dep = objectFactory.newInstance(platformDependencyKClass.java)
         dep.type.set(type)
         dep.type.finalizeValue()
         action.execute(dep)

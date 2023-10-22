@@ -228,7 +228,7 @@ class ModrinthTest : IntegrationTest {
                     accessToken = "123"
                     projectId = "12345678"
 
-                    minecraftVersionRange(project) {
+                    minecraftVersionRange {
                         start = "1.19.4"
                         end = "1.20.2"
                         includeSnapshots = true
@@ -269,7 +269,7 @@ class ModrinthTest : IntegrationTest {
                     accessToken = "123"
                     projectId = "12345678"
 
-                    minecraftVersionRange(project) {
+                    minecraftVersionRange {
                         start = "1.19.4"
                         end = "1.20.2"
                     }

@@ -14,7 +14,6 @@ import me.modmuss50.mpp.PublishWorkAction
 import me.modmuss50.mpp.PublishWorkParameters
 import me.modmuss50.mpp.path
 import org.gradle.api.Action
-import org.gradle.api.Project
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
@@ -45,8 +44,8 @@ interface ModrinthOptions : PlatformOptions, PlatformOptionsInternal<ModrinthOpt
         apiEndpoint.convention("https://api.modrinth.com/v2")
     }
 
-    fun minecraftVersionRange(project: Project, action: Action<VersionRangeOptions>) {
-        val options = project.objects.newInstance(VersionRangeOptions::class.java)
+    fun minecraftVersionRange(action: Action<VersionRangeOptions>) {
+        val options = objectFactory.newInstance(VersionRangeOptions::class.java)
         options.includeSnapshots.convention(false)
         action.execute(options)
 
@@ -54,7 +53,7 @@ interface ModrinthOptions : PlatformOptions, PlatformOptionsInternal<ModrinthOpt
         val endId = options.end.get()
 
         minecraftVersions.addAll(
-            project.provider {
+            providerFactory.provider {
                 val versions = MinecraftApi().getVersions()
                     .filter { it.type == "release" || options.includeSnapshots.get() }
                     .map { it.id }
@@ -115,7 +114,7 @@ interface ModrinthDependencyContainer : PlatformDependencyContainer<ModrinthDepe
     fun addInternal(type: PlatformDependency.DependencyType, slugs: Array<out String>) {
         slugs.forEach {
             dependencies.add(
-                internalObjectFactory.newInstance(ModrinthDependency::class.java).apply {
+                objectFactory.newInstance(ModrinthDependency::class.java).apply {
                     this.slug.set(it)
                     this.type.set(type)
                 },
