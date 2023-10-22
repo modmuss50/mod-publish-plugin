@@ -149,6 +149,7 @@ abstract class Curseforge @Inject constructor(name: String) : Platform(name), Cu
                     projectId = projectId.get(),
                     projectSlug = projectSlug.orNull,
                     fileId = response.id,
+                    title = announcementTitle.getOrElse("Download from CurseForge"),
                 )
             }
         }

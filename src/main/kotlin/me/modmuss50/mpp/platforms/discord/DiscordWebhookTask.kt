@@ -1,8 +1,5 @@
 package me.modmuss50.mpp.platforms.discord
 
-import me.modmuss50.mpp.CurseForgePublishResult
-import me.modmuss50.mpp.GithubPublishResult
-import me.modmuss50.mpp.ModrinthPublishResult
 import me.modmuss50.mpp.Platform
 import me.modmuss50.mpp.PublishModTask
 import me.modmuss50.mpp.PublishResult
@@ -91,9 +88,9 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
                     PublishResult.fromJson(it.readText())
                 }.map {
                     DiscordAPI.Embed(
-                        title = "Download from ${displayName(it)}",
+                        title = it.title,
                         url = it.link,
-                        color = brandColor(it),
+                        color = it.brandColor,
                     )
                 }.toList()
 
@@ -106,22 +103,6 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
                         embeds = embeds,
                     ),
                 )
-            }
-        }
-
-        private fun displayName(result: PublishResult): String {
-            return when (result) {
-                is CurseForgePublishResult -> "CurseForge"
-                is GithubPublishResult -> "GitHub"
-                is ModrinthPublishResult -> "Modrinth"
-            }
-        }
-
-        private fun brandColor(result: PublishResult): Int {
-            return when (result) {
-                is CurseForgePublishResult -> 0xF16436
-                is GithubPublishResult -> 0xF6F0FC
-                is ModrinthPublishResult -> 0x1BD96A
             }
         }
     }

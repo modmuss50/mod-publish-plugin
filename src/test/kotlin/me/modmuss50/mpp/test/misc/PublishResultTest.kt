@@ -16,7 +16,8 @@ class PublishResultTest {
                 "type": "github",
                 "repository": "test/test",
                 "releaseId": 123,
-                "url": "https://github.com"
+                "url": "https://github.com",
+                "title": "test"
             }
             """.trimIndent(),
         )
@@ -25,6 +26,7 @@ class PublishResultTest {
         assertEquals("test/test", github.repository)
         assertEquals(123, github.releaseId)
         assertEquals("https://github.com", github.url)
+        assertEquals("test", github.title)
     }
 
     @Test
@@ -35,7 +37,8 @@ class PublishResultTest {
                 "type": "curseforge",
                 "projectId": "abc",
                 "fileId": 123,
-                "projectSlug": "example"
+                "projectSlug": "example",
+                "title": "test"
             }
             """.trimIndent(),
         )
@@ -43,6 +46,7 @@ class PublishResultTest {
         val curseforge = result as CurseForgePublishResult
         assertEquals("abc", curseforge.projectId)
         assertEquals(123, curseforge.fileId)
+        assertEquals("test", curseforge.title)
     }
 
     @Test
@@ -52,7 +56,8 @@ class PublishResultTest {
             {
                 "type": "modrinth",
                 "id": "test",
-                "projectId": "123"
+                "projectId": "123",
+                "title": "test"
             }
             """.trimIndent(),
         )
@@ -60,5 +65,6 @@ class PublishResultTest {
         val modrinth = result as ModrinthPublishResult
         assertEquals("test", modrinth.id)
         assertEquals("123", modrinth.projectId)
+        assertEquals("test", modrinth.title)
     }
 }

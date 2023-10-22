@@ -172,6 +172,7 @@ abstract class Modrinth @Inject constructor(name: String) : Platform(name), Modr
                 return ModrinthPublishResult(
                     id = response.id,
                     projectId = response.projectId,
+                    title = announcementTitle.getOrElse("Download from Modrinth"),
                 )
             }
         }

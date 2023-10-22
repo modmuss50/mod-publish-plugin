@@ -18,9 +18,14 @@ interface PlatformOptions : PublishOptions {
     @get:Input
     val accessToken: Property<String>
 
+    @get:Optional
+    @get:Input
+    val announcementTitle: Property<String>
+
     fun from(other: PlatformOptions) {
         super.from(other)
         accessToken.set(other.accessToken)
+        announcementTitle.set(other.announcementTitle)
     }
 }
 

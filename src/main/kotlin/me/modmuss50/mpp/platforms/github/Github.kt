@@ -93,6 +93,7 @@ abstract class Github @Inject constructor(name: String) : Platform(name), Github
                     repository = repository.get(),
                     releaseId = release.id,
                     url = release.htmlUrl.toString(),
+                    title = announcementTitle.getOrElse("Download from GitHub"),
                 )
             }
         }
