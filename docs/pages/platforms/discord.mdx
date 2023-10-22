@@ -1,0 +1,40 @@
+## Basic example
+
+![Discord example](/images/discord_example.png)
+
+See the following minimal example showing how a message can be sent to a discord channel using a webhook.
+
+```groovy
+publishMods {
+    // ...
+    discord {
+        webhookUrl = providers.environmentVariable("DISCORD_WEBHOOK")
+    }
+}
+```
+
+Please note, when using the discord webhook you must also specify the `projectSlug` in any CurseForge publications. This is due to limitations in the CurseForge API.
+
+By default discord will publish a message with the changelog to the supplied webhook. A link to all of the platforms will also be included.
+
+```groovy
+publishMods {
+    // ...
+    discord {
+        // Pass in the secret webhook URL. Required
+        webhookUrl = providers.environmentVariable("DISCORD_WEBHOOK")
+
+        // Set the username used to send the webhook, defaults to "Mod Publish Plugin"
+        username = "My Cool Mod"
+
+        // Set the avatar image url for the webhook, defaults to none.
+        avatarUrl = "https://placekitten.com/500/500"
+
+        // Set the content message, in this example a header is added before the changelog. Defaults to just the changelog
+        content = changelog.map { "# A new version of my cool mod has been released! \n" + it}
+
+        // If you wish to only link to certain platform you can do the following
+        setPlatforms(platforms.curseforge, platforms.github)
+    }
+}
+```

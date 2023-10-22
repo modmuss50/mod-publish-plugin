@@ -4,6 +4,7 @@ import groovy.lang.Closure
 import groovy.lang.DelegatesTo
 import me.modmuss50.mpp.platforms.curseforge.Curseforge
 import me.modmuss50.mpp.platforms.curseforge.CurseforgeOptions
+import me.modmuss50.mpp.platforms.discord.DiscordWebhookTask
 import me.modmuss50.mpp.platforms.github.Github
 import me.modmuss50.mpp.platforms.github.GithubOptions
 import me.modmuss50.mpp.platforms.modrinth.Modrinth
@@ -15,6 +16,7 @@ import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.TaskProvider
 import java.lang.IllegalStateException
 import java.nio.file.Path
 import kotlin.reflect.KClass
@@ -158,6 +160,34 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
             it.from(this)
             action.execute(it)
         }
+    }
+
+    // Discord
+
+    fun discord(@DelegatesTo(value = DiscordWebhookTask::class) closure: Closure<*>): TaskProvider<DiscordWebhookTask> {
+        return discord("announceDiscord", closure)
+    }
+
+    fun discord(action: Action<DiscordWebhookTask>): TaskProvider<DiscordWebhookTask> {
+        return discord("announceDiscord", action)
+    }
+
+    fun discord(name: String, @DelegatesTo(value = DiscordWebhookTask::class) closure: Closure<*>): TaskProvider<DiscordWebhookTask> {
+        return discord(name) {
+            project.configure(it, closure)
+        }
+    }
+
+    fun discord(name: String, action: Action<DiscordWebhookTask>): TaskProvider<DiscordWebhookTask> {
+        val task = project.tasks.register(name, DiscordWebhookTask::class.java) {
+            action.execute(it)
+        }
+
+        project.tasks.named("publishMods").configure {
+            it.dependsOn(task.get())
+        }
+
+        return task
     }
 
     // Misc
