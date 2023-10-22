@@ -32,6 +32,8 @@ class CurseforgeTest : IntegrationTest {
                             slug = "fabric-api"
                         }
                         
+                        requires("mod-test", "mod-test-2")
+                        
                         apiEndpoint = "${server.endpoint}"
                     }
                 }
@@ -48,6 +50,8 @@ class CurseforgeTest : IntegrationTest {
         assertContains(metadata.gameVersions!!, 9990) // 1.20.1
         assertContains(metadata.gameVersions!!, 7499) // Fabric
         assertEquals("fabric-api", metadata.relations!!.projects[0].slug)
+        assertEquals("mod-test", metadata.relations!!.projects[1].slug)
+        assertEquals("mod-test-2", metadata.relations!!.projects[2].slug)
     }
 
     @Test

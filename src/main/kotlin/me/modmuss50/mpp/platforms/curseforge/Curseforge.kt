@@ -17,11 +17,12 @@ import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import javax.inject.Inject
 import kotlin.reflect.KClass
 
-interface CurseforgeOptions : PlatformOptions, PlatformOptionsInternal<CurseforgeOptions>, PlatformDependencyContainer<CurseforgeDependency> {
+interface CurseforgeOptions : PlatformOptions, PlatformOptionsInternal<CurseforgeOptions>, CurseforgeDependencyContainer {
     @get:Input
     val projectId: Property<String>
 
@@ -65,6 +66,36 @@ interface CurseforgeOptions : PlatformOptions, PlatformOptionsInternal<Curseforg
 interface CurseforgeDependency : PlatformDependency {
     @get:Input
     val slug: Property<String>
+}
+
+/**
+ * Provides shorthand methods for adding dependencies to curseforge
+ */
+interface CurseforgeDependencyContainer : PlatformDependencyContainer<CurseforgeDependency> {
+    fun requires(vararg slugs: String) {
+        addInternal(PlatformDependency.DependencyType.REQUIRED, slugs)
+    }
+    fun optional(vararg slugs: String) {
+        addInternal(PlatformDependency.DependencyType.OPTIONAL, slugs)
+    }
+    fun incompatible(vararg slugs: String) {
+        addInternal(PlatformDependency.DependencyType.INCOMPATIBLE, slugs)
+    }
+    fun embeds(vararg slugs: String) {
+        addInternal(PlatformDependency.DependencyType.EMBEDDED, slugs)
+    }
+
+    @Internal
+    fun addInternal(type: PlatformDependency.DependencyType, slugs: Array<out String>) {
+        slugs.forEach {
+            dependencies.add(
+                internalObjectFactory.newInstance(CurseforgeDependency::class.java).apply {
+                    this.slug.set(it)
+                    this.type.set(type)
+                },
+            )
+        }
+    }
 }
 
 abstract class Curseforge @Inject constructor(name: String) : Platform(name), CurseforgeOptions {
