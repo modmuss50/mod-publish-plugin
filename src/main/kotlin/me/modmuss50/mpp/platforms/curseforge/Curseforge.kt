@@ -79,10 +79,12 @@ interface CurseforgeDependencyContainer : PlatformDependencyContainer<Curseforge
     @Internal
     fun addInternal(type: PlatformDependency.DependencyType, slugs: Array<out String>) {
         slugs.forEach {
-           dependencies.add(internalObjectFactory.newInstance(CurseforgeDependency::class.java).apply {
-               this.slug.set(it)
-               this.type.set(type)
-           })
+            dependencies.add(
+                internalObjectFactory.newInstance(CurseforgeDependency::class.java).apply {
+                    this.slug.set(it)
+                    this.type.set(type)
+                },
+            )
         }
     }
 }

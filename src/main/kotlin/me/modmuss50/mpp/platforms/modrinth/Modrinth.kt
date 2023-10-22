@@ -14,6 +14,7 @@ import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.workers.WorkAction
 import org.gradle.workers.WorkParameters
@@ -23,7 +24,7 @@ import java.nio.file.Path
 import javax.inject.Inject
 import kotlin.reflect.KClass
 
-interface ModrinthOptions : PlatformOptions, PlatformOptionsInternal<ModrinthOptions>, PlatformDependencyContainer<ModrinthDependency> {
+interface ModrinthOptions : PlatformOptions, PlatformOptionsInternal<ModrinthOptions>, ModrinthDependencyContainer {
     @get:Input
     val projectId: Property<String>
 
@@ -89,6 +90,36 @@ interface ModrinthOptions : PlatformOptions, PlatformOptionsInternal<ModrinthOpt
 
     override val platformDependencyKClass: KClass<ModrinthDependency>
         get() = ModrinthDependency::class
+}
+
+/**
+ * Provides shorthand methods for adding dependencies to modrinth
+ */
+interface ModrinthDependencyContainer : PlatformDependencyContainer<ModrinthDependency> {
+    fun requires(vararg slugs: String) {
+        addInternal(PlatformDependency.DependencyType.REQUIRED, slugs)
+    }
+    fun optional(vararg slugs: String) {
+        addInternal(PlatformDependency.DependencyType.OPTIONAL, slugs)
+    }
+    fun incompatible(vararg slugs: String) {
+        addInternal(PlatformDependency.DependencyType.INCOMPATIBLE, slugs)
+    }
+    fun embeds(vararg slugs: String) {
+        addInternal(PlatformDependency.DependencyType.EMBEDDED, slugs)
+    }
+
+    @Internal
+    fun addInternal(type: PlatformDependency.DependencyType, slugs: Array<out String>) {
+        slugs.forEach {
+            dependencies.add(
+                internalObjectFactory.newInstance(ModrinthDependency::class.java).apply {
+                    this.slug.set(it)
+                    this.type.set(type)
+                },
+            )
+        }
+    }
 }
 
 interface ModrinthDependency : PlatformDependency {
