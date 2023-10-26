@@ -13,6 +13,8 @@ import me.modmuss50.mpp.PublishResult
 import me.modmuss50.mpp.PublishWorkAction
 import me.modmuss50.mpp.PublishWorkParameters
 import me.modmuss50.mpp.path
+import me.modmuss50.mpp.VersionRangeOptions
+import org.gradle.api.Action
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
@@ -37,6 +39,38 @@ interface CurseforgeOptions : PlatformOptions, PlatformOptionsInternal<Curseforg
     @get:Input
     val apiEndpoint: Property<String>
 
+    override fun setInternalDefaults() {
+        apiEndpoint.convention("https://minecraft.curseforge.com")
+    }
+
+    fun curseforgeVersionRange(action: Action<VersionRangeOptions>) {
+        val options = objectFactory.newInstance(VersionRangeOptions::class.java)
+        options.includeSnapshots.convention(false)
+        action.execute(options)
+
+        val startId = options.start.get()
+        val endId = options.end.get()
+
+        minecraftVersions.addAll(
+            providerFactory.provider {
+                val versions = CurseforgeApi(accessToken.get(), apiEndpoint.get())
+                    .getGameVersions()
+                    .map { it.slug }
+                    .filter { options.includeSnapshots.get() || it.endsWith("Snapshot", true) }
+
+                val startIndex = versions.indexOf(startId)
+                val endIndex = versions.indexOf(endId)
+
+                if (startIndex == -1) throw IllegalArgumentException("Invalid start version $startId")
+                if (endIndex == -1) throw IllegalArgumentException("Invalid end version $endId")
+                if (startIndex > endIndex) throw IllegalArgumentException("Start version $startId must be before end version $endId")
+                if (startIndex == endIndex) throw IllegalArgumentException("Start version $startId cannot be the same as end version $endId")
+
+                versions.subList(startIndex, endIndex + 1)
+            }
+        )
+    }
+
     fun from(other: CurseforgeOptions) {
         super.from(other)
         fromDependencies(other)
@@ -53,10 +87,6 @@ interface CurseforgeOptions : PlatformOptions, PlatformOptionsInternal<Curseforg
     fun from(other: Provider<CurseforgeOptions>, publishOptions: Provider<PublishOptions>) {
         from(other)
         from(publishOptions.get())
-    }
-
-    override fun setInternalDefaults() {
-        apiEndpoint.convention("https://minecraft.curseforge.com")
     }
 
     override val platformDependencyKClass: KClass<CurseforgeDependency>

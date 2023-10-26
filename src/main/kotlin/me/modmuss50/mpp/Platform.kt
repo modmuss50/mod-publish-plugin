@@ -92,6 +92,23 @@ interface PlatformDependency {
     }
 }
 
+interface VersionRangeOptions {
+    /**
+     * The start version of the range (inclusive)
+     */
+    val start: Property<String>
+
+    /**
+     * The end version of the range (exclusive)
+     */
+    val end: Property<String>
+
+    /**
+     * Whether to include snapshot versions in the range
+     */
+    val includeSnapshots: Property<Boolean>
+}
+
 abstract class Platform @Inject constructor(private val name: String) : Named, PlatformOptions {
     @ApiStatus.Internal
     abstract fun publish(context: PublishContext)

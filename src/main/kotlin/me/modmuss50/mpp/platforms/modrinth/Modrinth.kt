@@ -12,6 +12,7 @@ import me.modmuss50.mpp.PublishOptions
 import me.modmuss50.mpp.PublishResult
 import me.modmuss50.mpp.PublishWorkAction
 import me.modmuss50.mpp.PublishWorkParameters
+import me.modmuss50.mpp.VersionRangeOptions
 import me.modmuss50.mpp.path
 import org.gradle.api.Action
 import org.gradle.api.provider.ListProperty
@@ -67,7 +68,7 @@ interface ModrinthOptions : PlatformOptions, PlatformOptionsInternal<ModrinthOpt
                 if (startIndex == endIndex) throw IllegalArgumentException("Start version $startId cannot be the same as end version $endId")
 
                 versions.subList(startIndex, endIndex + 1)
-            },
+            }
         )
     }
 
@@ -138,23 +139,6 @@ interface ModrinthDependency : PlatformDependency {
 
     @Deprecated("For removal", ReplaceWith("id"))
     val projectId: Property<String> get() = id
-}
-
-interface VersionRangeOptions {
-    /**
-     * The start version of the range (inclusive)
-     */
-    val start: Property<String>
-
-    /**
-     * The end version of the range (exclusive)
-     */
-    val end: Property<String>
-
-    /**
-     * Whether to include snapshot versions in the range
-     */
-    val includeSnapshots: Property<Boolean>
 }
 
 abstract class Modrinth @Inject constructor(name: String) : Platform(name), ModrinthOptions {

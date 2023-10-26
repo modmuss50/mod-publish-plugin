@@ -45,6 +45,15 @@ publishMods {
         // This is due to limitations in the CurseForge API.
         projectSlug = "test-mod"
 
+        // You can specify a range of Minecraft versions like so:
+        curseforgeVersionRange {
+            start = "1.19.4"
+            end = "1.20.2"
+
+            // Optionally include snapshot versions, defaults to false
+            includeSnapshots = true
+        }
+
         requires {
             slug = "project-slug"
         }
