@@ -1,6 +1,7 @@
 package me.modmuss50.mpp.platforms.modrinth
 
 import me.modmuss50.mpp.HttpUtils
+import me.modmuss50.mpp.MinecraftApi
 import me.modmuss50.mpp.ModrinthPublishResult
 import me.modmuss50.mpp.Platform
 import me.modmuss50.mpp.PlatformDependency
@@ -44,29 +45,18 @@ interface ModrinthOptions : PlatformOptions, PlatformOptionsInternal<ModrinthOpt
         apiEndpoint.convention("https://api.modrinth.com/v2")
     }
 
-    fun minecraftVersionRange(action: Action<VersionRangeOptions>) {
-        val options = objectFactory.newInstance(VersionRangeOptions::class.java)
+    fun minecraftVersionRange(action: Action<ModrinthVersionRangeOptions>) {
+        val options = objectFactory.newInstance(ModrinthVersionRangeOptions::class.java)
         options.includeSnapshots.convention(false)
         action.execute(options)
 
         val startId = options.start.get()
         val endId = options.end.get()
+        val includeSnapshots = options.includeSnapshots.get()
 
         minecraftVersions.addAll(
             providerFactory.provider {
-                val versions = MinecraftApi().getVersions()
-                    .filter { it.type == "release" || options.includeSnapshots.get() }
-                    .map { it.id }
-                    .reversed()
-                val startIndex = versions.indexOf(startId)
-                val endIndex = versions.indexOf(endId)
-
-                if (startIndex == -1) throw IllegalArgumentException("Invalid start version $startId")
-                if (endIndex == -1) throw IllegalArgumentException("Invalid end version $endId")
-                if (startIndex > endIndex) throw IllegalArgumentException("Start version $startId must be before end version $endId")
-                if (startIndex == endIndex) throw IllegalArgumentException("Start version $startId cannot be the same as end version $endId")
-
-                versions.subList(startIndex, endIndex + 1)
+                MinecraftApi().getVersionsInRange(startId, endId, includeSnapshots)
             },
         )
     }
@@ -140,7 +130,7 @@ interface ModrinthDependency : PlatformDependency {
     val projectId: Property<String> get() = id
 }
 
-interface VersionRangeOptions {
+interface ModrinthVersionRangeOptions {
     /**
      * The start version of the range (inclusive)
      */

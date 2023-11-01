@@ -2,6 +2,7 @@ package me.modmuss50.mpp.platforms.curseforge
 
 import me.modmuss50.mpp.CurseForgePublishResult
 import me.modmuss50.mpp.HttpUtils
+import me.modmuss50.mpp.MinecraftApi
 import me.modmuss50.mpp.Platform
 import me.modmuss50.mpp.PlatformDependency
 import me.modmuss50.mpp.PlatformDependencyContainer
@@ -13,6 +14,7 @@ import me.modmuss50.mpp.PublishResult
 import me.modmuss50.mpp.PublishWorkAction
 import me.modmuss50.mpp.PublishWorkParameters
 import me.modmuss50.mpp.path
+import org.gradle.api.Action
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
@@ -55,6 +57,20 @@ interface CurseforgeOptions : PlatformOptions, PlatformOptionsInternal<Curseforg
         from(publishOptions.get())
     }
 
+    fun minecraftVersionRange(action: Action<CurseforgeVersionRangeOptions>) {
+        val options = objectFactory.newInstance(CurseforgeVersionRangeOptions::class.java)
+        action.execute(options)
+
+        val startId = options.start.get()
+        val endId = options.end.get()
+
+        minecraftVersions.addAll(
+            providerFactory.provider {
+                MinecraftApi().getVersionsInRange(startId, endId)
+            },
+        )
+    }
+
     override fun setInternalDefaults() {
         apiEndpoint.convention("https://minecraft.curseforge.com")
     }
@@ -66,6 +82,18 @@ interface CurseforgeOptions : PlatformOptions, PlatformOptionsInternal<Curseforg
 interface CurseforgeDependency : PlatformDependency {
     @get:Input
     val slug: Property<String>
+}
+
+interface CurseforgeVersionRangeOptions {
+    /**
+     * The start version of the range (inclusive)
+     */
+    val start: Property<String>
+
+    /**
+     * The end version of the range (exclusive)
+     */
+    val end: Property<String>
 }
 
 /**

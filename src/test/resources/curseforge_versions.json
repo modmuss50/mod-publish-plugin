@@ -7,6 +7,20 @@
     "apiVersion": ""
   },
   {
+    "id": 9980,
+    "gameVersionTypeID": 75125,
+    "name": "1.19.4",
+    "slug": "1-18-4",
+    "apiVersion": null
+  },
+  {
+    "id": 9981,
+    "gameVersionTypeID": 75125,
+    "name": "1.20",
+    "slug": "1-20",
+    "apiVersion": null
+  },
+  {
     "id": 9990,
     "gameVersionTypeID": 75125,
     "name": "1.20.1",

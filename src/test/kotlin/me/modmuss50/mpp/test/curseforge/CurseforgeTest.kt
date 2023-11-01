@@ -76,8 +76,11 @@ class CurseforgeTest : IntegrationTest {
                     // Common options that can be re-used between diffrent curseforge tasks
                     val curseforgeOptions = curseforgeOptions {
                         accessToken = "123"
-                        minecraftVersions.add("1.20.1")
                         apiEndpoint = "${server.endpoint}"
+                        minecraftVersionRange {
+                            start = "1.19.4"
+                            end = "1.20.1"
+                        }
                     }
                 
                     curseforge("curseforgeFabric") {
@@ -102,10 +105,15 @@ class CurseforgeTest : IntegrationTest {
             .run("publishMods")
         server.close()
 
+        val metadata = server.api.lastMetadata!!
+
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishCurseforgeFabric")!!.outcome)
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishCurseforgeForge")!!.outcome)
         assertContains(server.api.files, "mpp-example-forge.jar")
         assertContains(server.api.files, "mpp-example-fabric.jar")
+        assertContains(metadata.gameVersions!!, 9980) // 1.19.4
+        assertContains(metadata.gameVersions!!, 9981) // 1.20
+        assertContains(metadata.gameVersions!!, 9990) // 1.20.1
     }
 
     // Also test in groovy to ensure that the closures are working as expected
