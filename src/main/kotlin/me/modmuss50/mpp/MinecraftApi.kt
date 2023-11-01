@@ -27,7 +27,7 @@ class MinecraftApi(private val baseUrl: String = "https://piston-meta.mojang.com
     }
 
     fun getVersionsInRange(startId: String, endId: String, includeSnapshots: Boolean = false): List<String> {
-        val versions = MinecraftApi().getVersions()
+        val versions = getVersions()
             .filter { it.type == "release" || includeSnapshots }
             .map { it.id }
             .reversed()

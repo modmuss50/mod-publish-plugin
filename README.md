@@ -13,7 +13,7 @@ Add to your gradle plugins block:
 
 ```gradle
 plugins {
-  id "me.modmuss50.mod-publish-plugin" version "0.4.1"
+  id "me.modmuss50.mod-publish-plugin" version "0.4.2"
 }
 ```
 

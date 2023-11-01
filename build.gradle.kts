@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "me.modmuss50"
-version = "0.4.1"
+version = "0.4.2"
 description = "The Mod Publish Plugin is a plugin for the Gradle build system to help upload artifacts to a range of common destinations."
 
 repositories {
@@ -80,8 +80,6 @@ fun replaceVersion(path: String) {
     var content = project.file(path).readText()
 
     content = content.replace("(version \").*(\")".toRegex(), "version \"${project.version}\"")// project.version.toString())
-
-    println(content)
 
     project.file(path).writeText(content)
 }
