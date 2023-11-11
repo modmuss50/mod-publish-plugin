@@ -7,6 +7,7 @@ import me.modmuss50.mpp.test.github.MockGithubApi
 import me.modmuss50.mpp.test.modrinth.MockModrinthApi
 import org.gradle.testkit.runner.TaskOutcome
 import kotlin.test.Test
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -227,5 +228,64 @@ class DiscordTest : IntegrationTest {
         assertNotNull(requests[0].content)
         assertNull(requests[1].content)
         assertNull(requests[2].content)
+    }
+
+    @Test
+    fun announceWebhookDryRun() {
+        val discordApi = MockDiscordApi()
+        val server = MockWebServer(MockWebServer.CombinedApi(listOf(discordApi)))
+
+        val result = gradleTest()
+            .buildScript(
+                """
+                publishMods {
+                    file = tasks.jar.flatMap { it.archiveFile }
+                    changelog = "# Changelog\n-123\n-epic feature"
+                    version = "1.0.0"
+                    type = BETA
+                    
+                    dryRun = true
+                    
+                    curseforge {
+                        accessToken = "123"
+                        projectId = "123456"
+                        projectSlug = "test-mod"
+                        apiEndpoint = "${server.endpoint}"
+                    }
+                    
+                    modrinth {
+                        accessToken = "123"
+                        projectId = "12345678"                        
+                        apiEndpoint = "${server.endpoint}"
+                    }
+                    
+                    github {
+                        accessToken = "123"
+                        repository = "test/example"
+                        commitish = "main"
+                        apiEndpoint = "${server.endpoint}"
+                    }
+                
+                    discord {
+                        webhookUrl = "${server.endpoint}/api/webhooks/213/abc"
+                        dryRunWebhookUrl = "${server.endpoint}/api/webhooks/dryrun/def"
+                    }
+                }
+                """.trimIndent(),
+            )
+            .run("publishMods")
+        server.close()
+
+        var embeds = discordApi.requests.first().embeds!!
+        embeds = embeds.sortedBy { it.url }
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":announceDiscord")!!.outcome)
+        assertEquals(3, embeds.size)
+        assertEquals("https://curseforge.com/minecraft/mc-mods/test-mod/files/0", embeds[0].url)
+        assertEquals("https://github.com/modmuss50/mod-publish-plugin/dry-run", embeds[1].url)
+        assertEquals("https://modrinth.com/mod/dry-run/version/dry-run", embeds[2].url)
+
+        assertEquals(1, discordApi.requestedKeys.size)
+        assertContains(discordApi.requestedKeys.first(), "dryrun")
     }
 }

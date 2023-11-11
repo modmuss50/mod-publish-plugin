@@ -133,6 +133,15 @@ abstract class Curseforge @Inject constructor(name: String) : Platform(name), Cu
         }
     }
 
+    override fun dryRunPublishResult(): PublishResult {
+        return CurseForgePublishResult(
+            projectId = projectId.get(),
+            projectSlug = projectSlug.orNull,
+            fileId = 0,
+            title = announcementTitle.getOrElse("Download from CurseForge"),
+        )
+    }
+
     interface UploadParams : PublishWorkParameters, CurseforgeOptions
 
     abstract class UploadWorkAction : PublishWorkAction<UploadParams> {

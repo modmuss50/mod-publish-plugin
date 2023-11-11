@@ -1,5 +1,7 @@
 package me.modmuss50.mpp
 
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.Nested
@@ -51,6 +53,10 @@ abstract class PublishModTask @Inject constructor(@Nested val platform: Platform
                     it.into(project.buildDir.resolve("publishMods").resolve(name))
                 }
             }
+
+            result.get().asFile.writeText(
+                Json.encodeToString(platform.dryRunPublishResult()),
+            )
 
             return
         }

@@ -67,6 +67,15 @@ abstract class Github @Inject constructor(name: String) : Platform(name), Github
         }
     }
 
+    override fun dryRunPublishResult(): PublishResult {
+        return GithubPublishResult(
+            repository = repository.get(),
+            releaseId = 0,
+            url = "https://github.com/modmuss50/mod-publish-plugin/dry-run",
+            title = announcementTitle.getOrElse("Download from GitHub"),
+        )
+    }
+
     interface UploadParams : PublishWorkParameters, GithubOptions
 
     abstract class UploadWorkAction : PublishWorkAction<UploadParams> {

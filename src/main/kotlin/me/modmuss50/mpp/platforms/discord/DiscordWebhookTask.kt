@@ -22,6 +22,10 @@ interface DiscordWebhookOptions {
     val webhookUrl: Property<String>
 
     @get:Input
+    @get:Optional
+    val dryRunWebhookUrl: Property<String>
+
+    @get:Input
     val username: Property<String>
 
     @get:Input
@@ -33,6 +37,7 @@ interface DiscordWebhookOptions {
 
     fun from(other: DiscordWebhookOptions) {
         webhookUrl.set(other.webhookUrl)
+        dryRunWebhookUrl.set(other.dryRunWebhookUrl)
         username.set(other.username)
         avatarUrl.set(other.avatarUrl)
         content.set(other.content)
@@ -74,16 +79,24 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
         workQueue.submit(DiscordWorkAction::class.java) {
             it.from(this)
             it.publishResults.setFrom(publishResults)
+            it.dryRun.set(project.modPublishExtension.dryRun)
         }
     }
 
     interface DiscordWorkParameters : WorkParameters, DiscordWebhookOptions {
         val publishResults: ConfigurableFileCollection
+
+        val dryRun: Property<Boolean>
     }
 
     abstract class DiscordWorkAction : WorkAction<DiscordWorkParameters> {
         override fun execute() {
             with(parameters) {
+                if (dryRun.get() && !dryRunWebhookUrl.isPresent) {
+                    // Don't announce if we're dry running and don't have a dry run webhook URL.
+                    return
+                }
+
                 val embeds = publishResults.files.map {
                     PublishResult.fromJson(it.readText())
                 }.map {
@@ -94,10 +107,12 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
                     )
                 }.toList()
 
+                val url = if (dryRun.get()) dryRunWebhookUrl else webhookUrl
+
                 var firstRequest = true
                 embeds.chunked(10).forEach { chunk ->
                     DiscordAPI.executeWebhook(
-                        webhookUrl.get(),
+                        url.get(),
                         DiscordAPI.Webhook(
                             username = username.get(),
                             content = if (firstRequest) content.get() else null,

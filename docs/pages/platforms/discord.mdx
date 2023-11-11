@@ -24,6 +24,9 @@ publishMods {
         // Pass in the secret webhook URL. Required
         webhookUrl = providers.environmentVariable("DISCORD_WEBHOOK")
 
+        // Pass in the secret webhook URL to post the messages when running a dry run. Optional
+        dryRunWebhookUrl = providers.environmentVariable("DISCORD_WEBHOOK_DRY_RUN")
+
         // Set the username used to send the webhook, defaults to "Mod Publish Plugin"
         username = "My Cool Mod"
 

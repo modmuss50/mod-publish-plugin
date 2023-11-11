@@ -9,7 +9,8 @@ import me.modmuss50.mpp.platforms.discord.DiscordAPI
 import me.modmuss50.mpp.test.MockWebServer
 
 class MockDiscordApi : MockWebServer.MockApi {
-    var requests: ArrayList<DiscordAPI.Webhook> = arrayListOf()
+    var requests = arrayListOf<DiscordAPI.Webhook>()
+    var requestedKeys = arrayListOf<String>()
 
     override fun routes(): EndpointGroup {
         return EndpointGroup {
@@ -21,6 +22,7 @@ class MockDiscordApi : MockWebServer.MockApi {
 
     private fun webhook(context: Context) {
         requests.add(Json.decodeFromString(context.body()))
+        requestedKeys.add(context.pathParam("key"))
         context.result("") // Just returns an empty string
     }
 }

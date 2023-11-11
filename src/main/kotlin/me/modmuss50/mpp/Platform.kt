@@ -96,6 +96,9 @@ abstract class Platform @Inject constructor(private val name: String) : Named, P
     @ApiStatus.Internal
     abstract fun publish(context: PublishContext)
 
+    @ApiStatus.Internal
+    abstract fun dryRunPublishResult(): PublishResult
+
     @get:ApiStatus.Internal
     @get:Internal
     val taskName: String

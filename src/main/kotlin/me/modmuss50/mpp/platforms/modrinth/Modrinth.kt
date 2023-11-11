@@ -154,6 +154,14 @@ abstract class Modrinth @Inject constructor(name: String) : Platform(name), Modr
         }
     }
 
+    override fun dryRunPublishResult(): PublishResult {
+        return ModrinthPublishResult(
+            id = "dry-run",
+            projectId = "dry-run",
+            title = announcementTitle.getOrElse("Download from Modrinth"),
+        )
+    }
+
     interface UploadParams : PublishWorkParameters, ModrinthOptions
 
     abstract class UploadWorkAction : PublishWorkAction<UploadParams> {
