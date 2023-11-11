@@ -9,7 +9,7 @@ import me.modmuss50.mpp.platforms.discord.DiscordAPI
 import me.modmuss50.mpp.test.MockWebServer
 
 class MockDiscordApi : MockWebServer.MockApi {
-    var request: DiscordAPI.Webhook? = null
+    var requests: ArrayList<DiscordAPI.Webhook> = arrayListOf()
 
     override fun routes(): EndpointGroup {
         return EndpointGroup {
@@ -20,7 +20,7 @@ class MockDiscordApi : MockWebServer.MockApi {
     }
 
     private fun webhook(context: Context) {
-        request = Json.decodeFromString(context.body())
+        requests.add(Json.decodeFromString(context.body()))
         context.result("") // Just returns an empty string
     }
 }

@@ -94,15 +94,20 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
                     )
                 }.toList()
 
-                DiscordAPI.executeWebhook(
-                    webhookUrl.get(),
-                    DiscordAPI.Webhook(
-                        username = username.get(),
-                        content = content.get(),
-                        avatarUrl = avatarUrl.orNull,
-                        embeds = embeds,
-                    ),
-                )
+                var firstRequest = true
+                embeds.chunked(10).forEach { chunk ->
+                    DiscordAPI.executeWebhook(
+                        webhookUrl.get(),
+                        DiscordAPI.Webhook(
+                            username = username.get(),
+                            content = if (firstRequest) content.get() else null,
+                            avatarUrl = avatarUrl.orNull,
+                            embeds = chunk,
+                        ),
+                    )
+
+                    firstRequest = false
+                }
             }
         }
     }
