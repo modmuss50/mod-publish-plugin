@@ -41,3 +41,13 @@ publishMods {
     }
 }
 ```
+
+You can customise the platform specific message by using the `announcementTitle` property present on all of the platforms. This will be used as the title of the embed.
+
+```groovy
+publishMods {
+    curseforge {
+        announcementTitle = "Download from CurseForge"
+    }
+}
+```
