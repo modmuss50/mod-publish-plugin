@@ -32,7 +32,6 @@ object DiscordAPI {
         // files
         // payload_json
         // attachments
-        @SerialName("allowed_mentions")
         val flags: Int? = null,
         @SerialName("thread_name")
         val threadName: String? = null,
