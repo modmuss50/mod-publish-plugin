@@ -24,6 +24,7 @@ import org.gradle.api.tasks.Optional
 import org.jetbrains.annotations.ApiStatus
 import java.nio.file.Path
 import javax.inject.Inject
+import kotlin.random.Random
 import kotlin.reflect.KClass
 
 interface ModrinthOptions : PlatformOptions, PlatformOptionsInternal<ModrinthOptions>, ModrinthDependencyContainer {
@@ -156,7 +157,8 @@ abstract class Modrinth @Inject constructor(name: String) : Platform(name), Modr
 
     override fun dryRunPublishResult(): PublishResult {
         return ModrinthPublishResult(
-            id = "dry-run",
+            // Use a random file ID so that the URL is different each time, this is needed because discord drops duplicate URLs
+            id = "${Random.nextInt(0, 1000000)}",
             projectId = "dry-run",
             title = announcementTitle.getOrElse("Download from Modrinth"),
         )

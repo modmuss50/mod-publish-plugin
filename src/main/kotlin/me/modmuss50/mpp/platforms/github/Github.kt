@@ -17,6 +17,7 @@ import org.gradle.api.tasks.Optional
 import org.kohsuke.github.GHReleaseBuilder
 import org.kohsuke.github.GitHub
 import javax.inject.Inject
+import kotlin.random.Random
 
 interface GithubOptions : PlatformOptions, PlatformOptionsInternal<GithubOptions> {
     /**
@@ -71,7 +72,7 @@ abstract class Github @Inject constructor(name: String) : Platform(name), Github
         return GithubPublishResult(
             repository = repository.get(),
             releaseId = 0,
-            url = "https://github.com/modmuss50/mod-publish-plugin/dry-run",
+            url = "https://github.com/modmuss50/mod-publish-plugin/dry-run?random=${Random.nextInt(0, 1000000)}",
             title = announcementTitle.getOrElse("Download from GitHub"),
         )
     }

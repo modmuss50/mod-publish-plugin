@@ -107,6 +107,14 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
                     )
                 }.toList()
 
+                // Find any embeds with duplicate URLs and throw and error if there are any.
+                for (embed in embeds) {
+                    val count = embeds.count { it.url == embed.url }
+                    if (count > 1) {
+                        throw IllegalStateException("Duplicate embed URL: ${embed.url} for ${embed.title}")
+                    }
+                }
+
                 val url = if (dryRun.get()) dryRunWebhookUrl else webhookUrl
 
                 var firstRequest = true

@@ -204,7 +204,7 @@ class DiscordTest : IntegrationTest {
                         curseforge("curseforge" + i) {
                             accessToken = "123"
                             projectId = "123456"
-                            projectSlug = "test-mod"
+                            projectSlug = "test-mod-" + i
                             apiEndpoint = "${server.endpoint}"
                         }
                     }
@@ -224,6 +224,9 @@ class DiscordTest : IntegrationTest {
         assertEquals(10, requests[0].embeds!!.size)
         assertEquals(10, requests[1].embeds!!.size)
         assertEquals(5, requests[2].embeds!!.size)
+
+        val distinctUrls = requests.flatMap { it.embeds!! }.distinctBy { it.url }.size
+        assertEquals(25, distinctUrls)
 
         assertNotNull(requests[0].content)
         assertNull(requests[1].content)
@@ -281,11 +284,8 @@ class DiscordTest : IntegrationTest {
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":announceDiscord")!!.outcome)
         assertEquals(3, embeds.size)
-        assertEquals("https://curseforge.com/minecraft/mc-mods/test-mod/files/0", embeds[0].url)
-        assertEquals("https://github.com/modmuss50/mod-publish-plugin/dry-run", embeds[1].url)
-        assertEquals("https://modrinth.com/mod/dry-run/version/dry-run", embeds[2].url)
-
         assertEquals(1, discordApi.requestedKeys.size)
         assertContains(discordApi.requestedKeys.first(), "dryrun")
+        assertEquals(3, embeds.distinctBy { it.url }.size)
     }
 }

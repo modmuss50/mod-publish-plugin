@@ -22,6 +22,7 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import javax.inject.Inject
+import kotlin.random.Random
 import kotlin.reflect.KClass
 
 interface CurseforgeOptions : PlatformOptions, PlatformOptionsInternal<CurseforgeOptions>, CurseforgeDependencyContainer {
@@ -136,8 +137,9 @@ abstract class Curseforge @Inject constructor(name: String) : Platform(name), Cu
     override fun dryRunPublishResult(): PublishResult {
         return CurseForgePublishResult(
             projectId = projectId.get(),
-            projectSlug = projectSlug.orNull,
-            fileId = 0,
+            projectSlug = projectSlug.map { "dry-run" }.orNull,
+            // Use a random file ID so that the URL is different each time, this is needed because discord drops duplicate URLs
+            fileId = Random.nextInt(0, 1000000),
             title = announcementTitle.getOrElse("Download from CurseForge"),
         )
     }
