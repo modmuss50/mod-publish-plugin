@@ -12,6 +12,7 @@ import me.modmuss50.mpp.platforms.modrinth.ModrinthOptions
 import org.gradle.api.Action
 import org.gradle.api.ExtensiblePolymorphicDomainObjectContainer
 import org.gradle.api.NamedDomainObjectProvider
+import org.gradle.api.PolymorphicDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
@@ -76,7 +77,7 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
     }
 
     fun curseforge(name: String, action: Action<Curseforge>): NamedDomainObjectProvider<Curseforge> {
-        return platforms.register(name, Curseforge::class.java, action)
+        return platforms.maybeRegister(name, action)
     }
 
     fun curseforgeOptions(@DelegatesTo(value = Curseforge::class) closure: Closure<*>): Provider<CurseforgeOptions> {
@@ -111,7 +112,7 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
     }
 
     fun modrinth(name: String, action: Action<Modrinth>): NamedDomainObjectProvider<Modrinth> {
-        return platforms.register(name, Modrinth::class.java, action)
+        return platforms.maybeRegister(name, action)
     }
 
     fun modrinthOptions(@DelegatesTo(value = Modrinth::class) closure: Closure<*>): Provider<ModrinthOptions> {
@@ -146,7 +147,7 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
     }
 
     fun github(name: String, action: Action<Github>): NamedDomainObjectProvider<Github> {
-        return platforms.register(name, Github::class.java, action)
+        return platforms.maybeRegister(name, action)
     }
 
     fun githubOptions(@DelegatesTo(value = Github::class) closure: Closure<*>): Provider<GithubOptions> {
@@ -191,6 +192,14 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
     }
 
     // Misc
+
+    private inline fun <reified T> PolymorphicDomainObjectContainer<in T>.maybeRegister(name: String, action: Action<T>): NamedDomainObjectProvider<T> {
+        return if (name in platforms.names) {
+            named(name, T::class.java, action)
+        } else {
+            register(name, T::class.java, action)
+        }
+    }
 
     private fun <A : PlatformOptions, T : PlatformOptionsInternal<A>> configureOptions(klass: KClass<T>, action: Action<T>): Provider<T> {
         return project.provider {
