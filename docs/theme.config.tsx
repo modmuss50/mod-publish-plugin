@@ -6,6 +6,9 @@ const config: DocsThemeConfig = {
   project: {
     link: 'https://github.com/modmuss50/mod-publish-plugin',
   },
+  chat: {
+    link: 'https://discord.gg/teamreborn',
+  },
   docsRepositoryBase: 'https://github.com/modmuss50/mod-publish-plugin/tree/main/docs',
   footer: {
     text: (
