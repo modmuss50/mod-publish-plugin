@@ -33,6 +33,9 @@ class ProductionTest : IntegrationTest {
                         projectId = "${options.curseforgeProject}"
                         projectSlug = "${options.curseforgeProjectSlug}"
                         minecraftVersions.add("1.20.1")
+                        javaVersions.add(JavaVersion.VERSION_17)
+                        clientRequired = true
+                        serverRequired = true
                         
                         requires {
                             slug = "fabric-api"

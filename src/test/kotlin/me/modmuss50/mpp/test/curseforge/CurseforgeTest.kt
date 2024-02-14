@@ -27,6 +27,9 @@ class CurseforgeTest : IntegrationTest {
                         accessToken = "123"
                         projectId = "123456"
                         minecraftVersions.add("1.20.1")
+                        javaVersions.add(JavaVersion.VERSION_17)
+                        clientRequired = true
+                        serverRequired = true
                         
                         requires {
                             slug = "fabric-api"
@@ -49,6 +52,9 @@ class CurseforgeTest : IntegrationTest {
         assertEquals("Test Upload", metadata.displayName)
         assertContains(metadata.gameVersions!!, 9990) // 1.20.1
         assertContains(metadata.gameVersions!!, 7499) // Fabric
+        assertContains(metadata.gameVersions!!, 8326) // Java 17
+        assertContains(metadata.gameVersions!!, 9638) // Client
+        assertContains(metadata.gameVersions!!, 9639) // Server
         assertEquals("fabric-api", metadata.relations!!.projects[0].slug)
         assertEquals("mod-test", metadata.relations!!.projects[1].slug)
         assertEquals("mod-test-2", metadata.relations!!.projects[2].slug)
@@ -111,8 +117,8 @@ class CurseforgeTest : IntegrationTest {
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishCurseforgeForge")!!.outcome)
         assertContains(server.api.files, "mpp-example-forge.jar")
         assertContains(server.api.files, "mpp-example-fabric.jar")
-        assertContains(metadata.gameVersions!!, 9980) // 1.19.4
-        assertContains(metadata.gameVersions!!, 9981) // 1.20
+        assertContains(metadata.gameVersions!!, 9776) // 1.19.4
+        assertContains(metadata.gameVersions!!, 9971) // 1.20
         assertContains(metadata.gameVersions!!, 9990) // 1.20.1
     }
 

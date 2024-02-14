@@ -54,6 +54,13 @@ publishMods {
         // Optionally set the announcement title used by the discord publisher
         announcementTitle = "Download from CurseForge"
 
+        // Optionally specify the java version that is required to run the mod
+        javaVersions.add(JavaVersion.VERSION_17)
+
+        // Optionally specify an environment that is required to run the mod
+        clientRequired = true
+        serverRequired = true
+
         // When using the discord webhook you must also specify the project slug
         // This is due to limitations in the CurseForge API.
         projectSlug = "test-mod"

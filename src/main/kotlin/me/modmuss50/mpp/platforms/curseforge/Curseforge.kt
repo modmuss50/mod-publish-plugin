@@ -15,6 +15,7 @@ import me.modmuss50.mpp.PublishWorkAction
 import me.modmuss50.mpp.PublishWorkParameters
 import me.modmuss50.mpp.path
 import org.gradle.api.Action
+import org.gradle.api.JavaVersion
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
@@ -38,6 +39,17 @@ interface CurseforgeOptions : PlatformOptions, PlatformOptionsInternal<Curseforg
     val minecraftVersions: ListProperty<String>
 
     @get:Input
+    @get:Optional
+    val clientRequired: Property<Boolean>
+
+    @get:Input
+    @get:Optional
+    val serverRequired: Property<Boolean>
+
+    @get:Input
+    val javaVersions: ListProperty<JavaVersion>
+
+    @get:Input
     val apiEndpoint: Property<String>
 
     fun from(other: CurseforgeOptions) {
@@ -46,6 +58,9 @@ interface CurseforgeOptions : PlatformOptions, PlatformOptionsInternal<Curseforg
         projectId.set(other.projectId)
         projectSlug.set(other.projectSlug)
         minecraftVersions.set(other.minecraftVersions)
+        clientRequired.set(other.clientRequired)
+        serverRequired.set(other.serverRequired)
+        javaVersions.set(other.javaVersions)
         apiEndpoint.set(other.apiEndpoint)
     }
 
@@ -150,33 +165,34 @@ abstract class Curseforge @Inject constructor(name: String) : Platform(name), Cu
         override fun publish(): PublishResult {
             with(parameters) {
                 val api = CurseforgeApi(accessToken.get(), apiEndpoint.get())
-
-                val gameVersionTypes = HttpUtils.retry(maxRetries.get(), "Failed to get game version types") {
-                    api.getVersionTypes()
-                }.filter {
-                    it.slug.startsWith("minecraft") || it.slug == "java" || it.slug == "modloader"
-                }.map {
-                    it.id
-                }
-
-                val availableGameVersions = HttpUtils.retry(maxRetries.get(), "Failed to get game versions") {
-                    api.getGameVersions()
-                }.filter {
-                    gameVersionTypes.contains(it.gameVersionTypeID)
-                }
+                val versions = CurseforgeVersions(
+                    HttpUtils.retry(maxRetries.get(), "Failed to get game version types") {
+                        api.getVersionTypes()
+                    },
+                    HttpUtils.retry(maxRetries.get(), "Failed to get game versions") {
+                        api.getGameVersions()
+                    },
+                )
 
                 val gameVersions = ArrayList<Int>()
-
                 for (version in minecraftVersions.get()) {
-                    val id = availableGameVersions.find { it.name == version }?.id
-                        ?: throw RuntimeException("Could not find game version: $version")
-                    gameVersions.add(id)
+                    gameVersions.add(versions.getMinecraftVersion(version))
                 }
 
                 for (modLoader in modLoaders.get()) {
-                    val id = availableGameVersions.find { it.name.equals(modLoader, ignoreCase = true) }?.id
-                        ?: throw RuntimeException("Could not find mod loader: $modLoader")
-                    gameVersions.add(id)
+                    gameVersions.add(versions.getModLoaderVersion(modLoader))
+                }
+
+                if (clientRequired.isPresent && clientRequired.get()) {
+                    gameVersions.add(versions.getClientVersion())
+                }
+
+                if (serverRequired.isPresent && serverRequired.get()) {
+                    gameVersions.add(versions.getServerVersion())
+                }
+
+                for (javaVersion in javaVersions.get()) {
+                    gameVersions.add(versions.getJavaVersion(javaVersion))
                 }
 
                 val projectRelations = dependencies.get().map {
