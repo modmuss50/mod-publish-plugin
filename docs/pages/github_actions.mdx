@@ -1,0 +1,31 @@
+You can automate the building and publishing of your mod using GitHub Actions.
+This is a free service provided by GitHub that allows you to run scripts in response to events like pushing to a repository.
+
+To use GitHub Actions, you need to create a `.github/workflows/release.yml` file in your repository.
+```yml
+name: Release
+on: [workflow_dispatch] # Manual trigger
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    container:
+      image: mcr.microsoft.com/openjdk/jdk:21-ubuntu
+      options: --user root
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./gradlew build publishMods
+        env:
+          CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+```
+The above example is a simple workflow that will build and publish your mod when manually triggered via the GitHub web interface.
+You must set the following secrets in your repository settings:
+- `CURSEFORGE_API_KEY`: Your CurseForge API key. You can get this from your CurseForge account settings [here](https://legacy.curseforge.com/account/api-tokens).
+- `MODRINTH_TOKEN`: Your Modrinth API key. You can get this from your Modrinth account settings [here](https://modrinth.com/settings/pats).
+
+The `GITHUB_TOKEN` is automatically created by GitHub actions. If you arent publishing to any of these platforms you can omit the corresponding environment variable.
