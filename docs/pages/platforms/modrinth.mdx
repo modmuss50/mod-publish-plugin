@@ -15,6 +15,14 @@ publishMods {
 }
 
 ```
+
+You will need to generate a Modrinth PAT token in your account settings [here](https://modrinth.com/settings/pats), you can set this an environment variable.
+If you plan to publish from your local machine using a Gradle user property may be more convenient:
+
+You can use the gradle property provider like so:
+`providers.gradleProperty('CURSEFORGE_API_KEY')`
+
+
 ## Multiple projects
 You can create multiple Modrinth destinations by providing a name like so:
 ```groovy

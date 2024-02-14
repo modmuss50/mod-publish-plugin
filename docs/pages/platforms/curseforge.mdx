@@ -16,6 +16,13 @@ publishMods {
 }
 
 ```
+
+You will need to generate a CurseForge API token in your account settings [here](https://legacy.curseforge.com/account/api-tokens), you can set this an environment variable.
+If you plan to publish from your local machine using a Gradle user property may be more convenient:
+
+You can use the gradle property provider like so:
+`providers.gradleProperty('CURSEFORGE_API_KEY')`
+
 ## Multiple projects
 You can create multiple CurseForge destinations by providing a name like so:
 ```groovy
