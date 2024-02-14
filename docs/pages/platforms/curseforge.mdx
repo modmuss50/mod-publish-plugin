@@ -51,18 +51,11 @@ publishMods {
         // This is due to limitations in the CurseForge API.
         projectSlug = "test-mod"
 
-        requires {
-            slug = "project-slug"
-        }
-        optional {
-            slug = "project-slug"
-        }
-        incompatible {
-            slug = "project-slug"
-        }
-        embeds {
-            slug = "project-slug"
-        }
+        // Add dependencies to your project
+        requires("project-slug-1", "another-project")
+        optional("project-slug")
+        incompatible("project-slug")
+        embeds("project-slug")
     }
 }
 ```

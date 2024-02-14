@@ -69,6 +69,12 @@ publishMods {
             id = "12345678"
             slug = "project-slug"
         }
+
+        // You can use the shortened method if you only need to specify the slug
+        requires("project-slug")
+        optional("project-slug")
+        incompatible("project-slug")
+        embeds("project-slug")
     }
 }
 ```

@@ -30,10 +30,7 @@ publishMods {
         projectSlug = "example-project" // Required for discord webhook
         accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
         minecraftVersions.add("1.20.1")
-
-        requires {
-            slug = "fabric-api"
-        }
+        requires("fabric-api")
     }
     modrinth {
         projectId = "abcdef"
@@ -45,7 +42,6 @@ publishMods {
         accessToken = providers.environmentVariable("GITHUB_TOKEN")
         commitish = "main"
     }
-
     discord {
         webhookUrl = providers.environmentVariable("DISCORD_WEBHOOK")
     }
