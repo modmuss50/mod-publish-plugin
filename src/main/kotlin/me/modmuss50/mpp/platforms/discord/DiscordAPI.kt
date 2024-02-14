@@ -1,5 +1,6 @@
 package me.modmuss50.mpp.platforms.discord
 
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
@@ -8,6 +9,7 @@ import me.modmuss50.mpp.HttpUtils
 import okhttp3.RequestBody.Companion.toRequestBody
 
 object DiscordAPI {
+    @OptIn(ExperimentalSerializationApi::class)
     val json = Json { explicitNulls = false }
     private val httpUtils = HttpUtils()
     private val headers: Map<String, String> = mapOf("Content-Type" to "application/json")

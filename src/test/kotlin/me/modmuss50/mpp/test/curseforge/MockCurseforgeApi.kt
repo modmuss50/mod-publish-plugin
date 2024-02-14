@@ -8,12 +8,14 @@ import io.javalin.apibuilder.EndpointGroup
 import io.javalin.http.BadRequestResponse
 import io.javalin.http.Context
 import io.javalin.http.UnauthorizedResponse
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import me.modmuss50.mpp.platforms.curseforge.CurseforgeApi
 import me.modmuss50.mpp.test.MockWebServer
 import java.io.BufferedReader
 
 class MockCurseforgeApi : MockWebServer.MockApi {
+    @OptIn(ExperimentalSerializationApi::class)
     val json = Json { ignoreUnknownKeys = true; explicitNulls = false }
     var lastMetadata: CurseforgeApi.UploadFileMetadata? = null
     val files: ArrayList<String> = ArrayList()

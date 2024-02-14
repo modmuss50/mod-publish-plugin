@@ -1,5 +1,6 @@
 package me.modmuss50.mpp.platforms.curseforge
 
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
@@ -17,6 +18,7 @@ import kotlin.io.path.name
 // https://support.curseforge.com/en/support/solutions/articles/9000197321-curseforge-upload-api
 class CurseforgeApi(private val accessToken: String, private val baseUrl: String) {
     // dont serialize nulls
+    @OptIn(ExperimentalSerializationApi::class)
     val json = Json { explicitNulls = false }
 
     private val httpUtils = HttpUtils(exceptionFactory = CurseforgeHttpExceptionFactory())

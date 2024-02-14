@@ -25,7 +25,7 @@ abstract class PublishModTask @Inject constructor(@Nested val platform: Platform
     init {
         group = "publishing"
         outputs.upToDateWhen { false }
-        result.set(project.buildDir.resolve("publishMods/$name.json"))
+        result.set(project.layout.buildDirectory.file("publishMods/$name.json"))
         result.finalizeValue()
     }
 
@@ -38,10 +38,13 @@ abstract class PublishModTask @Inject constructor(@Nested val platform: Platform
                 throw FileNotFoundException("$file not found")
             }
 
+            project.logger.lifecycle("Dry run $name:")
+
             project.copy {
                 it.from(file)
-                it.into(project.buildDir.resolve("publishMods").resolve(name))
+                it.into(project.layout.buildDirectory.dir("publishMods/$name"))
             }
+            project.logger.lifecycle("Main file: ${file.name}")
 
             for (additionalFile in platform.additionalFiles.files) {
                 if (!additionalFile.exists()) {
@@ -50,9 +53,14 @@ abstract class PublishModTask @Inject constructor(@Nested val platform: Platform
 
                 project.copy {
                     it.from(additionalFile)
-                    it.into(project.buildDir.resolve("publishMods").resolve(name))
+                    it.into(project.layout.buildDirectory.dir("publishMods/$name"))
                 }
+                project.logger.lifecycle("Additional file: ${additionalFile.name}")
             }
+
+            project.logger.lifecycle("Display name: ${platform.displayName.get()}")
+            project.logger.lifecycle("Version: ${platform.version.get()}")
+            project.logger.lifecycle("Changelog: ${platform.changelog.get()}")
 
             result.get().asFile.writeText(
                 Json.encodeToString(platform.dryRunPublishResult()),
