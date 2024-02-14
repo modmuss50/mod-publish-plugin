@@ -19,6 +19,9 @@ publishMods {
     // The display name/release title, this defaults to the Gradle project name + version
     displayName = "My Mod"
 
+    // Set the display name to match the file name
+    displayName = file.map { it.asFile.name }
+
     // A list of mod loaders the release supports
     modLoaders.add("fabric")
 
