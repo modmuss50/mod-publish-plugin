@@ -9,8 +9,8 @@ import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
-import org.gradle.configurationcache.extensions.capitalized
 import org.jetbrains.annotations.ApiStatus
+import java.util.*
 import javax.inject.Inject
 import kotlin.reflect.KClass
 
@@ -102,7 +102,7 @@ abstract class Platform @Inject constructor(private val name: String) : Named, P
     @get:ApiStatus.Internal
     @get:Internal
     val taskName: String
-        get() = "publish" + name.capitalized()
+        get() = "publish" + titlecase(name)
 
     init {
         (this as PlatformOptionsInternal<*>).setInternalDefaults()
@@ -111,5 +111,15 @@ abstract class Platform @Inject constructor(private val name: String) : Named, P
     @Input
     override fun getName(): String {
         return name
+    }
+}
+
+fun titlecase(string: String): String {
+    return string.replaceFirstChar {
+        if (it.isLowerCase()) {
+            it.titlecase(Locale.ROOT)
+        } else {
+            it.toString()
+        }
     }
 }
