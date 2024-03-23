@@ -229,7 +229,7 @@ class ModrinthTest : IntegrationTest {
                     projectId = "12345678"
 
                     minecraftVersionRange {
-                        start = "1.19.4"
+                        start = "1.13.1" // test WALL_OF_SHAME
                         end = "1.20.2"
                         includeSnapshots = true
                     }
