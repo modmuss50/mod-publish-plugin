@@ -29,6 +29,7 @@ import kotlin.reflect.KClass
 
 interface ModrinthOptions : PlatformOptions, PlatformOptionsInternal<ModrinthOptions>, ModrinthDependencyContainer {
     companion object {
+        // https://github.com/modrinth/labrinth/blob/ae1c5342f2017c1c93008d1e87f1a29549dca92f/src/scheduler.rs#L112
         @JvmStatic
         val WALL_OF_SHAME = mapOf(
                 "1.14.2 Pre-Release 4" to "1.14.2-pre4",
