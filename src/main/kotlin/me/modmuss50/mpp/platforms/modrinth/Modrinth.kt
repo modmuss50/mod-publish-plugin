@@ -28,6 +28,25 @@ import kotlin.random.Random
 import kotlin.reflect.KClass
 
 interface ModrinthOptions : PlatformOptions, PlatformOptionsInternal<ModrinthOptions>, ModrinthDependencyContainer {
+    companion object {
+        // https://github.com/modrinth/labrinth/blob/ae1c5342f2017c1c93008d1e87f1a29549dca92f/src/scheduler.rs#L112
+        @JvmStatic
+        val WALL_OF_SHAME = mapOf(
+                "1.14.2 Pre-Release 4" to "1.14.2-pre4",
+                "1.14.2 Pre-Release 3" to "1.14.2-pre3",
+                "1.14.2 Pre-Release 2" to "1.14.2-pre2",
+                "1.14.2 Pre-Release 1" to "1.14.2-pre1",
+                "1.14.1 Pre-Release 2" to "1.14.1-pre2",
+                "1.14.1 Pre-Release 1" to "1.14.1-pre1",
+                "1.14 Pre-Release 5" to "1.14-pre5",
+                "1.14 Pre-Release 4" to "1.14-pre4",
+                "1.14 Pre-Release 3" to "1.14-pre3",
+                "1.14 Pre-Release 2" to "1.14-pre2",
+                "1.14 Pre-Release 1" to "1.14-pre1",
+                "3D Shareware v1.34" to "3D-Shareware-v1.34"
+        )
+    }
+
     @get:Input
     val projectId: Property<String>
 
@@ -57,7 +76,7 @@ interface ModrinthOptions : PlatformOptions, PlatformOptionsInternal<ModrinthOpt
 
         minecraftVersions.addAll(
             providerFactory.provider {
-                MinecraftApi().getVersionsInRange(startId, endId, includeSnapshots)
+                MinecraftApi().getVersionsInRange(startId, endId, includeSnapshots).map { WALL_OF_SHAME.getOrDefault(it, it) }
             },
         )
     }
