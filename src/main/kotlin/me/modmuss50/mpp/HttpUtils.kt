@@ -76,7 +76,7 @@ class HttpUtils(val exceptionFactory: HttpExceptionFactory = DefaultHttpExceptio
                 try {
                     return closure()
                 } catch (e: HttpException) {
-                    if (e.code / 100 != 5) {
+                    if (e.response.code / 100 != 5) {
                         throw e
                     }
 
@@ -97,9 +97,9 @@ class HttpUtils(val exceptionFactory: HttpExceptionFactory = DefaultHttpExceptio
 
     private class DefaultHttpExceptionFactory : HttpExceptionFactory {
         override fun createException(response: Response): HttpException {
-            return HttpException(response.code, response.body?.string() ?: response.message)
+            return HttpException(response, response.body?.string() ?: response.message)
         }
     }
 
-    class HttpException(val code: Int, message: String) : IOException("Request failed, status: $code message: $message")
+    class HttpException(val response: Response, message: String) : IOException("Request failed, status: ${response.code} message: $message url: ${response.request.url}")
 }

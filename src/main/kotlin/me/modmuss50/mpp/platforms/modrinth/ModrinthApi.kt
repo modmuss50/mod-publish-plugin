@@ -159,9 +159,9 @@ class ModrinthApi(private val accessToken: String, private val baseUrl: String) 
         override fun createException(response: Response): HttpUtils.HttpException {
             return try {
                 val errorResponse = json.decodeFromString<ErrorResponse>(response.body!!.string())
-                HttpUtils.HttpException(response.code, errorResponse.description)
+                HttpUtils.HttpException(response, errorResponse.description)
             } catch (e: SerializationException) {
-                HttpUtils.HttpException(response.code, "Unknown error")
+                HttpUtils.HttpException(response, "Unknown error")
             }
         }
     }
