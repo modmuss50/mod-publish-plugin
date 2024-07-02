@@ -21,7 +21,7 @@ repositories {
 dependencies {
     implementation(gradleApi())
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
-    implementation("com.squareup.okhttp3:okhttp:4.10.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("org.kohsuke:github-api:1.315")
 
     testImplementation(kotlin("test"))
