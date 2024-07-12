@@ -10,9 +10,11 @@ import me.modmuss50.mpp.PublishResult
 import me.modmuss50.mpp.PublishWorkAction
 import me.modmuss50.mpp.PublishWorkParameters
 import me.modmuss50.mpp.ReleaseType
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Optional
 import org.kohsuke.github.GHReleaseBuilder
 import org.kohsuke.github.GitHub
@@ -20,6 +22,10 @@ import javax.inject.Inject
 import kotlin.random.Random
 
 interface GithubOptions : PlatformOptions, PlatformOptionsInternal<GithubOptions> {
+    @get:InputFile
+    @get:Optional
+    override val file: RegularFileProperty
+
     /**
      * "owner/repo"
      */
@@ -63,6 +69,16 @@ interface GithubOptions : PlatformOptions, PlatformOptionsInternal<GithubOptions
 
 abstract class Github @Inject constructor(name: String) : Platform(name), GithubOptions {
     override fun publish(context: PublishContext) {
+        val files = ArrayList(additionalFiles.files)
+
+        if (file.isPresent) {
+            files.add(file.get().asFile)
+        }
+
+        if (files.isEmpty()) {
+            throw IllegalStateException("No files to upload to GitHub.")
+        }
+
         context.submit(UploadWorkAction::class) {
             it.from(this)
         }
@@ -83,8 +99,6 @@ abstract class Github @Inject constructor(name: String) : Platform(name), Github
         // TODO: Maybe look at moving away from using a large library for this.
         override fun publish(): PublishResult {
             with(parameters) {
-                val mainFile = file.get().asFile
-
                 val repo = connect().getRepository(repository.get())
                 val release = with(GHReleaseBuilder(repo, tagName.get())) {
                     name(displayName.get())
@@ -93,10 +107,14 @@ abstract class Github @Inject constructor(name: String) : Platform(name), Github
                     commitish(commitish.get())
                 }.create()
 
-                release.uploadAsset(mainFile, "application/java-archive")
+                val files = ArrayList(additionalFiles.files)
 
-                for (additionalFile in additionalFiles.files) {
-                    release.uploadAsset(additionalFile, "application/java-archive")
+                if (file.isPresent) {
+                    files.add(file.get().asFile)
+                }
+
+                for (file in files) {
+                    release.uploadAsset(file, "application/java-archive")
                 }
 
                 return GithubPublishResult(
