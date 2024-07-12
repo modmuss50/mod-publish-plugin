@@ -69,7 +69,7 @@ interface GithubOptions : PlatformOptions, PlatformOptionsInternal<GithubOptions
 
 abstract class Github @Inject constructor(name: String) : Platform(name), GithubOptions {
     override fun publish(context: PublishContext) {
-        val files = ArrayList(additionalFiles.files)
+        val files = additionalFiles.files.toMutableList()
 
         if (file.isPresent) {
             files.add(file.get().asFile)
@@ -107,7 +107,7 @@ abstract class Github @Inject constructor(name: String) : Platform(name), Github
                     commitish(commitish.get())
                 }.create()
 
-                val files = ArrayList(additionalFiles.files)
+                val files = additionalFiles.files.toMutableList()
 
                 if (file.isPresent) {
                     files.add(file.get().asFile)
