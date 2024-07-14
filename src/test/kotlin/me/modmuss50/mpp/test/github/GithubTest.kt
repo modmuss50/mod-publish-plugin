@@ -62,4 +62,65 @@ class GithubTest : IntegrationTest {
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishGithub")!!.outcome)
     }
+
+    @Test
+    fun uploadGithubExistingRelease() {
+        val server = MockWebServer(MockGithubApi())
+
+        val result = gradleTest()
+            .buildScript(
+                """
+                    publishMods {
+                        file = tasks.jar.flatMap { it.archiveFile }
+                        changelog = "Hello!"
+                        version = "1.0.0"
+                        type = STABLE
+                        github {
+                            accessToken = "123"
+                            repository = "test/example"
+                            commitish = "main"
+                            apiEndpoint = "${server.endpoint}"
+                            tagName = "release/1.0.0"
+                        }
+                        github("githubOther") {
+                            accessToken = "123"
+                            apiEndpoint = "${server.endpoint}"
+                            parent(tasks.named("publishGithub"))
+                        }
+                    }
+                """.trimIndent(),
+            )
+            .run("publishGithubOther")
+        server.close()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishGithubOther")!!.outcome)
+    }
+
+    @Test
+    fun allowEmptyFiles() {
+        val server = MockWebServer(MockGithubApi())
+
+        val result = gradleTest()
+            .buildScript(
+                """
+                    publishMods {
+                        changelog = "Hello!"
+                        version = "1.0.0"
+                        type = STABLE
+                        github {
+                            accessToken = "123"
+                            repository = "test/example"
+                            commitish = "main"
+                            apiEndpoint = "${server.endpoint}"
+                            tagName = "release/1.0.0"
+                            allowEmptyFiles = true
+                        }
+                    }
+                """.trimIndent(),
+            )
+            .run("publishGithub")
+        server.close()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishGithub")!!.outcome)
+    }
 }

@@ -15,8 +15,8 @@ publishMods {
 }
 
 ```
-## Multiple projects
-You can create multiple GitHub destinations by providing a name like so:
+## Multiple releases
+You can create multiple GitHub destinations by specifying a name like so:
 ```groovy
 publishMods {
     github("githubProjectA") {
@@ -28,6 +28,40 @@ publishMods {
     }
 }
 ```
+This will create 2 separate GitHub releases.
+
+## Parent releases
+If you wish to upload files to a GitHub release created by another task either in the same project or another subproject, you can use the `parent` option.
+This is useful where you have multiple subprojects that you want to publish to a single release, the following example shows how a root project can create the release and subprojects can upload files to it:
+
+#### Root project
+```groovy
+publishMods {
+    github {
+        accessToken = providers.environmentVariable("GITHUB_TOKEN")
+        repository = "Example/MyMod"
+        commitish = "main"
+        tagName = "release/1.0.0"
+
+        // Allow the release to be initially created without any files.
+        allowEmptyFiles = true
+    }
+}
+```
+
+#### Subproject
+When using the `parent` option, only the `accessToken` and files are required, the other options are forcefully inherited from the parent task.
+```groovy
+publishMods {
+    github {
+        accessToken = providers.environmentVariable("GITHUB_TOKEN")
+
+        // Specify the root project's github task to upload files to
+        parent project(":").tasks.named("publishGithub")
+    }
+}
+```
+
 ## All options
 See the following example showing all the Github specific options:
 ```groovy
@@ -40,6 +74,14 @@ publishMods {
 
         // Optionally set the announcement title used by the discord publisher
         announcementTitle = "Download from GitHub"
+
+        // Upload the files to a previously created release, by providing another github publish task
+        // This is useful in multi-project builds where you want to publish multiple subprojects to a single release
+        parent tasks.named("publishGithub")
+
+        // Optionally allow the release to be created without any attached files.
+        // This is useful when you have subprojects using the parent option that you want to publish a single release.
+        allowEmptyFiles = true
     }
 }
 ```

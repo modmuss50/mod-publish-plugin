@@ -5,18 +5,24 @@ import me.modmuss50.mpp.Platform
 import me.modmuss50.mpp.PlatformOptions
 import me.modmuss50.mpp.PlatformOptionsInternal
 import me.modmuss50.mpp.PublishContext
+import me.modmuss50.mpp.PublishModTask
 import me.modmuss50.mpp.PublishOptions
 import me.modmuss50.mpp.PublishResult
 import me.modmuss50.mpp.PublishWorkAction
 import me.modmuss50.mpp.PublishWorkParameters
 import me.modmuss50.mpp.ReleaseType
+import org.gradle.api.Task
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.TaskProvider
+import org.jetbrains.annotations.ApiStatus.Internal
+import org.kohsuke.github.GHRelease
 import org.kohsuke.github.GHReleaseBuilder
+import org.kohsuke.github.GHRepository
 import org.kohsuke.github.GitHub
 import javax.inject.Inject
 import kotlin.random.Random
@@ -45,16 +51,27 @@ interface GithubOptions : PlatformOptions, PlatformOptionsInternal<GithubOptions
     @get:Optional
     val apiEndpoint: Property<String>
 
+    @get:Input
+    val allowEmptyFiles: Property<Boolean>
+
+    @get:InputFile
+    @get:Optional
+    @get:Internal
+    val releaseResult: RegularFileProperty
+
     override fun setInternalDefaults() {
         tagName.convention(version)
+        allowEmptyFiles.convention(false)
     }
 
     fun from(other: GithubOptions) {
         super.from(other)
         repository.set(other.repository)
         commitish.set(other.commitish)
-        apiEndpoint.set(other.apiEndpoint)
         tagName.set(other.tagName)
+        apiEndpoint.set(other.apiEndpoint)
+        allowEmptyFiles.set(other.allowEmptyFiles)
+        releaseResult.set(other.releaseResult)
     }
 
     fun from(other: Provider<GithubOptions>) {
@@ -64,6 +81,30 @@ interface GithubOptions : PlatformOptions, PlatformOptionsInternal<GithubOptions
     fun from(other: Provider<GithubOptions>, publishOptions: Provider<PublishOptions>) {
         from(other)
         from(publishOptions.get())
+    }
+
+    /**
+     * Publish to an existing release, created by another task.
+     */
+    fun parent(task: TaskProvider<Task>) {
+        val publishTask = task.map { it as PublishModTask }
+        releaseResult.set(publishTask.flatMap { it.result })
+
+        val options = publishTask.map { it.platform as GithubOptions }
+        version.set(options.flatMap { it.version })
+        version.finalizeValue()
+        changelog.set(options.flatMap { it.changelog })
+        changelog.finalizeValue()
+        type.set(options.flatMap { it.type })
+        type.finalizeValue()
+        displayName.set(options.flatMap { it.displayName })
+        displayName.finalizeValue()
+        repository.set(options.flatMap { it.repository })
+        repository.finalizeValue()
+        commitish.set(options.flatMap { it.commitish })
+        commitish.finalizeValue()
+        tagName.set(options.flatMap { it.tagName })
+        tagName.finalizeValue()
     }
 }
 
@@ -75,7 +116,7 @@ abstract class Github @Inject constructor(name: String) : Platform(name), Github
             files.add(file.get().asFile)
         }
 
-        if (files.isEmpty()) {
+        if (files.isEmpty() && !allowEmptyFiles.get()) {
             throw IllegalStateException("No files to upload to GitHub.")
         }
 
@@ -100,12 +141,7 @@ abstract class Github @Inject constructor(name: String) : Platform(name), Github
         override fun publish(): PublishResult {
             with(parameters) {
                 val repo = connect().getRepository(repository.get())
-                val release = with(GHReleaseBuilder(repo, tagName.get())) {
-                    name(displayName.get())
-                    body(changelog.get())
-                    prerelease(type.get() != ReleaseType.STABLE)
-                    commitish(commitish.get())
-                }.create()
+                val release = getOrCreateRelease(repo)
 
                 val files = additionalFiles.files.toMutableList()
 
@@ -123,6 +159,22 @@ abstract class Github @Inject constructor(name: String) : Platform(name), Github
                     url = release.htmlUrl.toString(),
                     title = announcementTitle.getOrElse("Download from GitHub"),
                 )
+            }
+        }
+
+        private fun getOrCreateRelease(repo: GHRepository): GHRelease {
+            with(parameters) {
+                if (releaseResult.isPresent) {
+                    val result = PublishResult.fromJson(releaseResult.get().asFile.readText()) as GithubPublishResult
+                    return repo.getRelease(result.releaseId)
+                }
+
+                return with(GHReleaseBuilder(repo, tagName.get())) {
+                    name(displayName.get())
+                    body(changelog.get())
+                    prerelease(type.get() != ReleaseType.STABLE)
+                    commitish(commitish.get())
+                }.create()
             }
         }
 
