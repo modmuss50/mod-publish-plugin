@@ -19,6 +19,7 @@ class MockGithubApi : MockWebServer.MockApi {
                         path("{id}/assets") {
                             post(this::uploadAsset)
                         }
+                        get("{id}", this::getRelease)
                     }
                 }
             }
@@ -53,6 +54,20 @@ class MockGithubApi : MockWebServer.MockApi {
         context.result(
             """
             {
+            }
+            """.trimIndent(),
+        )
+    }
+
+    // https://docs.github.com/en/rest/releases/releases?apiVersion=2022-11-28#get-a-release
+    private fun getRelease(context: Context) {
+        val id = context.pathParam("id")
+        context.result(
+            """
+            {
+            "id": $id,
+            "upload_url": "http://localhost:${context.port()}/repos/${context.pathParam("owner")}/${context.pathParam("name")}/releases/1/assets{?name,label}",
+            "html_url": "https://github.com"
             }
             """.trimIndent(),
         )

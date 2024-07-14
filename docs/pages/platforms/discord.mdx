@@ -37,7 +37,7 @@ publishMods {
         content = changelog.map { "# A new version of my cool mod has been released! \n" + it}
 
         // If you wish to only link to certain platform you can do the following
-        setPlatforms(platforms.curseforge, platforms.github)
+        setPlatforms(publishMods.platforms.curseforge, publishMods.platforms.github)
     }
 }
 ```
