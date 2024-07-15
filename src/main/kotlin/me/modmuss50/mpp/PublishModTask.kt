@@ -70,8 +70,10 @@ abstract class PublishModTask @Inject constructor(@Nested val platform: Platform
 
     private fun dryRunCopyMainFile() {
         // A bit of a hack to handle the optional main file for Github.
-        if (platform is GithubOptions && !platform.file.isPresent) {
-            return
+        if (platform is GithubOptions) {
+            if (!platform.file.isPresent && platform.allowEmptyFiles.get()) {
+                return
+            }
         }
 
         val file = platform.file.get().asFile

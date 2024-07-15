@@ -118,10 +118,24 @@ class GithubTest : IntegrationTest {
                     }
                 """.trimIndent(),
             )
-            .run("publishGithub")
+            .subProject(
+                "child",
+                """
+                    publishMods {
+                        github {
+                            accessToken = "123"
+                            apiEndpoint = "${server.endpoint}"
+                            parent(project(":").tasks.named("publishGithub"))
+                            file = tasks.jar.flatMap { it.archiveFile }
+                        }
+                    }
+                """.trimIndent(),
+            )
+            .run("publishMods")
         server.close()
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishGithub")!!.outcome)
+        assertEquals(TaskOutcome.SUCCESS, result.task(":child:publishGithub")!!.outcome)
     }
 
     @Test

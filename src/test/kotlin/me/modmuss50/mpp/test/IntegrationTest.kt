@@ -6,11 +6,29 @@ import org.intellij.lang.annotations.Language
 import java.io.File
 
 interface IntegrationTest {
+    companion object {
+        @Language("gradle")
+        val kotlinHeader = """
+            plugins {
+                java
+                id("me.modmuss50.mod-publish-plugin")
+            }
+        """.trimIndent()
+
+        @Language("gradle")
+        val groovyHeader = """
+            plugins {
+                id 'java'
+                id 'me.modmuss50.mod-publish-plugin'
+            }
+        """.trimIndent()
+    }
+
     fun gradleTest(groovy: Boolean = false): TestBuilder {
         return TestBuilder(groovy)
     }
 
-    class TestBuilder(val groovy: Boolean) {
+    class TestBuilder(groovy: Boolean) {
         private val runner = GradleRunner.create()
             .withPluginClasspath()
             .forwardOutput()
@@ -19,6 +37,7 @@ interface IntegrationTest {
         private val gradleHome: File
         private val projectDir: File
         private val buildScript: File
+        private val gradleSettings: File
         private var arguments = ArrayList<String>()
 
         init {
@@ -27,6 +46,7 @@ interface IntegrationTest {
             gradleHome = File(testDir, "home")
             projectDir = File(testDir, "project")
             buildScript = File(projectDir, "build.gradle$ext")
+            gradleSettings = File(projectDir, "settings.gradle$ext")
 
             projectDir.mkdirs()
 
@@ -41,27 +61,9 @@ interface IntegrationTest {
             resources.mkdirs()
             File(resources, "fabric.mod.json").writeText("{}")
 
-            if (!groovy) {
-                buildScript(
-                    """
-                plugins {
-                    java
-                    id("me.modmuss50.mod-publish-plugin")
-                }
-                    """.trimIndent(),
-                )
-            } else {
-                buildScript(
-                    """
-                plugins {
-                    id 'java'
-                    id 'me.modmuss50.mod-publish-plugin'
-                }
-                    """.trimIndent(),
-                )
-            }
+            buildScript(if (groovy) groovyHeader else kotlinHeader)
 
-            File(projectDir, "settings.gradle$ext").writeText("rootProject.name = \"mpp-example\"")
+            gradleSettings.writeText("rootProject.name = \"mpp-example\"")
 
             runner.withProjectDir(projectDir)
             argument("--gradle-user-home", gradleHome.absolutePath)
@@ -73,6 +75,24 @@ interface IntegrationTest {
         // Appends to an existing buildscript
         fun buildScript(@Language("gradle") script: String): TestBuilder {
             buildScript.appendText(script + "\n")
+            return this
+        }
+
+        fun subProject(name: String, @Language("gradle") script: String): TestBuilder {
+            val subProjectDir = File(projectDir, name)
+
+            if (subProjectDir.exists()) {
+                subProjectDir.deleteRecursively()
+            }
+
+            subProjectDir.mkdirs()
+
+            val subBuildScript = File(subProjectDir, "build.gradle.kts")
+            subBuildScript.appendText(kotlinHeader + "\n")
+            subBuildScript.appendText(script)
+
+            gradleSettings.appendText("\ninclude(\"$name\")")
+
             return this
         }
 
