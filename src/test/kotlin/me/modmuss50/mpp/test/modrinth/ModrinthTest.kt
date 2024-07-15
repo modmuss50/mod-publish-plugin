@@ -105,6 +105,9 @@ class ModrinthTest : IntegrationTest {
                     accessToken = providers.environmentVariable("TEST_TOKEN_THAT_DOES_NOT_EXISTS")
                     projectId = "12345678"
                     minecraftVersions.add("1.20.1")
+                    requires {
+                           id = "P7dR8mSH" // fabric-api
+                    }
                 }
             }
                 """.trimIndent(),

@@ -16,6 +16,7 @@ import me.modmuss50.mpp.PublishWorkParameters
 import me.modmuss50.mpp.path
 import org.gradle.api.Action
 import org.gradle.api.JavaVersion
+import org.gradle.api.logging.Logger
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
@@ -157,6 +158,12 @@ abstract class Curseforge @Inject constructor(name: String) : Platform(name), Cu
             fileId = Random.nextInt(0, 1000000),
             title = announcementTitle.getOrElse("Download from CurseForge"),
         )
+    }
+
+    override fun printDryRunInfo(logger: Logger) {
+        for (dependency in dependencies.get()) {
+            logger.lifecycle("Dependency(slug: ${dependency.slug.get()}, type: ${dependency.type.get()})")
+        }
     }
 
     interface UploadParams : PublishWorkParameters, CurseforgeOptions

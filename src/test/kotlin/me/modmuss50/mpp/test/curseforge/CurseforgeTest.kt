@@ -195,6 +195,9 @@ class CurseforgeTest : IntegrationTest {
                         accessToken = providers.environmentVariable("TEST_TOKEN_THAT_DOES_NOT_EXISTS")
                         projectId = "123456"
                         minecraftVersions.add("1.20.1")
+                        requires {
+                            slug = "fabric-api"
+                        }
                     }
                 }
                 """.trimIndent(),

@@ -15,6 +15,7 @@ import me.modmuss50.mpp.PublishWorkAction
 import me.modmuss50.mpp.PublishWorkParameters
 import me.modmuss50.mpp.path
 import org.gradle.api.Action
+import org.gradle.api.logging.Logger
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
@@ -181,6 +182,13 @@ abstract class Modrinth @Inject constructor(name: String) : Platform(name), Modr
             projectId = "dry-run",
             title = announcementTitle.getOrElse("Download from Modrinth"),
         )
+    }
+
+    override fun printDryRunInfo(logger: Logger) {
+        for (dependency in dependencies.get()) {
+            val idOrSlug = dependency.id.orNull ?: dependency.slug.get()
+            logger.lifecycle("Dependency(id/slug: $idOrSlug, version: ${dependency.version.orNull})")
+        }
     }
 
     interface UploadParams : PublishWorkParameters, ModrinthOptions

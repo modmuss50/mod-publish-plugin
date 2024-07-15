@@ -34,6 +34,7 @@ abstract class PublishModTask @Inject constructor(@Nested val platform: Platform
     fun publish() {
         if (project.modPublishExtension.dryRun.get()) {
             project.logger.lifecycle("Dry run $name:")
+            platform.printDryRunInfo(project.logger)
 
             dryRunCopyMainFile()
 

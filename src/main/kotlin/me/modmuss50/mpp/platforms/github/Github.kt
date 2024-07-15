@@ -13,6 +13,7 @@ import me.modmuss50.mpp.PublishWorkParameters
 import me.modmuss50.mpp.ReleaseType
 import org.gradle.api.Task
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.logging.Logger
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
@@ -132,6 +133,9 @@ abstract class Github @Inject constructor(name: String) : Platform(name), Github
             url = "https://github.com/modmuss50/mod-publish-plugin/dry-run?random=${Random.nextInt(0, 1000000)}",
             title = announcementTitle.getOrElse("Download from GitHub"),
         )
+    }
+
+    override fun printDryRunInfo(logger: Logger) {
     }
 
     interface UploadParams : PublishWorkParameters, GithubOptions

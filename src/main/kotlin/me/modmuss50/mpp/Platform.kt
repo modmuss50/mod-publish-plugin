@@ -2,6 +2,7 @@ package me.modmuss50.mpp
 
 import org.gradle.api.Action
 import org.gradle.api.Named
+import org.gradle.api.logging.Logger
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
@@ -98,6 +99,9 @@ abstract class Platform @Inject constructor(private val name: String) : Named, P
 
     @ApiStatus.Internal
     abstract fun dryRunPublishResult(): PublishResult
+
+    @ApiStatus.Internal
+    abstract fun printDryRunInfo(logger: Logger)
 
     @get:ApiStatus.Internal
     @get:Internal
