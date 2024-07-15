@@ -190,7 +190,7 @@ class DiscordTest : IntegrationTest {
         val discordApi = MockDiscordApi()
         val server = MockWebServer(MockWebServer.CombinedApi(listOf(discordApi, MockCurseforgeApi())))
 
-        val result = gradleTest()
+        gradleTest()
             .buildScript(
                 """
                 publishMods {
@@ -301,7 +301,7 @@ class DiscordTest : IntegrationTest {
                     changelog = "# Changelog\n-123\n-epic feature"
                     discord {
                         webhookUrl = "${server.endpoint}/api/webhooks/213/abc"
-                        setPlatformsFrom(*project.subprojects.toTypedArray())
+                        setPlatformsAllFrom(*project.subprojects.toTypedArray())
                     }
                 }
                 """.trimIndent(),
