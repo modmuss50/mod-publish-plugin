@@ -2,6 +2,7 @@ package me.modmuss50.mpp
 
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import me.modmuss50.mpp.platforms.github.GithubOptions
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.Nested
@@ -32,23 +33,13 @@ abstract class PublishModTask @Inject constructor(@Nested val platform: Platform
     @TaskAction
     fun publish() {
         if (project.modPublishExtension.dryRun.get()) {
-            val file = platform.file.get().asFile
-
-            if (!file.exists()) {
-                throw FileNotFoundException("$file not found")
-            }
-
             project.logger.lifecycle("Dry run $name:")
 
-            project.copy {
-                it.from(file)
-                it.into(project.layout.buildDirectory.dir("publishMods/$name"))
-            }
-            project.logger.lifecycle("Main file: ${file.name}")
+            dryRunCopyMainFile()
 
             for (additionalFile in platform.additionalFiles.files) {
                 if (!additionalFile.exists()) {
-                    throw FileNotFoundException("$file not found")
+                    throw FileNotFoundException("$additionalFile not found")
                 }
 
                 project.copy {
@@ -75,5 +66,24 @@ abstract class PublishModTask @Inject constructor(@Nested val platform: Platform
         val workQueue = workerExecutor.noIsolation()
         val context = PublishContext(queue = workQueue, result = result.get())
         platform.publish(context)
+    }
+
+    private fun dryRunCopyMainFile() {
+        // A bit of a hack to handle the optional main file for Github.
+        if (platform is GithubOptions && !platform.file.isPresent) {
+            return
+        }
+
+        val file = platform.file.get().asFile
+
+        if (!file.exists()) {
+            throw FileNotFoundException("$file not found")
+        }
+
+        project.copy {
+            it.from(file)
+            it.into(project.layout.buildDirectory.dir("publishMods/$name"))
+        }
+        project.logger.lifecycle("Main file: ${file.name}")
     }
 }

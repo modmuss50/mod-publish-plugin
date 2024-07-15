@@ -123,4 +123,33 @@ class GithubTest : IntegrationTest {
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishGithub")!!.outcome)
     }
+
+    @Test
+    fun allowEmptyFilesDryRun() {
+        val server = MockWebServer(MockGithubApi())
+
+        val result = gradleTest()
+            .buildScript(
+                """
+                    publishMods {
+                        changelog = "Hello!"
+                        version = "1.0.0"
+                        type = STABLE
+                        dryRun = true
+                        github {
+                            accessToken = "123"
+                            repository = "test/example"
+                            commitish = "main"
+                            apiEndpoint = "${server.endpoint}"
+                            tagName = "release/1.0.0"
+                            allowEmptyFiles = true
+                        }
+                    }
+                """.trimIndent(),
+            )
+            .run("publishGithub")
+        server.close()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishGithub")!!.outcome)
+    }
 }
