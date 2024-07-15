@@ -288,4 +288,68 @@ class DiscordTest : IntegrationTest {
         assertContains(discordApi.requestedKeys.first(), "dryrun")
         assertEquals(3, embeds.distinctBy { it.url }.size)
     }
+
+    @Test
+    fun announceChildProjects() {
+        val discordApi = MockDiscordApi()
+        val server = MockWebServer(MockWebServer.CombinedApi(listOf(discordApi, MockCurseforgeApi(), MockModrinthApi())))
+
+        val result = gradleTest()
+            .buildScript(
+                """
+                publishMods {
+                    changelog = "# Changelog\n-123\n-epic feature"
+                    discord {
+                        webhookUrl = "${server.endpoint}/api/webhooks/213/abc"
+                        setPlatformsFrom(*project.subprojects.toTypedArray())
+                    }
+                }
+                """.trimIndent(),
+            )
+            .subProject(
+                "child1",
+                """
+                publishMods {
+                    file = tasks.jar.flatMap { it.archiveFile }
+                    changelog = "# Changelog\n-123\n-epic feature"
+                    version = "1.0.0"
+                    type = BETA
+                    
+                    curseforge {
+                        accessToken = "123"
+                        projectId = "123456"
+                        projectSlug = "test-mod"
+                        apiEndpoint = "${server.endpoint}"
+                    }
+                }
+                """.trimIndent(),
+            )
+            .subProject(
+                "child2",
+                """
+                publishMods {
+                    file = tasks.jar.flatMap { it.archiveFile }
+                    changelog = "# Changelog\n-123\n-epic feature"
+                    version = "1.0.0"
+                    type = BETA
+                    
+                    modrinth {
+                        accessToken = "123"
+                        projectId = "12345678"                        
+                        apiEndpoint = "${server.endpoint}"
+                    }
+                }
+                """.trimIndent(),
+            )
+            .run("publishMods")
+        server.close()
+
+        var embeds = discordApi.requests.first().embeds!!
+        embeds = embeds.sortedBy { it.url }
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":announceDiscord")!!.outcome)
+        assertEquals(2, embeds.size)
+        assertEquals("https://curseforge.com/minecraft/mc-mods/test-mod/files/20402", embeds[0].url)
+        assertEquals("https://modrinth.com/mod/12345678/version/hFdJG9fY", embeds[1].url)
+    }
 }

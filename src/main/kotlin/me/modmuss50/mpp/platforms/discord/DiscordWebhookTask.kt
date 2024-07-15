@@ -5,6 +5,8 @@ import me.modmuss50.mpp.PublishModTask
 import me.modmuss50.mpp.PublishResult
 import me.modmuss50.mpp.modPublishExtension
 import org.gradle.api.DefaultTask
+import org.gradle.api.NamedDomainObjectCollection
+import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.provider.Property
@@ -12,7 +14,6 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
-import org.gradle.api.tasks.TaskCollection
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.work.DisableCachingByDefault
 import org.gradle.workers.WorkAction
@@ -82,21 +83,35 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
     /**
      * Set the platforms to announce, by passing in publish tasks.
      */
-    fun setPlatforms(vararg tasks: TaskProvider<Task>) {
+    fun setPlatforms(vararg tasks: TaskProvider<out Task>) {
         publishResults.setFrom(
             tasks
                 .map { task -> task.map { it as PublishModTask } }
                 .map { task -> task.flatMap { it.result } },
         )
+
+        setPlatforms(project.tasks.containerWithType(PublishModTask::class.java))
     }
 
     /**
      * Set the platforms to announce, by passing in publish tasks.
      */
-    fun setPlatforms(tasks: TaskCollection<Task>) {
+    fun setPlatforms(tasks: NamedDomainObjectCollection<out Task>) {
         publishResults.setFrom(
             tasks
                 .map { it as PublishModTask }
+                .map { it.result },
+        )
+    }
+
+    /**
+     * Set the platforms to announce, by passing in projects, using all the mod publish tasks from each project.
+     */
+    fun setPlatformsAllFrom(vararg projects: Project) {
+        publishResults.setFrom(
+            projects
+                .map { it.tasks.withType(PublishModTask::class.java) }
+                .flatMap { it.toList() }
                 .map { it.result },
         )
     }

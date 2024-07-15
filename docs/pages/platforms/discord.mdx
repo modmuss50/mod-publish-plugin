@@ -38,6 +38,9 @@ publishMods {
 
         // If you wish to only link to certain platform you can do the following
         setPlatforms(publishMods.platforms.curseforge, publishMods.platforms.github)
+
+        // Instead if you wish to link to all platform in a specific Gradle project you can do the following
+        setPlatformsAllFrom(project(":child1"), project(":child2"))
     }
 }
 ```
