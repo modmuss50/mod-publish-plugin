@@ -38,7 +38,6 @@ class MinecraftApi(private val baseUrl: String = "https://piston-meta.mojang.com
         if (startIndex == -1) throw IllegalArgumentException("Invalid start version $startId")
         if (endIndex == -1) throw IllegalArgumentException("Invalid end version $endId")
         if (startIndex > endIndex) throw IllegalArgumentException("Start version $startId must be before end version $endId")
-        if (startIndex == endIndex) throw IllegalArgumentException("Start version $startId cannot be the same as end version $endId")
 
         return versions.subList(startIndex, endIndex + 1)
     }
