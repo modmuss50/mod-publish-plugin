@@ -1,4 +1,3 @@
-import org.gradle.jvm.tasks.Jar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -36,6 +35,17 @@ tasks.withType(KotlinCompile::class.java).all {
         freeCompilerArgs = listOf("-Xjvm-default=all")
     }
 }
+
+// Workaround https://github.com/gradle/gradle/issues/25898
+tasks.withType(Test::class.java).configureEach {
+    jvmArgs = listOf(
+        "--add-opens=java.base/java.lang=ALL-UNNAMED",
+        "--add-opens=java.base/java.util=ALL-UNNAMED",
+        "--add-opens=java.base/java.lang.invoke=ALL-UNNAMED",
+        "--add-opens=java.base/java.net=ALL-UNNAMED"
+    )
+}
+
 
 tasks.withType(JavaCompile::class.java).all {
     options.release = 8

@@ -4,7 +4,10 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import me.modmuss50.mpp.platforms.github.GithubOptions
 import org.gradle.api.DefaultTask
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
@@ -17,8 +20,16 @@ import javax.inject.Inject
 @DisableCachingByDefault(because = "Re-upload mod each time")
 abstract class PublishModTask @Inject constructor(@Nested val platform: Platform) : DefaultTask() {
     @get:ApiStatus.Internal
+    @get:Input
+    abstract val dryRun: Property<Boolean>
+
+    @get:ApiStatus.Internal
     @get:OutputFile
     abstract val result: RegularFileProperty
+
+    @get:ApiStatus.Internal
+    @get:OutputFile
+    abstract val dryRunDirectory: DirectoryProperty
 
     @get:Inject
     protected abstract val workerExecutor: WorkerExecutor
@@ -26,15 +37,19 @@ abstract class PublishModTask @Inject constructor(@Nested val platform: Platform
     init {
         group = "publishing"
         outputs.upToDateWhen { false }
+        dryRun.set(project.modPublishExtension.dryRun)
+        dryRun.finalizeValue()
         result.set(project.layout.buildDirectory.file("publishMods/$name.json"))
         result.finalizeValue()
+        dryRunDirectory.set(project.layout.buildDirectory.dir("publishMods/$name"))
+        dryRunDirectory.finalizeValue()
     }
 
     @TaskAction
     fun publish() {
-        if (project.modPublishExtension.dryRun.get()) {
-            project.logger.lifecycle("Dry run $name:")
-            platform.printDryRunInfo(project.logger)
+        if (dryRun.get()) {
+            logger.lifecycle("Dry run $name:")
+            platform.printDryRunInfo(logger)
 
             dryRunCopyMainFile()
 
@@ -43,16 +58,13 @@ abstract class PublishModTask @Inject constructor(@Nested val platform: Platform
                     throw FileNotFoundException("$additionalFile not found")
                 }
 
-                project.copy {
-                    it.from(additionalFile)
-                    it.into(project.layout.buildDirectory.dir("publishMods/$name"))
-                }
-                project.logger.lifecycle("Additional file: ${additionalFile.name}")
+                additionalFile.copyTo(dryRunDirectory.get().asFile.resolve(additionalFile.name))
+                logger.lifecycle("Additional file: ${additionalFile.name}")
             }
 
-            project.logger.lifecycle("Display name: ${platform.displayName.get()}")
-            project.logger.lifecycle("Version: ${platform.version.get()}")
-            project.logger.lifecycle("Changelog: ${platform.changelog.get()}")
+            logger.lifecycle("Display name: ${platform.displayName.get()}")
+            logger.lifecycle("Version: ${platform.version.get()}")
+            logger.lifecycle("Changelog: ${platform.changelog.get()}")
 
             result.get().asFile.writeText(
                 Json.encodeToString(platform.dryRunPublishResult()),
@@ -83,10 +95,7 @@ abstract class PublishModTask @Inject constructor(@Nested val platform: Platform
             throw FileNotFoundException("$file not found")
         }
 
-        project.copy {
-            it.from(file)
-            it.into(project.layout.buildDirectory.dir("publishMods/$name"))
-        }
-        project.logger.lifecycle("Main file: ${file.name}")
+        file.copyTo(dryRunDirectory.get().asFile.resolve(file.name))
+        logger.lifecycle("Main file: ${file.name}")
     }
 }
