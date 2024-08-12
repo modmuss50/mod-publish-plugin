@@ -66,6 +66,7 @@ tasks.jar {
 }
 
 spotless {
+    lineEndings = com.diffplug.spotless.LineEnding.UNIX
     kotlin {
         ktlint()
     }
