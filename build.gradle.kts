@@ -5,12 +5,12 @@ plugins {
     `maven-publish`
     embeddedKotlin("jvm")
     embeddedKotlin("plugin.serialization")
-    id("com.diffplug.spotless") version "6.25.0"
+    id("com.diffplug.spotless") version "6.18.0"
     id("com.gradle.plugin-publish") version "1.2.1"
 }
 
 group = "me.modmuss50"
-version = "0.6.3"
+version = "0.7.0"
 description = "The Mod Publish Plugin is a plugin for the Gradle build system to help upload artifacts to a range of common destinations."
 
 repositories {
