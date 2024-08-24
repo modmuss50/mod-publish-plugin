@@ -42,6 +42,15 @@ class HttpUtils(val exceptionFactory: HttpExceptionFactory = DefaultHttpExceptio
         )
     }
 
+    inline fun <reified T> patch(url: String, body: RequestBody, headers: Map<String, String>): T {
+        return request(
+            Request.Builder()
+                .url(url)
+                .patch(body),
+            headers,
+        )
+    }
+
     inline fun <reified T> request(requestBuilder: Request.Builder, headers: Map<String, String>): T {
         for ((name, value) in headers) {
             requestBuilder.header(name, value)

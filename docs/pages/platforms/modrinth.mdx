@@ -48,6 +48,10 @@ publishMods {
         // Optionally set the announcement title used by the discord publisher
         announcementTitle = "Download from Modrinth"
 
+        // Optionally update the project description after publishing a file
+        // This can be useful if you want to sync your Github readme with the Modrinth project description
+        projectDescription = providers.fileContents(layout.projectDirectory.file("readme.md")).asText
+
         // You can specify a range of Minecraft versions like so:
         minecraftVersionRange {
             start = "1.19.4"

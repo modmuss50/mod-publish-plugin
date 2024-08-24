@@ -11,6 +11,7 @@ import me.modmuss50.mpp.ReleaseType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import java.nio.file.Path
 import java.time.Duration
@@ -125,6 +126,12 @@ class ModrinthApi(private val accessToken: String, private val baseUrl: String) 
         val id: String,
     )
 
+    // https://docs.modrinth.com/#tag/projects/operation/modifyProject
+    @Serializable
+    data class ModifyProject(
+        val body: String,
+    )
+
     @Serializable
     data class ErrorResponse(
         val error: String,
@@ -151,6 +158,11 @@ class ModrinthApi(private val accessToken: String, private val baseUrl: String) 
 
     fun checkProject(projectSlug: String): ProjectCheckResponse {
         return httpUtils.get("$baseUrl/project/$projectSlug/check", headers)
+    }
+
+    fun modifyProject(projectSlug: String, modifyProject: ModifyProject) {
+        val body = Json.encodeToString(modifyProject).toRequestBody()
+        httpUtils.patch<String>("$baseUrl/project/$projectSlug", body, headers)
     }
 
     private class ModrinthHttpExceptionFactory : HttpUtils.HttpExceptionFactory {

@@ -57,6 +57,13 @@ interface ModrinthOptions : PlatformOptions, PlatformOptionsInternal<ModrinthOpt
     @get:Input
     val featured: Property<Boolean>
 
+    /**
+     * When set, this will update the project description to the provided value.
+     */
+    @get:Input
+    @get:Optional
+    val projectDescription: Property<String>
+
     @get:Input
     val apiEndpoint: Property<String>
 
@@ -88,6 +95,7 @@ interface ModrinthOptions : PlatformOptions, PlatformOptionsInternal<ModrinthOpt
         projectId.set(other.projectId)
         minecraftVersions.set(other.minecraftVersions)
         featured.set(other.featured)
+        projectDescription.set(other.projectDescription)
         apiEndpoint.set(other.apiEndpoint)
     }
 
@@ -224,6 +232,12 @@ abstract class Modrinth @Inject constructor(name: String) : Platform(name), Modr
 
                 val response = HttpUtils.retry(maxRetries.get(), "Failed to create version") {
                     api.createVersion(metadata, files)
+                }
+
+                if (projectDescription.isPresent) {
+                    HttpUtils.retry(maxRetries.get(), "Failed to update project description") {
+                        api.modifyProject(projectId.get().modrinthId, ModrinthApi.ModifyProject(body = projectDescription.get()))
+                    }
                 }
 
                 return ModrinthPublishResult(

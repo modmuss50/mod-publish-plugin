@@ -293,4 +293,38 @@ class ModrinthTest : IntegrationTest {
         assertContains(gameVersions, "1.20.1")
         assertContains(gameVersions, "1.20.2")
     }
+
+    @Test
+    fun updateProjectDescription() {
+        val api = MockModrinthApi()
+        val server = MockWebServer(api)
+
+        val result = gradleTest()
+            .buildScript(
+                """
+            publishMods {
+                file = tasks.jar.flatMap { it.archiveFile }
+                changelog = "Hello!"
+                version = "1.0.0"
+                type = STABLE
+                modLoaders.add("fabric")
+            
+                modrinth {
+                    accessToken = "123"
+                    projectId = "12345678"
+                    minecraftVersions.add("1.20.1")
+                    projectDescription = providers.fileContents(layout.projectDirectory.file("readme.md")).asText
+                    
+                    apiEndpoint = "${server.endpoint}"
+                }
+            }
+                """.trimIndent(),
+            )
+            .file("readme.md", "Hello World")
+            .run("publishModrinth")
+        server.close()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinth")!!.outcome)
+        assertEquals("Hello World", api.projectBody)
+    }
 }

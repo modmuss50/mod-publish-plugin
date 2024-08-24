@@ -2,6 +2,7 @@ package me.modmuss50.mpp.test.modrinth
 
 import io.javalin.apibuilder.ApiBuilder.before
 import io.javalin.apibuilder.ApiBuilder.get
+import io.javalin.apibuilder.ApiBuilder.patch
 import io.javalin.apibuilder.ApiBuilder.path
 import io.javalin.apibuilder.ApiBuilder.post
 import io.javalin.apibuilder.EndpointGroup
@@ -16,12 +17,16 @@ import me.modmuss50.mpp.test.MockWebServer
 class MockModrinthApi : MockWebServer.MockApi {
     val json = Json { ignoreUnknownKeys = true }
     var lastCreateVersion: ModrinthApi.CreateVersion? = null
+    var projectBody: String? = null
 
     override fun routes(): EndpointGroup {
         return EndpointGroup {
             path("/version") {
                 before(this::authHandler)
                 post(this::createVersion)
+            }
+            path("project/{slug}") {
+                patch(this::modifyProject)
             }
             path("/project/{slug}/check") {
                 get(this::checkProject)
@@ -58,6 +63,12 @@ class MockModrinthApi : MockWebServer.MockApi {
                 ),
             ),
         )
+    }
+
+    private fun modifyProject(context: Context) {
+        val modifyProject = json.decodeFromString<ModrinthApi.ModifyProject>(context.body())
+        projectBody = modifyProject.body
+        context.result()
     }
 
     private fun checkProject(context: Context) {

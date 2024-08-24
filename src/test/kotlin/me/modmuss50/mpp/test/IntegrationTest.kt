@@ -85,6 +85,13 @@ interface IntegrationTest {
             return this
         }
 
+        // Creates a new file in the project directory with the given content
+        fun file(path: String, content: String): TestBuilder {
+            val file = File(projectDir, path)
+            file.writeText(content)
+            return this
+        }
+
         fun subProject(name: String, @Language("gradle") script: String): TestBuilder {
             val subProjectDir = File(projectDir, name)
 
