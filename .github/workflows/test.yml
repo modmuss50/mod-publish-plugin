@@ -8,7 +8,7 @@ jobs:
       matrix:
         os: [ ubuntu-24.04, macos-14, windows-2022 ]
         java: [ 17, 21 ]
-        gradle: [ 8.10, nightly ]
+        gradle: [ "8.10", nightly ]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -20,7 +20,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v3
         with:
           cache-disabled: true
-          gradle-version: "${{ matrix.gradle }}"
+          gradle-version: ${{ matrix.gradle }}
       - name: Build
         run: gradle build --stacktrace --warning-mode fail
 
