@@ -19,6 +19,7 @@ import org.gradle.work.DisableCachingByDefault
 import org.gradle.workers.WorkAction
 import org.gradle.workers.WorkParameters
 import org.gradle.workers.WorkerExecutor
+import org.jetbrains.annotations.ApiStatus
 import javax.inject.Inject
 
 interface DiscordWebhookOptions {
@@ -50,6 +51,10 @@ interface DiscordWebhookOptions {
 
 @DisableCachingByDefault(because = "Publish webhook each time")
 abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
+    @get:ApiStatus.Internal
+    @get:Input
+    abstract val dryRun: Property<Boolean>
+
     @get:InputFiles
     abstract val publishResults: ConfigurableFileCollection
 
@@ -60,6 +65,9 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
         group = "publishing"
         username.convention("Mod Publish Plugin")
         content.convention(project.modPublishExtension.changelog)
+
+        dryRun.set(project.modPublishExtension.dryRun)
+        dryRun.finalizeValue()
 
         // By default, announce all the platforms.
         publishResults.from(
@@ -122,7 +130,7 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
         workQueue.submit(DiscordWorkAction::class.java) {
             it.from(this)
             it.publishResults.setFrom(publishResults)
-            it.dryRun.set(project.modPublishExtension.dryRun)
+            it.dryRun.set(dryRun)
         }
     }
 

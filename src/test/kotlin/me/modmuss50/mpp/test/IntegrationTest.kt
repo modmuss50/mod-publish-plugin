@@ -39,6 +39,7 @@ interface IntegrationTest {
         private val buildScript: File
         private val gradleSettings: File
         private var arguments = ArrayList<String>()
+        private var notConfigCacheCompatible = false
 
         init {
             val testDir = File("build/intergation_test")
@@ -72,6 +73,12 @@ interface IntegrationTest {
             argument("clean")
         }
 
+        // Disables the configuration cache for this test
+        fun notConfigCacheCompatible(): TestBuilder {
+            notConfigCacheCompatible = true
+            return this
+        }
+
         // Appends to an existing buildscript
         fun buildScript(@Language("gradle") script: String): TestBuilder {
             buildScript.appendText(script + "\n")
@@ -101,6 +108,9 @@ interface IntegrationTest {
         }
 
         fun run(task: String): BuildResult {
+            if (!notConfigCacheCompatible) {
+                argument("--configuration-cache")
+            }
             argument(task)
             runner.withArguments(arguments)
             return runner.run()

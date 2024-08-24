@@ -304,6 +304,7 @@ class CurseforgeTest : IntegrationTest {
                 }
                 """.trimIndent(),
             )
+            .notConfigCacheCompatible()
             .run("publishCurseforge")
         server.close()
 
