@@ -5,8 +5,8 @@ plugins {
     `maven-publish`
     embeddedKotlin("jvm")
     embeddedKotlin("plugin.serialization")
-    id("com.diffplug.spotless") version "6.18.0"
-    id("com.gradle.plugin-publish") version "1.2.0"
+    id("com.diffplug.spotless") version "6.25.0"
+    id("com.gradle.plugin-publish") version "1.2.1"
 }
 
 group = "me.modmuss50"
@@ -19,13 +19,13 @@ repositories {
 
 dependencies {
     implementation(gradleApi())
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    implementation("org.kohsuke:github-api:1.315")
+    implementation("org.kohsuke:github-api:1.324")
 
     testImplementation(kotlin("test"))
-    testImplementation("io.javalin:javalin:5.6.1")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.9.3")
+    testImplementation("io.javalin:javalin:6.3.0")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.11.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
@@ -45,7 +45,6 @@ tasks.withType(Test::class.java).configureEach {
         "--add-opens=java.base/java.net=ALL-UNNAMED"
     )
 }
-
 
 tasks.withType(JavaCompile::class.java).all {
     options.release = 8
