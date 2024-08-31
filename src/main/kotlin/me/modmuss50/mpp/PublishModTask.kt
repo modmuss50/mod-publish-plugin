@@ -59,7 +59,7 @@ abstract class PublishModTask @Inject constructor(@Nested val platform: Platform
                     throw FileNotFoundException("$additionalFile not found")
                 }
 
-                additionalFile.copyTo(dryRunDirectory.get().asFile.resolve(additionalFile.name))
+                additionalFile.copyTo(dryRunDirectory.get().asFile.resolve(additionalFile.name), overwrite = true)
                 logger.lifecycle("Additional file: ${additionalFile.name}")
             }
 
@@ -96,7 +96,7 @@ abstract class PublishModTask @Inject constructor(@Nested val platform: Platform
             throw FileNotFoundException("$file not found")
         }
 
-        file.copyTo(dryRunDirectory.get().asFile.resolve(file.name))
+        file.copyTo(dryRunDirectory.get().asFile.resolve(file.name), overwrite = true)
         logger.lifecycle("Main file: ${file.name}")
     }
 }
