@@ -53,6 +53,11 @@ interface CurseforgeOptions : PlatformOptions, PlatformOptionsInternal<Curseforg
     @get:Input
     val apiEndpoint: Property<String>
 
+    // Set the type of changelog for CurseForge. If unset, defaults to MARKDOWN
+    @get:Input
+    @get:Optional
+    val changelogType: Property<CurseforgeApi.ChangelogType>
+
     fun from(other: CurseforgeOptions) {
         super.from(other)
         fromDependencies(other)
@@ -63,6 +68,7 @@ interface CurseforgeOptions : PlatformOptions, PlatformOptionsInternal<Curseforg
         serverRequired.set(other.serverRequired)
         javaVersions.set(other.javaVersions)
         apiEndpoint.set(other.apiEndpoint)
+        changelogType.set(other.changelogType)
     }
 
     fun from(other: Provider<CurseforgeOptions>) {
@@ -219,7 +225,7 @@ abstract class Curseforge @Inject constructor(name: String) : Platform(name), Cu
 
                 val metadata = CurseforgeApi.UploadFileMetadata(
                     changelog = changelog.get(),
-                    changelogType = "markdown",
+                    changelogType = changelogType.getOrElse(CurseforgeApi.ChangelogType.MARKDOWN),
                     displayName = displayName.get(),
                     gameVersions = gameVersions,
                     releaseType = CurseforgeApi.ReleaseType.valueOf(type.get()),

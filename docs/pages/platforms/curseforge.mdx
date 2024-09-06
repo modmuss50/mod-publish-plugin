@@ -70,6 +70,10 @@ publishMods {
         optional("project-slug")
         incompatible("project-slug")
         embeds("project-slug")
+
+        // Set a changelog using text, markdown, or html (defaults to markdown)
+        changelog = "# Markdown changelog content"
+        changelogType = MARKDOWN
     }
 }
 ```
