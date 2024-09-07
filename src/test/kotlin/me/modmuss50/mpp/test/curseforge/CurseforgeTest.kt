@@ -1,5 +1,6 @@
 package me.modmuss50.mpp.test.curseforge
 
+import me.modmuss50.mpp.platforms.curseforge.CurseforgeApi
 import me.modmuss50.mpp.test.IntegrationTest
 import me.modmuss50.mpp.test.MockWebServer
 import org.gradle.testkit.runner.TaskOutcome
@@ -17,7 +18,7 @@ class CurseforgeTest : IntegrationTest {
                 """
                 publishMods {
                     file = tasks.jar.flatMap { it.archiveFile }
-                    changelog = "Hello!"
+                    changelog = "<p>Hello!</p>"
                     version = "1.0.0"
                     type = BETA
                     modLoaders.add("fabric")
@@ -30,6 +31,7 @@ class CurseforgeTest : IntegrationTest {
                         javaVersions.add(JavaVersion.VERSION_17)
                         clientRequired = true
                         serverRequired = true
+                        changelogType = "html"
                         
                         requires {
                             slug = "fabric-api"
@@ -48,7 +50,8 @@ class CurseforgeTest : IntegrationTest {
         val metadata = server.api.lastMetadata!!
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishCurseforge")!!.outcome)
-        assertEquals("Hello!", metadata.changelog)
+        assertEquals("<p>Hello!</p>", metadata.changelog)
+        assertEquals(CurseforgeApi.ChangelogType.HTML, metadata.changelogType)
         assertEquals("Test Upload", metadata.displayName)
         assertContains(metadata.gameVersions!!, 9990) // 1.20.1
         assertContains(metadata.gameVersions!!, 7499) // Fabric
@@ -87,6 +90,7 @@ class CurseforgeTest : IntegrationTest {
                             start = "1.19.4"
                             end = "1.20.1"
                         }
+                        changelogType = "text"
                     }
                 
                     curseforge("curseforgeFabric") {
@@ -120,6 +124,7 @@ class CurseforgeTest : IntegrationTest {
         assertContains(metadata.gameVersions!!, 9776) // 1.19.4
         assertContains(metadata.gameVersions!!, 9971) // 1.20
         assertContains(metadata.gameVersions!!, 9990) // 1.20.1
+        assertEquals(CurseforgeApi.ChangelogType.TEXT, metadata.changelogType)
     }
 
     // Also test in groovy to ensure that the closures are working as expected
@@ -147,6 +152,7 @@ class CurseforgeTest : IntegrationTest {
                         accessToken = "123"
                         minecraftVersions.add("1.20.1")
                         apiEndpoint = "${server.endpoint}"
+                        changelogType = "markdown"
                     }
                 
                     curseforge("curseforgeFabric") {
@@ -171,10 +177,13 @@ class CurseforgeTest : IntegrationTest {
             .run("publishMods")
         server.close()
 
+        val metadata = server.api.lastMetadata!!
+
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishCurseforgeFabric")!!.outcome)
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishCurseforgeForge")!!.outcome)
         assertContains(server.api.files, "mpp-example-forge.jar")
         assertContains(server.api.files, "mpp-example-fabric.jar")
+        assertEquals(CurseforgeApi.ChangelogType.MARKDOWN, metadata.changelogType)
     }
 
     @Test
