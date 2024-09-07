@@ -72,6 +72,18 @@ class CurseforgeApi(private val accessToken: String, private val baseUrl: String
         @SerialName("markdown")
         MARKDOWN,
         ;
+
+        companion object {
+            @JvmStatic
+            fun of(value: String): ChangelogType {
+                val upper = value.uppercase()
+                try {
+                    return ChangelogType.valueOf(upper)
+                } catch (e: java.lang.IllegalArgumentException) {
+                    throw java.lang.IllegalArgumentException("Invalid changelog type: $upper. Must be one of: TEXT, HTML, MARKDOWN")
+                }
+            }
+        }
     }
 
     @Serializable
