@@ -62,9 +62,34 @@ class CurseforgeApi(private val accessToken: String, private val baseUrl: String
     }
 
     @Serializable
+    enum class ChangelogType {
+        @SerialName("text")
+        TEXT,
+
+        @SerialName("html")
+        HTML,
+
+        @SerialName("markdown")
+        MARKDOWN,
+        ;
+
+        companion object {
+            @JvmStatic
+            fun of(value: String): ChangelogType {
+                val upper = value.uppercase()
+                try {
+                    return ChangelogType.valueOf(upper)
+                } catch (e: java.lang.IllegalArgumentException) {
+                    throw java.lang.IllegalArgumentException("Invalid changelog type: $upper. Must be one of: TEXT, HTML, MARKDOWN")
+                }
+            }
+        }
+    }
+
+    @Serializable
     data class UploadFileMetadata(
         val changelog: String, // Can be HTML or markdown if changelogType is set.
-        val changelogType: String? = null, // Optional: defaults to text
+        val changelogType: ChangelogType? = null, // Optional: defaults to text
         val displayName: String? = null, // Optional: A friendly display name used on the site if provided.
         val parentFileID: Int? = null, // Optional: The parent file of this file.
         val gameVersions: List<Int>?, // A list of supported game versions, see the Game Versions API for details. Not supported if parentFileID is provided.
