@@ -50,9 +50,9 @@ class ModrinthTest : IntegrationTest {
         val result = gradleTest()
             .buildScript(
                 """
+                version = "1.0.0"
                 publishMods {
                     changelog = "Hello!"
-                    version = "1.0.0"
                     type = BETA
                 
                     // Common options that can be re-used between diffrent modrinth tasks

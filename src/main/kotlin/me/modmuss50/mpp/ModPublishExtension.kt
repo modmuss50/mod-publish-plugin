@@ -14,14 +14,11 @@ import org.gradle.api.ExtensiblePolymorphicDomainObjectContainer
 import org.gradle.api.NamedDomainObjectProvider
 import org.gradle.api.PolymorphicDomainObjectContainer
 import org.gradle.api.Project
-import org.gradle.api.configuration.BuildFeatures
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
-import java.lang.IllegalStateException
 import java.nio.file.Path
-import javax.inject.Inject
 import kotlin.reflect.KClass
 
 abstract class ModPublishExtension(val project: Project) : PublishOptions {
@@ -32,9 +29,6 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
 
     abstract val dryRun: Property<Boolean>
     val platforms: ExtensiblePolymorphicDomainObjectContainer<Platform> = project.objects.polymorphicDomainObjectContainer(Platform::class.java)
-
-    @get:Inject
-    protected abstract val buildFeatures: BuildFeatures
 
     init {
         dryRun.convention(false)
@@ -217,11 +211,6 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
 
     // Returns the project version as a string, or throws if not set.
     private fun getProjectVersion(): String {
-        // TODO remove this when there is a config caching friendly way to get the version
-        if (buildFeatures.getConfigurationCache().getActive().get()) {
-            throw IllegalStateException("Cannot infer project version when configuration cache, please set the version explicitly in the publishMods block.")
-        }
-
         val version = project.version
 
         if (version == Project.DEFAULT_VERSION) {
