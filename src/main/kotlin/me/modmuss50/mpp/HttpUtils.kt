@@ -5,6 +5,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.Response
+import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.lang.RuntimeException
 import java.time.Duration
@@ -74,6 +75,8 @@ class HttpUtils(val exceptionFactory: HttpExceptionFactory = DefaultHttpExceptio
     }
 
     companion object {
+        private val LOGGER = LoggerFactory.getLogger(HttpUtils::class.java)
+
         /**
          * Retry server errors
          */
@@ -91,11 +94,12 @@ class HttpUtils(val exceptionFactory: HttpExceptionFactory = DefaultHttpExceptio
 
                     // Only retry 5xx server errors
                     count++
-                    exception = exception ?: RuntimeException(message)
+                    exception = exception ?: RuntimeException("$message after $maxRetries attempts with error: ${e.message}")
                     exception.addSuppressed(e)
                 }
             }
 
+            LOGGER.error("$message failed after $maxRetries retries", exception)
             throw exception!!
         }
     }
