@@ -48,6 +48,8 @@ abstract class PublishModTask @Inject constructor(@Nested val platform: Platform
 
     @TaskAction
     fun publish() {
+        platform.validateInputs()
+
         if (dryRun.get()) {
             logger.lifecycle("Dry run $name:")
             platform.printDryRunInfo(logger)

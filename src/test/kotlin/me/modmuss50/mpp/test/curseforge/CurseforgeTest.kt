@@ -320,4 +320,32 @@ class CurseforgeTest : IntegrationTest {
         assertEquals(TaskOutcome.FAILED, result.task(":publishCurseforge")!!.outcome)
         result.output.contains("Gradle version is unspecified")
     }
+
+    @Test
+    fun validateNoDuplicateVersions() {
+        val result = gradleTest()
+            .buildScript(
+                """
+                publishMods {
+                    file = tasks.jar.flatMap { it.archiveFile }
+                    changelog = "Hello!"
+                    version = "1.0.0"
+                    type = BETA
+                    modLoaders.add("fabric")
+                    
+                    dryRun = true
+                
+                    curseforge {
+                        projectId = "123456"
+                        minecraftVersions.add("1.20.1")
+                        minecraftVersions.add("1.20.1")
+                    }
+                }
+                """.trimIndent(),
+            )
+            .run("publishCurseforge")
+
+        assertEquals(TaskOutcome.FAILED, result.task(":publishCurseforge")!!.outcome)
+        assertContains(result.output, "minecraftVersions contains duplicate values: [1.20.1]")
+    }
 }

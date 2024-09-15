@@ -13,6 +13,7 @@ import me.modmuss50.mpp.PublishOptions
 import me.modmuss50.mpp.PublishResult
 import me.modmuss50.mpp.PublishWorkAction
 import me.modmuss50.mpp.PublishWorkParameters
+import me.modmuss50.mpp.Validators
 import me.modmuss50.mpp.path
 import org.gradle.api.Action
 import org.gradle.api.logging.Logger
@@ -177,6 +178,11 @@ interface ModrinthVersionRangeOptions {
 }
 
 abstract class Modrinth @Inject constructor(name: String) : Platform(name), ModrinthOptions {
+    override fun validateInputs() {
+        super.validateInputs()
+        Validators.validateUnique("minecraftVersions", minecraftVersions)
+    }
+
     override fun publish(context: PublishContext) {
         context.submit(UploadWorkAction::class) {
             it.from(this)

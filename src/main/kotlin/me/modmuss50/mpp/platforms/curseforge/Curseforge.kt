@@ -13,6 +13,7 @@ import me.modmuss50.mpp.PublishOptions
 import me.modmuss50.mpp.PublishResult
 import me.modmuss50.mpp.PublishWorkAction
 import me.modmuss50.mpp.PublishWorkParameters
+import me.modmuss50.mpp.Validators
 import me.modmuss50.mpp.path
 import org.gradle.api.Action
 import org.gradle.api.JavaVersion
@@ -149,6 +150,12 @@ interface CurseforgeDependencyContainer : PlatformDependencyContainer<Curseforge
 }
 
 abstract class Curseforge @Inject constructor(name: String) : Platform(name), CurseforgeOptions {
+    override fun validateInputs() {
+        super.validateInputs()
+        Validators.validateUnique("minecraftVersions", minecraftVersions)
+        Validators.validateUnique("javaVersions", javaVersions)
+    }
+
     override fun publish(context: PublishContext) {
         context.submit(UploadWorkAction::class) {
             it.from(this)

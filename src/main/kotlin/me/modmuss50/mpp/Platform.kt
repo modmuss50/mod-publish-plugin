@@ -95,6 +95,10 @@ interface PlatformDependency {
 
 abstract class Platform @Inject constructor(private val name: String) : Named, PlatformOptions {
     @ApiStatus.Internal
+    open fun validateInputs() {
+    }
+
+    @ApiStatus.Internal
     abstract fun publish(context: PublishContext)
 
     @ApiStatus.Internal
