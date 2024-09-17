@@ -17,6 +17,7 @@ object DiscordAPI {
     // https://discord.com/developers/docs/resources/webhook#execute-webhook
     fun executeWebhook(url: String, webhook: Webhook) {
         val body = json.encodeToString(webhook).toRequestBody()
+        println(json.encodeToString(webhook))
         httpUtils.post<String>(url, body, headers)
     }
 
@@ -29,7 +30,7 @@ object DiscordAPI {
         val avatarUrl: String? = null,
         val tts: Boolean? = null,
         val embeds: List<Embed>? = null,
-        val allowedMentions: AllowedMentions? = null,
+        // allowedMentions -- Skip this as we don't need it
         val components: List<Component>? = null,
         // files -- Skip these as we don't need them
         // payload_json
@@ -37,12 +38,6 @@ object DiscordAPI {
         val flags: Int? = null,
         @SerialName("thread_name")
         val threadName: String? = null,
-    )
-
-    @Serializable
-    data class AllowedMentions(
-        val parse: List<String> = listOf("roles"),
-        val users: List<String>? = null,
     )
 
     @Serializable

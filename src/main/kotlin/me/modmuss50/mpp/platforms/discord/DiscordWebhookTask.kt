@@ -52,10 +52,6 @@ interface DiscordWebhookOptions {
     @get:Input
     val content: Property<String>
 
-    @get:Input
-    @get:Optional
-    val allowMentions: Property<Boolean>
-
     fun from(other: DiscordWebhookOptions) {
         webhookUrl.set(other.webhookUrl)
         dryRunWebhookUrl.set(other.dryRunWebhookUrl)
@@ -65,7 +61,6 @@ interface DiscordWebhookOptions {
         color.set(other.color)
         useComponents.set(other.useComponents)
         content.set(other.content)
-        allowMentions.set(other.allowMentions)
     }
 }
 
@@ -163,7 +158,7 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
     abstract class DiscordWorkAction : WorkAction<DiscordWorkParameters> {
         override fun execute() {
             with(parameters) {
-                val componentType = when (useComponents.get().lowercase()) {
+                val componentType = when (useComponents.orNull?.lowercase()) {
                     "message" -> ComponentMessageType.MESSAGE
                     "embed" -> ComponentMessageType.EMBED
                     else -> ComponentMessageType.MESSAGE
@@ -254,11 +249,6 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
                         DiscordAPI.executeWebhook(
                             url.get(),
                             DiscordAPI.Webhook(
-                                allowedMentions = if (allowMentions.getOrElse(false)) {
-                                    DiscordAPI.AllowedMentions()
-                                } else {
-                                    null
-                                },
                                 username = username.get(),
                                 content = if (firstRequest) content.get() else null,
                                 avatarUrl = avatarUrl.orNull,
@@ -272,11 +262,6 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
                     DiscordAPI.executeWebhook(
                         url.get(),
                         DiscordAPI.Webhook(
-                            allowedMentions = if (allowMentions.getOrElse(false)) {
-                                DiscordAPI.AllowedMentions()
-                            } else {
-                                null
-                            },
                             content = content.get(),
                             username = username.get(),
                             avatarUrl = avatarUrl.orNull,
