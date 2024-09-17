@@ -38,14 +38,34 @@ interface DiscordWebhookOptions {
     val avatarUrl: Property<String>
 
     @get:Input
+    @get:Optional
+    val thumbnailUrl: Property<String>
+
+    @get:Input
+    @get:Optional
+    val color: Property<Any>
+
+    @get:Input
+    @get:Optional
+    val useComponents: Property<String>
+
+    @get:Input
     val content: Property<String>
+
+    @get:Input
+    @get:Optional
+    val allowMentions: Property<Boolean>
 
     fun from(other: DiscordWebhookOptions) {
         webhookUrl.set(other.webhookUrl)
         dryRunWebhookUrl.set(other.dryRunWebhookUrl)
         username.set(other.username)
         avatarUrl.set(other.avatarUrl)
+        thumbnailUrl.set(other.thumbnailUrl)
+        color.set(other.color)
+        useComponents.set(other.useComponents)
         content.set(other.content)
+        allowMentions.set(other.allowMentions)
     }
 }
 
@@ -143,46 +163,138 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
     abstract class DiscordWorkAction : WorkAction<DiscordWorkParameters> {
         override fun execute() {
             with(parameters) {
+                val componentType = when (useComponents.get().lowercase()) {
+                    "message" -> ComponentMessageType.MESSAGE
+                    "embed" -> ComponentMessageType.EMBED
+                    else -> ComponentMessageType.MESSAGE
+                }
+                val useComponents = useComponents.isPresent
+
                 if (dryRun.get() && !dryRunWebhookUrl.isPresent) {
                     // Don't announce if we're dry running and don't have a dry run webhook URL.
                     return
                 }
 
-                val embeds = publishResults.files.map {
-                    PublishResult.fromJson(it.readText())
-                }.map {
-                    DiscordAPI.Embed(
-                        title = it.title,
-                        url = it.link,
-                        color = it.brandColor,
-                    )
-                }.toList()
+                val embeds = if (useComponents) {
+                    if (componentType == ComponentMessageType.EMBED) {
+                        listOf(
+                            DiscordAPI.Embed(
+                                thumbnail = if (thumbnailUrl.isPresent) {
+                                    DiscordAPI.EmbedThumbnail(
+                                        url = thumbnailUrl.get(),
+                                    )
+                                } else {
+                                    null
+                                },
+                                description = content.get(),
+                                color = when (color.orNull) {
+                                    "modrinth" -> 0x1BD96A
+                                    "github" -> 0xF6F0FC
+                                    "curseforge" -> 0xF16436
+                                    is Int -> color.get() as Int
+                                    is String -> {
+                                        val hex = color.get() as String
+                                        println(hex.removePrefix("#").toInt(16))
+                                        hex.removePrefix("#").toInt(16)
+                                    }
+                                    else -> null
+                                },
+                            ),
+                        )
+                    } else {
+                        listOf()
+                    }
+                } else {
+                    publishResults.files.map {
+                        PublishResult.fromJson(it.readText())
+                    }.map {
+                        DiscordAPI.Embed(
+                            title = it.title,
+                            url = it.link,
+                            color = it.brandColor,
+                        )
+                    }.toList()
+                }
+
+                val components = if (useComponents) {
+                    publishResults.files.map {
+                        PublishResult.fromJson(it.readText())
+                    }.map {
+                        DiscordAPI.ButtonComponent(
+                            label = it.title,
+                            url = it.link,
+                        )
+                    }.toList()
+                } else {
+                    listOf()
+                }
 
                 // Find any embeds with duplicate URLs and throw and error if there are any.
-                for (embed in embeds) {
-                    val count = embeds.count { it.url == embed.url }
-                    if (count > 1) {
-                        throw IllegalStateException("Duplicate embed URL: ${embed.url} for ${embed.title}")
+                if (!useComponents) {
+                    for (embed in embeds) {
+                        val count = embeds.count { it.url == embed.url }
+                        if (count > 1) {
+                            throw IllegalStateException("Duplicate embed URL: ${embed.url} for ${embed.title}")
+                        }
+                    }
+                } else {
+                    for (component in components) {
+                        val count = embeds.count { it.url == component.url }
+                        if (count > 1) {
+                            throw IllegalStateException("Duplicate component URL: ${component.url} for ${component.label}")
+                        }
                     }
                 }
 
                 val url = if (dryRun.get()) dryRunWebhookUrl else webhookUrl
 
-                var firstRequest = true
-                embeds.chunked(10).forEach { chunk ->
+                if (!useComponents) {
+                    var firstRequest = true
+                    embeds.chunked(10).forEach { chunk ->
+                        DiscordAPI.executeWebhook(
+                            url.get(),
+                            DiscordAPI.Webhook(
+                                allowedMentions = if (allowMentions.getOrElse(false)) {
+                                    DiscordAPI.AllowedMentions()
+                                } else {
+                                    null
+                                },
+                                username = username.get(),
+                                content = if (firstRequest) content.get() else null,
+                                avatarUrl = avatarUrl.orNull,
+                                embeds = chunk,
+                            ),
+                        )
+
+                        firstRequest = false
+                    }
+                } else {
                     DiscordAPI.executeWebhook(
                         url.get(),
                         DiscordAPI.Webhook(
+                            allowedMentions = if (allowMentions.getOrElse(false)) {
+                                DiscordAPI.AllowedMentions()
+                            } else {
+                                null
+                            },
+                            content = content.get(),
                             username = username.get(),
-                            content = if (firstRequest) content.get() else null,
                             avatarUrl = avatarUrl.orNull,
-                            embeds = chunk,
+                            embeds = embeds,
+                            components = components.chunked(5).map {
+                                DiscordAPI.ActionRow(
+                                    components = it,
+                                )
+                            },
                         ),
                     )
-
-                    firstRequest = false
                 }
             }
         }
+    }
+
+    enum class ComponentMessageType {
+        MESSAGE,
+        EMBED,
     }
 }
