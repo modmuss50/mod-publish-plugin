@@ -1,9 +1,6 @@
 # Mod Publish Plugin
 A modern Gradle plugin to publish mods to a range of destinations.
 
-**Please note this plugin is still under development, breaking changes may be made at anytime!**
-Specify an exact version number to prevent unwanted breakages to your build script.
-
 Please make sure to report all issues, and any suggestions on this Github repo!
 
 ## Basic usage
@@ -16,6 +13,8 @@ plugins {
   id "me.modmuss50.mod-publish-plugin" version "0.7.4"
 }
 ```
+
+It is recommended to specify an exact version number to prevent unwanted breakages to your build script.
 
 Basic example to publish a jar to CurseForge, Modrinth and Github from a Fabric project:
 ```gradle
