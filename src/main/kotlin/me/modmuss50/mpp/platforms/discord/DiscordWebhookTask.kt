@@ -254,8 +254,7 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
          */
         fun createEmbeds(): List<DiscordAPI.Embed> {
             with(parameters) {
-                val style: MessageStyle = style.get()
-                return when (style.type) {
+                return when (style.get().type) {
                     MessageStyles.CLASSIC -> createLinkEmbeds()
                     // Get the link embeds and the modern embed
                     MessageStyles.MODERN -> listOf(createModernEmbed()) + createLinkEmbeds()
@@ -270,8 +269,7 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
          */
         fun createClassicMessage(): String? {
             with(parameters) {
-                val style: MessageStyle = style.get()
-                if (style.type != MessageStyles.CLASSIC) {
+                if (style.get().type != MessageStyles.CLASSIC) {
                     return null
                 }
 
@@ -316,8 +314,7 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
          */
         fun createLinkEmbeds(): List<DiscordAPI.Embed> {
             with(parameters) {
-                val style: MessageStyle = style.get()
-                if (style.link != LinkType.EMBED) {
+                if (style.get().link != LinkType.EMBED) {
                     // Return empty list as there is no link embed
                     // Doing this helps keeping createEmbeds cleaner
                     return listOf()
@@ -352,8 +349,7 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
          */
         fun createComponents(): List<DiscordAPI.ActionRow> {
             with(parameters) {
-                val style: MessageStyle = style.get()
-                if (style.link != LinkType.BUTTON) {
+                if (style.get().link != LinkType.BUTTON) {
                     // Return empty list as there is no button
                     // Doing this helps keeping createEmbeds cleaner
                     return listOf()
