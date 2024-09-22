@@ -46,7 +46,7 @@ object DiscordAPI {
 
     @Serializable
     data class ActionRow(
-        val components: List<ButtonComponent>? = null,
+        val components: List<Component>? = null,
     ) : Component() {
         override val type: Int = 1
     }
@@ -147,5 +147,22 @@ object DiscordAPI {
         val name: String,
         val value: String,
         val inline: Boolean? = null,
+    )
+
+    // https://discord.com/developers/docs/resources/webhook#get-webhook
+    fun getWebhook(url: String): WebhookData {
+        val response = httpUtils.get<WebhookData>(url, headers)
+        return response
+    }
+
+    /**
+     * The response from getting thw webhook data
+     */
+    @Serializable
+    data class WebhookData(
+        // Only get the application id
+        // as this is the only thing that matters
+        @SerialName("application_id")
+        val applicationId: String?,
     )
 }
