@@ -156,7 +156,7 @@ object DiscordAPI {
     }
 
     /**
-     * The response from getting thw webhook data
+     * The response from getting the webhook data
      */
     @Serializable
     data class WebhookData(
