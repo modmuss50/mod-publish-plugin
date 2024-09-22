@@ -470,6 +470,65 @@ class DiscordTest : IntegrationTest {
     }
 
     @Test
+    fun announceInline() {
+        val discordApi = MockDiscordApi()
+        val server = MockWebServer(MockWebServer.CombinedApi(listOf(discordApi, MockCurseforgeApi(), MockModrinthApi(), MockGithubApi())))
+
+        val result = gradleTest()
+            .buildScript(
+                """
+                publishMods {
+                    file = tasks.jar.flatMap { it.archiveFile }
+                    changelog = "# Changelog\n-123\n-epic feature"
+                    version = "1.0.0"
+                    type = BETA
+                    
+                    curseforge {
+                        accessToken = "123"
+                        projectId = "123456"
+                        projectSlug = "test-mod"
+                        apiEndpoint = "${server.endpoint}"
+                    }
+                    
+                    modrinth {
+                        accessToken = "123"
+                        projectId = "12345678"                        
+                        apiEndpoint = "${server.endpoint}"
+                    }
+                    
+                    github {
+                        accessToken = "123"
+                        repository = "test/example"
+                        commitish = "main"
+                        apiEndpoint = "${server.endpoint}"
+                    }
+                
+                    discord {
+                        webhookUrl = "${server.endpoint}/api/webhooks/213/abc"
+                        style {
+                            link = INLINE
+                        }
+                    }
+                }
+                """.trimIndent(),
+            )
+            .run("publishMods")
+        server.close()
+
+        val first = discordApi.requests.first()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":announceDiscord")!!.outcome)
+        assertNull(first.embeds)
+        assertNull(first.components)
+        assertNotNull(first.content)
+
+        var links = first.content!!.split("\n").takeLast(3).sortedBy { it }
+        assertEquals("[Download from CurseForge](https://curseforge.com/minecraft/mc-mods/test-mod/files/20402)", links[0])
+        assertEquals("[Download from GitHub](https://github.com)", links[1])
+        assertEquals("[Download from Modrinth](https://modrinth.com/mod/12345678/version/hFdJG9fY)", links[2])
+    }
+
+    @Test
     fun announceModern() {
         val discordApi = MockDiscordApi()
         val server = MockWebServer(MockWebServer.CombinedApi(listOf(discordApi, MockCurseforgeApi(), MockModrinthApi(), MockGithubApi())))
@@ -506,7 +565,7 @@ class DiscordTest : IntegrationTest {
                     discord {
                         webhookUrl = "${server.endpoint}/api/webhooks/213/abc"
                         style {
-                            type = MODERN
+                            look = MODERN
                         }
                     }
                 }

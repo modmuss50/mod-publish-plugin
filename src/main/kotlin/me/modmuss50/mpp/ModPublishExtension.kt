@@ -34,6 +34,7 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
 
     val EMBED = LinkType.EMBED
     val BUTTON = LinkType.BUTTON
+    val INLINE = LinkType.INLINE
 
     abstract val dryRun: Property<Boolean>
     val platforms: ExtensiblePolymorphicDomainObjectContainer<Platform> = project.objects.polymorphicDomainObjectContainer(Platform::class.java)

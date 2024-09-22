@@ -65,14 +65,15 @@ class MessageStyle internal constructor() : java.io.Serializable {
     }
 }
 
-enum class LinkType {
-    EMBED,
-    BUTTON,
-}
-
 enum class MessageLook {
     MODERN,
     CLASSIC,
+}
+
+enum class LinkType {
+    EMBED,
+    BUTTON,
+    INLINE,
 }
 
 @DisableCachingByDefault(because = "Publish webhook each time")
@@ -242,6 +243,20 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
 
                     firstRequest = false
                 }
+
+                // Message has no embeds nor buttons, and was not sent yet
+                if (firstRequest) {
+                    DiscordAPI.executeWebhook(
+                        url.get(),
+                        DiscordAPI.Webhook(
+                            content = createClassicMessage(),
+                            username = username.get(),
+                            avatarUrl = avatarUrl.orNull,
+                        ),
+                    )
+
+                    firstRequest = false
+                }
             }
         }
 
@@ -273,7 +288,7 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
                     return null
                 }
 
-                return content.get()
+                return createMessageBody()
             }
         }
 
@@ -290,7 +305,7 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
                         is String -> DiscordAPI.EmbedThumbnail(url = style.thumbnailUrl!!)
                         else -> null
                     },
-                    description = content.get(),
+                    description = createMessageBody(),
                     color = when (style.color) {
                         "modrinth" -> 0x1BD96A
                         "github" -> 0xF6F0FC
@@ -382,6 +397,29 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
                         components = it,
                     )
                 }
+            }
+        }
+
+        /**
+         * Create the body of the message
+         *
+         * This is used to inject content if needed
+         */
+        fun createMessageBody(): String {
+            with(parameters) {
+                var content = content.get()
+
+                if (style.get().link == LinkType.INLINE) {
+                    publishResults.files.map {
+                        PublishResult.fromJson(it.readText())
+                    }.forEach {
+                        // Append the links to the end of the message
+                        // !!! The current implementation does not support emotes for inline links !!!
+                        content += "\n[${it.title}](${it.link})"
+                    }
+                }
+
+                return content
             }
         }
     }

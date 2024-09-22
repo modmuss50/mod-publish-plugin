@@ -37,6 +37,20 @@ class DryTest : IntegrationTest {
             .run("publishMods")
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishMods")!!.outcome)
+
+        result = gradleTest()
+            .buildScript(
+                createScript(
+                    """
+                    style {
+                        link = INLINE
+                    }
+                    """.trimIndent(),
+                ),
+            )
+            .run("publishMods")
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishMods")!!.outcome)
         //endregion
 
         //region Modern message body
@@ -45,7 +59,7 @@ class DryTest : IntegrationTest {
                 createScript(
                     """
                     style {
-                        type = MODERN
+                        look = MODERN
                     }
                     """.trimIndent(),
                 ),
@@ -59,8 +73,23 @@ class DryTest : IntegrationTest {
                 createScript(
                     """
                     style {
-                        type = MODERN
+                        look = MODERN
                         link = BUTTON
+                    }
+                    """.trimIndent(),
+                ),
+            )
+            .run("publishMods")
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishMods")!!.outcome)
+
+        result = gradleTest()
+            .buildScript(
+                createScript(
+                    """
+                    style {
+                        look = MODERN
+                        link = INLINE
                     }
                     """.trimIndent(),
                 ),
