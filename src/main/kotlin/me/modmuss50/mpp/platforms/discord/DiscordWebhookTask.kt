@@ -52,13 +52,13 @@ interface DiscordWebhookOptions {
 
 @Suppress("MemberVisibilityCanBePrivate")
 class MessageStyle internal constructor() : java.io.Serializable {
-    var type: MessageStyles = MessageStyles.CLASSIC
+    var look: MessageLook = MessageLook.CLASSIC
     var thumbnailUrl: String? = null
     var color: Any? = null
     var link: LinkType = LinkType.EMBED
 
     fun from(other: MessageStyle) {
-        type = other.type
+        look = other.look
         thumbnailUrl = other.thumbnailUrl
         color = other.color
         link = other.link
@@ -70,7 +70,7 @@ enum class LinkType {
     BUTTON,
 }
 
-enum class MessageStyles {
+enum class MessageLook {
     MODERN,
     CLASSIC,
 }
@@ -254,10 +254,10 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
          */
         fun createEmbeds(): List<DiscordAPI.Embed> {
             with(parameters) {
-                return when (style.get().type) {
-                    MessageStyles.CLASSIC -> createLinkEmbeds()
+                return when (style.get().look) {
+                    MessageLook.CLASSIC -> createLinkEmbeds()
                     // Get the link embeds and the modern embed
-                    MessageStyles.MODERN -> listOf(createModernEmbed()) + createLinkEmbeds()
+                    MessageLook.MODERN -> listOf(createModernEmbed()) + createLinkEmbeds()
                 }
             }
         }
@@ -269,7 +269,7 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
          */
         fun createClassicMessage(): String? {
             with(parameters) {
-                if (style.get().type != MessageStyles.CLASSIC) {
+                if (style.get().look != MessageLook.CLASSIC) {
                     return null
                 }
 

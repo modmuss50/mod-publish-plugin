@@ -6,7 +6,7 @@ import me.modmuss50.mpp.platforms.curseforge.Curseforge
 import me.modmuss50.mpp.platforms.curseforge.CurseforgeOptions
 import me.modmuss50.mpp.platforms.discord.DiscordWebhookTask
 import me.modmuss50.mpp.platforms.discord.LinkType
-import me.modmuss50.mpp.platforms.discord.MessageStyles
+import me.modmuss50.mpp.platforms.discord.MessageLook
 import me.modmuss50.mpp.platforms.github.Github
 import me.modmuss50.mpp.platforms.github.GithubOptions
 import me.modmuss50.mpp.platforms.modrinth.Modrinth
@@ -29,8 +29,8 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
     val ALPHA = ReleaseType.ALPHA
     val STABLE = ReleaseType.STABLE
 
-    val CLASSIC = MessageStyles.CLASSIC
-    val MODERN = MessageStyles.MODERN
+    val CLASSIC = MessageLook.CLASSIC
+    val MODERN = MessageLook.MODERN
 
     val EMBED = LinkType.EMBED
     val BUTTON = LinkType.BUTTON
