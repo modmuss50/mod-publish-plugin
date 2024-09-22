@@ -522,7 +522,7 @@ class DiscordTest : IntegrationTest {
         assertNull(first.components)
         assertNotNull(first.content)
 
-        var links = first.content!!.split("\n").takeLast(3).sortedBy { it }
+        val links = first.content!!.split("\n").takeLast(3).sortedBy { it }
         assertEquals("[Download from CurseForge](https://curseforge.com/minecraft/mc-mods/test-mod/files/20402)", links[0])
         assertEquals("[Download from GitHub](https://github.com)", links[1])
         assertEquals("[Download from Modrinth](https://modrinth.com/mod/12345678/version/hFdJG9fY)", links[2])
