@@ -54,3 +54,73 @@ publishMods {
     }
 }
 ```
+
+The webhook message can be customized to different styles  
+The look can be set to `CLASSIC` or `MODERN`
+
+<details>
+  <summary>Look examples</summary>
+  ## Classic look
+  The classic look is used by default by the plugin
+  ![Classic look](/images/discord_example.png)
+
+  ## Modern look
+  ![Modern look](/images/discord_modern.png)
+
+  ```groovy
+  publishMods {
+    // ...
+    discord {
+      // ...
+      style {
+        // ...
+        look = MODERN
+      }
+    }
+  }
+  ```
+
+  The style tag also has the options `thumbnailUrl` and `color`, this options allow you to customize more the look of your embeds
+
+  The `color` option can be either an integer or a string, the string must be a full `RRGGBB` hex optionally prefixed with a `#`.  
+  The string can also be `modrinth`, `github` or `curseforge`, with those working as alias for the colors used for the embed links for those platforms
+
+  ![Example with thumbnail](/images/discord_modern_button_thumbnail.png)
+  ```groovy
+  publishMods {
+    // ...
+    discord {
+      // ...
+      style {
+        // ...
+        look = MODERN
+        thumbnailUrl = https://example.com
+        color = "github"
+      }
+    }
+  }
+  ```
+</details>
+
+You can also set your links to be posted as `EMBED` or `BUTTON`
+<details>
+  <summary>Link examples</summary>
+  ## Embed link
+  The embed links are used by default by the plugin
+  ![Embed links](/images/discord_example.png)
+  ## Button links
+  ![Button links](/images/discord_button.png)
+
+  ```groovy
+  publishMods {
+    // ...
+    discord {
+      // ...
+      style {
+        // ...
+        link = BUTTON
+      }
+    }
+  }
+  ```
+</details>
