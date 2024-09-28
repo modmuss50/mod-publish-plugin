@@ -1,10 +1,10 @@
 package me.modmuss50.mpp.test
 
 import kotlinx.serialization.json.Json
-import org.gradle.internal.impldep.org.junit.Ignore
 import org.gradle.testkit.runner.TaskOutcome
 import org.intellij.lang.annotations.Language
 import java.io.File
+import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
