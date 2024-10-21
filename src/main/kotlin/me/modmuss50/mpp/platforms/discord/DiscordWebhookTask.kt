@@ -52,16 +52,24 @@ interface DiscordWebhookOptions {
 
 @Suppress("MemberVisibilityCanBePrivate")
 class MessageStyle internal constructor() : java.io.Serializable {
-    var look: MessageLook = MessageLook.CLASSIC
+    var look: String = "CLASSIC"
     var thumbnailUrl: String? = null
     var color: Any? = null
-    var link: LinkType = LinkType.EMBED
+    var link: String = "EMBED"
 
     fun from(other: MessageStyle) {
         look = other.look
         thumbnailUrl = other.thumbnailUrl
         color = other.color
         link = other.link
+    }
+
+    fun link(): LinkType {
+        return LinkType.valueOf(link)
+    }
+
+    fun look(): MessageLook {
+        return MessageLook.valueOf(look)
     }
 }
 
@@ -189,7 +197,7 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
 
                 val url = if (dryRun.get()) dryRunWebhookUrl else webhookUrl
 
-                if (style.get().link == LinkType.BUTTON) {
+                if (style.get().link() == LinkType.BUTTON) {
                     // Verify that the webhook is application owned,
                     // as only ones made by an application can use components/buttons
                     val webhook = DiscordAPI.getWebhook(url.get())
@@ -269,7 +277,7 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
          */
         fun createEmbeds(): List<DiscordAPI.Embed> {
             with(parameters) {
-                return when (style.get().look) {
+                return when (style.get().look()) {
                     MessageLook.CLASSIC -> createLinkEmbeds()
                     // Get the link embeds and the modern embed
                     MessageLook.MODERN -> listOf(createModernEmbed()) + createLinkEmbeds()
@@ -284,7 +292,7 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
          */
         fun createClassicMessage(): String? {
             with(parameters) {
-                if (style.get().look != MessageLook.CLASSIC) {
+                if (style.get().look() != MessageLook.CLASSIC) {
                     return null
                 }
 
@@ -329,7 +337,7 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
          */
         fun createLinkEmbeds(): List<DiscordAPI.Embed> {
             with(parameters) {
-                if (style.get().link != LinkType.EMBED) {
+                if (style.get().link() != LinkType.EMBED) {
                     // Return empty list as there is no link embed
                     // Doing this helps keeping createEmbeds cleaner
                     return listOf()
@@ -364,7 +372,7 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
          */
         fun createComponents(): List<DiscordAPI.ActionRow> {
             with(parameters) {
-                if (style.get().link != LinkType.BUTTON) {
+                if (style.get().link() != LinkType.BUTTON) {
                     // Return empty list as there is no button
                     // Doing this helps keeping createEmbeds cleaner
                     return listOf()
@@ -409,7 +417,7 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
             with(parameters) {
                 var content = content.get()
 
-                if (style.get().link == LinkType.INLINE) {
+                if (style.get().link() == LinkType.INLINE) {
                     publishResults.files.map {
                         PublishResult.fromJson(it.readText())
                     }.forEach {

@@ -262,7 +262,7 @@ class DiscordTest : IntegrationTest {
                     discord {
                         webhookUrl = "${server.endpoint}/api/webhooks/213/abc"
                         style {
-                            link = BUTTON
+                            link = "BUTTON"
                         }
                     }
                 }
@@ -448,7 +448,7 @@ class DiscordTest : IntegrationTest {
                     discord {
                         webhookUrl = "${server.endpoint}/api/webhooks/213/abc"
                         style {
-                            link = BUTTON
+                            link = "BUTTON"
                         }
                     }
                 }
@@ -506,7 +506,7 @@ class DiscordTest : IntegrationTest {
                     discord {
                         webhookUrl = "${server.endpoint}/api/webhooks/213/abc"
                         style {
-                            link = INLINE
+                            link = "INLINE"
                         }
                     }
                 }
@@ -565,7 +565,7 @@ class DiscordTest : IntegrationTest {
                     discord {
                         webhookUrl = "${server.endpoint}/api/webhooks/213/abc"
                         style {
-                            look = MODERN
+                            look = "MODERN"
                         }
                     }
                 }

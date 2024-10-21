@@ -5,8 +5,6 @@ import groovy.lang.DelegatesTo
 import me.modmuss50.mpp.platforms.curseforge.Curseforge
 import me.modmuss50.mpp.platforms.curseforge.CurseforgeOptions
 import me.modmuss50.mpp.platforms.discord.DiscordWebhookTask
-import me.modmuss50.mpp.platforms.discord.LinkType
-import me.modmuss50.mpp.platforms.discord.MessageLook
 import me.modmuss50.mpp.platforms.github.Github
 import me.modmuss50.mpp.platforms.github.GithubOptions
 import me.modmuss50.mpp.platforms.modrinth.Modrinth
@@ -28,13 +26,6 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
     val BETA = ReleaseType.BETA
     val ALPHA = ReleaseType.ALPHA
     val STABLE = ReleaseType.STABLE
-
-    val CLASSIC = MessageLook.CLASSIC
-    val MODERN = MessageLook.MODERN
-
-    val EMBED = LinkType.EMBED
-    val BUTTON = LinkType.BUTTON
-    val INLINE = LinkType.INLINE
 
     abstract val dryRun: Property<Boolean>
     val platforms: ExtensiblePolymorphicDomainObjectContainer<Platform> = project.objects.polymorphicDomainObjectContainer(Platform::class.java)
