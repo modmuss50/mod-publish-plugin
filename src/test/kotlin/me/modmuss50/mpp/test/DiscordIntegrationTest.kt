@@ -12,7 +12,7 @@ import kotlin.test.assertEquals
  * Enable this test to execute a dry run, this is more to test the discord integration. Create a options.json with all the tokens
  */
 @Ignore
-class DryTest : IntegrationTest {
+class DiscordIntegrationTest : IntegrationTest {
     @Test
     fun run() {
         //region Classic message body
@@ -29,7 +29,7 @@ class DryTest : IntegrationTest {
                 createScript(
                     """
                     style {
-                        link = BUTTON
+                        link = "BUTTON"
                     }
                     """.trimIndent(),
                 ),
@@ -43,7 +43,7 @@ class DryTest : IntegrationTest {
                 createScript(
                     """
                     style {
-                        link = INLINE
+                        link = "INLINE"
                     }
                     """.trimIndent(),
                 ),
@@ -59,7 +59,7 @@ class DryTest : IntegrationTest {
                 createScript(
                     """
                     style {
-                        look = MODERN
+                        look = "MODERN"
                     }
                     """.trimIndent(),
                 ),
@@ -73,8 +73,8 @@ class DryTest : IntegrationTest {
                 createScript(
                     """
                     style {
-                        look = MODERN
-                        link = BUTTON
+                        look = "MODERN"
+                        link = "BUTTON"
                     }
                     """.trimIndent(),
                 ),
@@ -88,8 +88,8 @@ class DryTest : IntegrationTest {
                 createScript(
                     """
                     style {
-                        look = MODERN
-                        link = INLINE
+                        look = "MODERN"
+                        link = "INLINE"
                     }
                     """.trimIndent(),
                 ),
