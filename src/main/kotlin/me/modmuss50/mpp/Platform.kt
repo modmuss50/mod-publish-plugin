@@ -26,8 +26,8 @@ interface PlatformOptions : PublishOptions {
 
     fun from(other: PlatformOptions) {
         super.from(other)
-        accessToken.set(other.accessToken)
-        announcementTitle.set(other.announcementTitle)
+        accessToken.convention(other.accessToken)
+        announcementTitle.convention(other.announcementTitle)
     }
 }
 
@@ -57,7 +57,7 @@ interface PlatformDependencyContainer<T : PlatformDependency> {
     }
 
     fun fromDependencies(other: PlatformDependencyContainer<T>) {
-        dependencies.set(other.dependencies)
+        dependencies.convention(other.dependencies)
     }
 
     @get:ApiStatus.Internal

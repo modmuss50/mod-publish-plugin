@@ -46,12 +46,12 @@ interface DiscordWebhookOptions {
     val style: Property<MessageStyle>
 
     fun from(other: DiscordWebhookOptions) {
-        webhookUrl.set(other.webhookUrl)
-        dryRunWebhookUrl.set(other.dryRunWebhookUrl)
-        username.set(other.username)
-        avatarUrl.set(other.avatarUrl)
-        content.set(other.content)
-        style.set(other.style)
+        webhookUrl.convention(other.webhookUrl)
+        dryRunWebhookUrl.convention(other.dryRunWebhookUrl)
+        username.convention(other.username)
+        avatarUrl.convention(other.avatarUrl)
+        content.convention(other.content)
+        style.convention(other.style)
     }
 
     fun style(style: Action<MessageStyle>) {
@@ -77,10 +77,10 @@ interface MessageStyle {
     val link: Property<String>
 
     fun from(other: MessageStyle) {
-        look.set(other.look)
-        thumbnailUrl.set(other.thumbnailUrl)
-        color.set(other.color)
-        link.set(other.link)
+        look.convention(other.look)
+        thumbnailUrl.convention(other.thumbnailUrl)
+        color.convention(other.color)
+        link.convention(other.link)
     }
 }
 
@@ -119,7 +119,7 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
             look.convention("CLASSIC")
             link.convention("EMBED")
 
-            style.set(this)
+            style.convention(this)
         }
 
         // By default, announce all the platforms.

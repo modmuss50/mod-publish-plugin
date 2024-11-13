@@ -93,11 +93,11 @@ interface ModrinthOptions : PlatformOptions, PlatformOptionsInternal<ModrinthOpt
     fun from(other: ModrinthOptions) {
         super.from(other)
         fromDependencies(other)
-        projectId.set(other.projectId)
-        minecraftVersions.set(other.minecraftVersions)
-        featured.set(other.featured)
-        projectDescription.set(other.projectDescription)
-        apiEndpoint.set(other.apiEndpoint)
+        projectId.convention(other.projectId)
+        minecraftVersions.convention(other.minecraftVersions)
+        featured.convention(other.featured)
+        projectDescription.convention(other.projectDescription)
+        apiEndpoint.convention(other.apiEndpoint)
     }
 
     fun from(other: Provider<ModrinthOptions>) {

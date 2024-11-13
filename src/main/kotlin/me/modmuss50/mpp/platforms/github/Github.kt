@@ -67,12 +67,12 @@ interface GithubOptions : PlatformOptions, PlatformOptionsInternal<GithubOptions
 
     fun from(other: GithubOptions) {
         super.from(other)
-        repository.set(other.repository)
-        commitish.set(other.commitish)
-        tagName.set(other.tagName)
-        apiEndpoint.set(other.apiEndpoint)
-        allowEmptyFiles.set(other.allowEmptyFiles)
-        releaseResult.set(other.releaseResult)
+        repository.convention(other.repository)
+        commitish.convention(other.commitish)
+        tagName.convention(other.tagName)
+        apiEndpoint.convention(other.apiEndpoint)
+        allowEmptyFiles.convention(other.allowEmptyFiles)
+        releaseResult.convention(other.releaseResult)
     }
 
     fun from(other: Provider<GithubOptions>) {

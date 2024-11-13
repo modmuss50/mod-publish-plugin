@@ -60,14 +60,14 @@ interface CurseforgeOptions : PlatformOptions, PlatformOptionsInternal<Curseforg
     fun from(other: CurseforgeOptions) {
         super.from(other)
         fromDependencies(other)
-        projectId.set(other.projectId)
-        projectSlug.set(other.projectSlug)
-        minecraftVersions.set(other.minecraftVersions)
-        clientRequired.set(other.clientRequired)
-        serverRequired.set(other.serverRequired)
-        javaVersions.set(other.javaVersions)
-        apiEndpoint.set(other.apiEndpoint)
-        changelogType.set(other.changelogType)
+        projectId.convention(other.projectId)
+        projectSlug.convention(other.projectSlug)
+        minecraftVersions.convention(other.minecraftVersions)
+        clientRequired.convention(other.clientRequired)
+        serverRequired.convention(other.serverRequired)
+        javaVersions.convention(other.javaVersions)
+        apiEndpoint.convention(other.apiEndpoint)
+        changelogType.convention(other.changelogType)
     }
 
     fun from(other: Provider<CurseforgeOptions>) {

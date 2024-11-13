@@ -35,13 +35,13 @@ interface PublishOptions {
     val maxRetries: Property<Int>
 
     fun from(other: PublishOptions) {
-        file.set(other.file)
-        version.set(other.version)
-        changelog.set(other.changelog)
-        type.set(other.type)
-        displayName.set(other.displayName)
-        modLoaders.set(other.modLoaders)
-        additionalFiles.setFrom(other.additionalFiles)
-        maxRetries.set(other.maxRetries)
+        file.convention(other.file)
+        version.convention(other.version)
+        changelog.convention(other.changelog)
+        type.convention(other.type)
+        displayName.convention(other.displayName)
+        modLoaders.convention(other.modLoaders)
+        additionalFiles.convention(other.additionalFiles)
+        maxRetries.convention(other.maxRetries)
     }
 }
