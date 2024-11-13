@@ -15,7 +15,8 @@ import kotlin.test.assertEquals
 class ProductionTest : IntegrationTest {
     @Test
     fun run() {
-        val options = Json.decodeFromString<ProductionOptions>(File("options.json").readText())
+        val json = Json { ignoreUnknownKeys = true }
+        val options = json.decodeFromString<ProductionOptions>(File("options.json").readText())
 
         val result = gradleTest()
             .buildScript(
