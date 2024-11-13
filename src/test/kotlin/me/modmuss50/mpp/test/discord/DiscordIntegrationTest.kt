@@ -1,6 +1,8 @@
 package me.modmuss50.mpp.test.discord
 
 import kotlinx.serialization.json.Json
+import me.modmuss50.mpp.test.IntegrationTest
+import me.modmuss50.mpp.test.ProductionOptions
 import org.gradle.testkit.runner.TaskOutcome
 import org.intellij.lang.annotations.Language
 import java.io.File
