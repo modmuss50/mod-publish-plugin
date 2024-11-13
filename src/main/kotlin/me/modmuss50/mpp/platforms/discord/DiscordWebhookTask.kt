@@ -13,6 +13,7 @@ import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskProvider
@@ -41,35 +42,45 @@ interface DiscordWebhookOptions {
     @get:Input
     val content: Property<String>
 
+    @get:Nested
+    val style: Property<MessageStyle>
+
     fun from(other: DiscordWebhookOptions) {
         webhookUrl.set(other.webhookUrl)
         dryRunWebhookUrl.set(other.dryRunWebhookUrl)
         username.set(other.username)
         avatarUrl.set(other.avatarUrl)
         content.set(other.content)
+        style.set(other.style)
+    }
+
+    fun style(style: Action<MessageStyle>) {
+        style.execute(this.style.get())
     }
 }
 
 @Suppress("MemberVisibilityCanBePrivate")
-class MessageStyle internal constructor() : java.io.Serializable {
-    var look: String = "CLASSIC"
-    var thumbnailUrl: String? = null
-    var color: Any? = null
-    var link: String = "EMBED"
+interface MessageStyle {
+    @get:Input
+    val look: Property<String>
+
+    @get:Input
+    @get:Optional
+    val thumbnailUrl: Property<String>
+
+    @get:Input
+    @get:Optional
+    val color: Property<String>
+
+    @get:Input
+    @get:Optional
+    val link: Property<String>
 
     fun from(other: MessageStyle) {
-        look = other.look
-        thumbnailUrl = other.thumbnailUrl
-        color = other.color
-        link = other.link
-    }
-
-    fun link(): LinkType {
-        return LinkType.valueOf(link)
-    }
-
-    fun look(): MessageLook {
-        return MessageLook.valueOf(look)
+        look.set(other.look)
+        thumbnailUrl.set(other.thumbnailUrl)
+        color.set(other.color)
+        link.set(other.link)
     }
 }
 
@@ -96,10 +107,6 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
     @get:Inject
     protected abstract val workerExecutor: WorkerExecutor
 
-    @JvmField
-    @Suppress("MemberVisibilityCanBePrivate")
-    protected val style: MessageStyle = MessageStyle()
-
     init {
         group = "publishing"
         username.convention("Mod Publish Plugin")
@@ -107,6 +114,13 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
 
         dryRun.set(project.modPublishExtension.dryRun)
         dryRun.finalizeValue()
+
+        with(project.objects.newInstance(MessageStyle::class.java)) {
+            look.convention("CLASSIC")
+            link.convention("EMBED")
+
+            style.set(this)
+        }
 
         // By default, announce all the platforms.
         publishResults.from(
@@ -163,10 +177,6 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
         )
     }
 
-    fun style(style: Action<MessageStyle>) {
-        style.execute(this.style)
-    }
-
     @TaskAction
     fun announce() {
         val workQueue = workerExecutor.noIsolation()
@@ -182,8 +192,6 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
         val publishResults: ConfigurableFileCollection
 
         val dryRun: Property<Boolean>
-
-        val style: Property<MessageStyle>
     }
 
     @Suppress("MemberVisibilityCanBePrivate")
@@ -197,7 +205,7 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
 
                 val url = if (dryRun.get()) dryRunWebhookUrl else webhookUrl
 
-                if (style.get().link() == LinkType.BUTTON) {
+                if (LinkType.valueOf(style.get().link.get()) == LinkType.BUTTON) {
                     // Verify that the webhook is application owned,
                     // as only ones made by an application can use components/buttons
                     val webhook = DiscordAPI.getWebhook(url.get())
@@ -277,7 +285,7 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
          */
         fun createEmbeds(): List<DiscordAPI.Embed> {
             with(parameters) {
-                return when (style.get().look()) {
+                return when (MessageLook.valueOf(style.get().look.get())) {
                     MessageLook.CLASSIC -> createLinkEmbeds()
                     // Get the link embeds and the modern embed
                     MessageLook.MODERN -> listOf(createModernEmbed()) + createLinkEmbeds()
@@ -292,7 +300,7 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
          */
         fun createClassicMessage(): String? {
             with(parameters) {
-                if (style.get().look() != MessageLook.CLASSIC) {
+                if (MessageLook.valueOf(style.get().look.get()) != MessageLook.CLASSIC) {
                     return null
                 }
 
@@ -309,25 +317,30 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
             with(parameters) {
                 val style: MessageStyle = style.get()
                 return DiscordAPI.Embed(
-                    thumbnail = when (style.thumbnailUrl) {
-                        is String -> DiscordAPI.EmbedThumbnail(url = style.thumbnailUrl!!)
-                        else -> null
-                    },
+                    thumbnail = style.thumbnailUrl.map { DiscordAPI.EmbedThumbnail(url = it) }.orNull,
                     description = createMessageBody(),
-                    color = when (style.color) {
-                        "modrinth" -> 0x1BD96A
-                        "github" -> 0xF6F0FC
-                        "curseforge" -> 0xF16436
-                        is Int -> style.color as Int
-                        is String -> {
-                            val hex = style.color as String
-                            hex.removePrefix("#").toInt(16)
-                        }
-
-                        else -> null
-                    },
+                    color = style.color.map { parseColor(it) }.orNull,
                 )
             }
+        }
+
+        private fun parseColor(str: String): Int {
+            return when (str) {
+                "modrinth" -> 0x1BD96A
+                "github" -> 0xF6F0FC
+                "curseforge" -> 0xF16436
+                else -> parseHexStringOrThrow(str)
+            }
+        }
+
+        private fun parseHexStringOrThrow(str: String): Int {
+            if (!str.startsWith("#")) {
+                throw IllegalArgumentException("Hex color must start with #")
+            }
+            if (str.length != 7) {
+                throw IllegalArgumentException("Hex color must be 7 characters long")
+            }
+            return str.removePrefix("#").toInt(16)
         }
 
         /**
@@ -337,7 +350,7 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
          */
         fun createLinkEmbeds(): List<DiscordAPI.Embed> {
             with(parameters) {
-                if (style.get().link() != LinkType.EMBED) {
+                if (LinkType.valueOf(style.get().link.get()) != LinkType.EMBED) {
                     // Return empty list as there is no link embed
                     // Doing this helps keeping createEmbeds cleaner
                     return listOf()
@@ -372,7 +385,7 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
          */
         fun createComponents(): List<DiscordAPI.ActionRow> {
             with(parameters) {
-                if (style.get().link() != LinkType.BUTTON) {
+                if (LinkType.valueOf(style.get().link.get()) != LinkType.BUTTON) {
                     // Return empty list as there is no button
                     // Doing this helps keeping createEmbeds cleaner
                     return listOf()
@@ -417,7 +430,7 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
             with(parameters) {
                 var content = content.get()
 
-                if (style.get().link() == LinkType.INLINE) {
+                if (LinkType.valueOf(style.get().link.get()) == LinkType.INLINE) {
                     publishResults.files.map {
                         PublishResult.fromJson(it.readText())
                     }.forEach {
