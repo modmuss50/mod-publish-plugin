@@ -1,4 +1,4 @@
-package me.modmuss50.mpp.test
+package me.modmuss50.mpp.test.discord
 
 import kotlinx.serialization.json.Json
 import org.gradle.testkit.runner.TaskOutcome
@@ -101,7 +101,8 @@ class DiscordIntegrationTest : IntegrationTest {
     }
 
     private fun createScript(@Language("gradle") style: String): String {
-        val options = Json.decodeFromString<ProductionOptions>(File("options.json").readText())
+        val json = Json { ignoreUnknownKeys = true }
+        val options = json.decodeFromString<ProductionOptions>(File("options.json").readText())
 
         @Language("gradle")
         val buildScript = """
