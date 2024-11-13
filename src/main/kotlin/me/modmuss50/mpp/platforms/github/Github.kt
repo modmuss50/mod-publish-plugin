@@ -153,6 +153,12 @@ abstract class Github @Inject constructor(name: String) : Platform(name), Github
                     files.add(file.get().asFile)
                 }
 
+                val noneUnique = files.groupingBy { it.name }.eachCount().filter { it.value > 1 }
+                if (noneUnique.isNotEmpty()) {
+                    val noneUniqueNames = noneUnique.keys.joinToString(", ")
+                    throw IllegalStateException("Github file names must be unique within a release, found duplicates: $noneUniqueNames")
+                }
+
                 for (file in files) {
                     release.uploadAsset(file, "application/java-archive")
                 }
