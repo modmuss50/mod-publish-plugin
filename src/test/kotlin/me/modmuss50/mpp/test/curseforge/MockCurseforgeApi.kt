@@ -18,6 +18,7 @@ class MockCurseforgeApi : MockWebServer.MockApi {
     @OptIn(ExperimentalSerializationApi::class)
     val json = Json { ignoreUnknownKeys = true; explicitNulls = false }
     var lastMetadata: CurseforgeApi.UploadFileMetadata? = null
+    var allMetadata: ArrayList<CurseforgeApi.UploadFileMetadata> = ArrayList()
     val files: ArrayList<String> = ArrayList()
 
     override fun routes(): EndpointGroup {
@@ -77,6 +78,7 @@ class MockCurseforgeApi : MockWebServer.MockApi {
         }
 
         lastMetadata = json.decodeFromString(metadata)
+        allMetadata.add(lastMetadata!!)
         files.add(file.filename())
 
         context.result("""{"id": "20402"}""")

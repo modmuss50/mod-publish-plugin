@@ -74,6 +74,11 @@ publishMods {
         // Set a changelog using text, markdown, or html (defaults to markdown)
         changelog = "# Markdown changelog content"
         changelogType = "markdown"
+
+        // Set the display name of an additional file
+        additionalFile(jar) {
+            name = "Fabric"
+        }
     }
 }
 ```

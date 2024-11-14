@@ -348,4 +348,53 @@ class CurseforgeTest : IntegrationTest {
         assertEquals(TaskOutcome.FAILED, result.task(":publishCurseforge")!!.outcome)
         assertContains(result.output, "minecraftVersions contains duplicate values: [1.20.1]")
     }
+
+    @Test
+    fun additionalFiles() {
+        val server = MockWebServer(MockCurseforgeApi())
+
+        val result = gradleTest()
+            .buildScript(
+                """
+                val fabricJar = tasks.register("fabricJar", Jar::class.java) {
+                    archiveClassifier = "fabric"
+                }
+                val forgeJar = tasks.register("forgeJar", Jar::class.java) {
+                    archiveClassifier = "forge"
+                }
+                publishMods {
+                    file = tasks.jar.flatMap { it.archiveFile }
+                    changelog = "<p>Hello!</p>"
+                    version = "1.0.0"
+                    type = BETA
+                    modLoaders.add("fabric")
+                
+                    curseforge {
+                        accessToken = "123"
+                        projectId = "123456"
+                        minecraftVersions.add("1.20.1")
+                        
+                        additionalFile(fabricJar.flatMap { it.archiveFile }) {
+                            name = "Fabric"
+                        }
+
+                        additionalFile(forgeJar.flatMap { it.archiveFile }) {
+                            name = "Forge"
+                        }
+
+                        apiEndpoint = "${server.endpoint}"
+                    }
+                }
+                """.trimIndent(),
+            )
+            .run("publishCurseforge")
+        server.close()
+
+        val metadata = server.api.allMetadata
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishCurseforge")!!.outcome)
+        assertEquals(3, metadata.size)
+        assertEquals("Fabric", metadata[1].displayName)
+        assertEquals("Forge", metadata[2].displayName)
+    }
 }

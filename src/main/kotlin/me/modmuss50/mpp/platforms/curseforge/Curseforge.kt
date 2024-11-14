@@ -17,13 +17,17 @@ import me.modmuss50.mpp.Validators
 import me.modmuss50.mpp.path
 import org.gradle.api.Action
 import org.gradle.api.JavaVersion
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.logging.Logger
 import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
+import org.jetbrains.annotations.ApiStatus
 import javax.inject.Inject
 import kotlin.random.Random
 import kotlin.reflect.KClass
@@ -57,6 +61,10 @@ interface CurseforgeOptions : PlatformOptions, PlatformOptionsInternal<Curseforg
     @get:Input
     val changelogType: Property<String>
 
+    @get:Nested
+    @get:ApiStatus.Internal
+    val additionalFilesExt: MapProperty<ConfigurableFileCollection, AdditionalFileOptions>
+
     fun from(other: CurseforgeOptions) {
         super.from(other)
         fromDependencies(other)
@@ -68,6 +76,7 @@ interface CurseforgeOptions : PlatformOptions, PlatformOptionsInternal<Curseforg
         javaVersions.convention(other.javaVersions)
         apiEndpoint.convention(other.apiEndpoint)
         changelogType.convention(other.changelogType)
+        additionalFilesExt.convention(other.additionalFilesExt)
     }
 
     fun from(other: Provider<CurseforgeOptions>) {
@@ -91,6 +100,17 @@ interface CurseforgeOptions : PlatformOptions, PlatformOptionsInternal<Curseforg
                 MinecraftApi().getVersionsInRange(startId, endId)
             },
         )
+    }
+
+    fun additionalFile(file: Any, action: Action<AdditionalFileOptions>) {
+        val options = objectFactory.newInstance(AdditionalFileOptions::class.java)
+        action.execute(options)
+
+        val fileCollection = objectFactory.fileCollection()
+        fileCollection.from(file)
+
+        additionalFiles.from(fileCollection)
+        additionalFilesExt.put(fileCollection, options)
     }
 
     override fun setInternalDefaults() {
@@ -117,6 +137,17 @@ interface CurseforgeVersionRangeOptions {
      * The end version of the range (exclusive)
      */
     val end: Property<String>
+}
+
+/**
+ * Options for additional files to upload alongside the main file
+ */
+interface AdditionalFileOptions {
+    /**
+     * The display name of the additional file
+     */
+    @get:Input
+    val name: Property<String>
 }
 
 /**
@@ -242,8 +273,13 @@ abstract class Curseforge @Inject constructor(name: String) : Platform(name), Cu
                     api.uploadFile(projectId.get(), file.path, metadata)
                 }
 
+                val additionalFileOptions = additionalFilesExt.get().map { (key, value) ->
+                    key.singleFile.toPath() to value
+                }.toMap()
+
                 for (additionalFile in additionalFiles.files) {
-                    val additionalMetadata = metadata.copy(parentFileID = response.id, gameVersions = null, displayName = null)
+                    val fileOptions = additionalFileOptions[additionalFile.toPath()]
+                    val additionalMetadata = metadata.copy(parentFileID = response.id, gameVersions = null, displayName = fileOptions?.name?.orNull)
 
                     HttpUtils.retry(maxRetries.get(), "Failed to upload additional file") {
                         api.uploadFile(projectId.get(), additionalFile.toPath(), additionalMetadata)
