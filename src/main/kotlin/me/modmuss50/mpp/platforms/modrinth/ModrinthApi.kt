@@ -141,7 +141,7 @@ class ModrinthApi(private val accessToken: String, private val baseUrl: String) 
     private val headers: Map<String, String>
         get() = mapOf(
             "Authorization" to accessToken,
-            "Content-Type" to "application/json"
+            "Content-Type" to "application/json",
         )
 
     fun createVersion(metadata: CreateVersion, files: Map<String, Path>): CreateVersionResponse {
