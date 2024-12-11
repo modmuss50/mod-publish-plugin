@@ -257,8 +257,9 @@ abstract class Modrinth @Inject constructor(name: String) : Platform(name), Modr
         private fun toApiDependency(dependency: ModrinthDependency, api: ModrinthApi): ModrinthApi.Dependency {
             with(dependency) {
                 var projectId: String? = null
+                var versionId: String? = null
 
-                // Use the project id if we have it
+                // Use the project ID if we have it
                 if (id.isPresent) {
                     projectId = id.get().modrinthId
                 }
@@ -280,9 +281,31 @@ abstract class Modrinth @Inject constructor(name: String) : Platform(name), Modr
                     throw IllegalStateException("Modrinth dependency has no configured projectId or projectSlug value")
                 }
 
+                if (version.isPresent) {
+                    val response = HttpUtils.retry(parameters.maxRetries.get(), "Failed to lookup dependency versions from slug/id: ${version.get()}") {
+                        api.listVersions(projectId)
+                    }
+
+                    for (responseVersion in response) {
+                        if (responseVersion.id == version.get()) {
+                            versionId = version.get()
+                            break
+                        }
+                        
+                        if (responseVersion.versionNumber == version.get()) {
+                            versionId = responseVersion.id
+                            break
+                        }
+                    }
+
+                    if (versionId == null) {
+                        throw IllegalStateException("Modrinth dependency has a version configured but no matching version id or version slug could be found!")
+                    }
+                }
+
                 return ModrinthApi.Dependency(
                     projectId = projectId,
-                    versionId = version.orNull,
+                    versionId = versionId,
                     dependencyType = ModrinthApi.DependencyType.valueOf(type.get()),
                 )
             }
