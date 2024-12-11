@@ -304,6 +304,10 @@ abstract class Modrinth @Inject constructor(name: String) : Platform(name), Modr
                             versionId = version.id
                         }
                     }
+                    
+                    if (versionId == null) {
+                        throw IllegalStateException("Modrinth dependency has a configured versionSlug but no matching version could be found!")
+                    }
                 }
 
                 // Ensure we have an id
