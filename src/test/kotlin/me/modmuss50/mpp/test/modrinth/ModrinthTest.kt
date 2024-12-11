@@ -327,4 +327,55 @@ class ModrinthTest : IntegrationTest {
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinth")!!.outcome)
         assertEquals("Hello World", api.projectBody)
     }
+
+    @Test
+    fun uploadModrinthSlugDependency() {
+        val server = MockWebServer(MockModrinthApi())
+
+        val result = gradleTest()
+            .buildScript(
+                """
+            publishMods {
+                file = tasks.jar.flatMap { it.archiveFile }
+                changelog = "Hello!"
+                version = "1.0.0"
+                type = STABLE
+                
+                // Common options that can be re-used between diffrent modrinth tasks
+                val modrinthOptions = modrinthOptions {
+                    accessToken = "123"
+                    minecraftVersions.add("1.20.1")
+                    apiEndpoint = "${server.endpoint}"
+                }
+                
+                modrinth("modrinthFabric") {
+                    from(modrinthOptions)
+                    file = tasks.jar.flatMap { it.archiveFile }
+                    projectId = "12345678"
+                    modLoaders.add("fabric")
+                    requires {
+                        slug = "fabric-api"
+                        version = "0.92.1+1.20.1"
+                    }
+                }
+
+                modrinth("modrinthForge") {
+                    from(modrinthOptions)
+                    file = tasks.jar.flatMap { it.archiveFile }
+                    projectId = "67896545"
+                    modLoaders.add("forge")
+                    requires {
+                        id = "P7dR8mSH"
+                        version = "P7uGFii0"
+                    }
+                }
+            }
+                """.trimIndent(),
+            )
+            .run("publishMods")
+        server.close()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinthFabric")!!.outcome)
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinthForge")!!.outcome)
+    }
 }

@@ -154,17 +154,10 @@ interface ModrinthDependency : PlatformDependency {
 
     @get:Input
     @get:Optional
-    val versionId: Property<String>
-
-    @get:Input
-    @get:Optional
-    val versionSlug: Property<String>
+    val version: Property<String>
 
     @Deprecated("For removal", ReplaceWith("id"))
     val projectId: Property<String> get() = id
-
-    @Deprecated("For removal", ReplaceWith("versionId"))
-    val version: Property<String> get() = versionId
 }
 
 interface ModrinthVersionRangeOptions {
@@ -270,11 +263,6 @@ abstract class Modrinth @Inject constructor(name: String) : Platform(name), Modr
                 if (id.isPresent) {
                     projectId = id.get().modrinthId
                 }
-                
-                // Use the version ID if we have it
-                if (this.versionId.isPresent) {
-                    versionId = this.versionId.get().modrinthId
-                }
 
                 // Lookup the project ID from the slug
                 if (slug.isPresent) {
@@ -288,31 +276,31 @@ abstract class Modrinth @Inject constructor(name: String) : Platform(name), Modr
                     }.id
                 }
 
-                // Lookup the version ID from the slug
-                if (versionSlug.isPresent) {
-                    // Don't allow a slug and id to both be specified
-                    if (versionId != null) {
-                        throw IllegalStateException("Modrinth dependency cannot specify both versionId and versionSlug")
-                    }
-
-                    val response = HttpUtils.retry(parameters.maxRetries.get(), "Failed to lookup version id from slug: ${slug.get()}") {
-                        api.listVersions(slug.get())
-                    }
-                    
-                    for (version in response) {
-                        if (version.versionNumber == versionSlug.get()) {
-                            versionId = version.id
-                        }
-                    }
-                    
-                    if (versionId == null) {
-                        throw IllegalStateException("Modrinth dependency has a configured versionSlug but no matching version could be found!")
-                    }
-                }
-
                 // Ensure we have an id
                 if (projectId == null) {
                     throw IllegalStateException("Modrinth dependency has no configured projectId or projectSlug value")
+                }
+
+                if (version.isPresent) {
+                    val response = HttpUtils.retry(parameters.maxRetries.get(), "Failed to lookup dependency versions from slug/id: ${version.get()}") {
+                        api.listVersions(projectId)
+                    }
+
+                    for (responseVersion in response) {
+                        if (responseVersion.id == version.get()) {
+                            versionId = version.get()
+                            break
+                        }
+                        
+                        if (responseVersion.versionNumber == version.get()) {
+                            versionId = responseVersion.id
+                            break
+                        }
+                    }
+
+                    if (versionId == null) {
+                        throw IllegalStateException("Modrinth dependency has a version configured but no matching version id or version slug could be found!")
+                    }
                 }
 
                 return ModrinthApi.Dependency(

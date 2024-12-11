@@ -26,14 +26,6 @@ class HttpUtils(val exceptionFactory: HttpExceptionFactory = DefaultHttpExceptio
         .build()
     val json = Json { ignoreUnknownKeys = true }
 
-    inline fun <reified T> get(url: String): T {
-        return request(
-            Request.Builder()
-                .url(url),
-            emptyMap()
-        )
-    }
-
     inline fun <reified T> get(url: String, headers: Map<String, String>): T {
         return request(
             Request.Builder()
