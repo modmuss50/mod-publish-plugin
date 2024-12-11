@@ -13,6 +13,7 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
+import sun.jvm.hotspot.code.NMethod
 import java.nio.file.Path
 import java.time.Duration
 import kotlin.io.path.name
@@ -110,6 +111,15 @@ class ModrinthApi(private val accessToken: String, private val baseUrl: String) 
             }
         }
     }
+    
+    // There's more but we don't need it
+    @Serializable
+    data class ListVersionsResponse(
+        val name: String,
+        @SerialName("version_number")
+        val versionNumber: String,
+        val id: String
+    )
 
     // There is a lot more to this response, however we dont need it.
     @Serializable
@@ -143,6 +153,10 @@ class ModrinthApi(private val accessToken: String, private val baseUrl: String) 
             "Authorization" to accessToken,
             "Content-Type" to "application/json",
         )
+    
+    fun listVersions(projectSlug: String): Array<ListVersionsResponse> {
+        return httpUtils.get("$baseUrl/project/$projectSlug/version")
+    }
 
     fun createVersion(metadata: CreateVersion, files: Map<String, Path>): CreateVersionResponse {
         val mediaType = "application/java-archive".toMediaTypeOrNull()
