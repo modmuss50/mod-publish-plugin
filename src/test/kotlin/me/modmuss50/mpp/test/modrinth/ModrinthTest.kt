@@ -330,7 +330,8 @@ class ModrinthTest : IntegrationTest {
 
     @Test
     fun uploadModrinthSlugDependency() {
-        val server = MockWebServer(MockModrinthApi())
+        val mockModrinthApi = MockModrinthApi()
+        val server = MockWebServer(mockModrinthApi)
 
         val result = gradleTest()
             .buildScript(
@@ -341,32 +342,19 @@ class ModrinthTest : IntegrationTest {
                 version = "1.0.0"
                 type = STABLE
                 
-                // Common options that can be re-used between diffrent modrinth tasks
-                val modrinthOptions = modrinthOptions {
+                modrinth {
                     accessToken = "123"
                     minecraftVersions.add("1.20.1")
                     apiEndpoint = "${server.endpoint}"
-                }
-                
-                modrinth("modrinthFabric") {
-                    from(modrinthOptions)
-                    file = tasks.jar.flatMap { it.archiveFile }
-                    projectId = "12345678"
-                    modLoaders.add("fabric")
-                    requires {
-                        slug = "fabric-api"
-                        version = "0.92.1+1.20.1"
-                    }
-                }
-
-                modrinth("modrinthForge") {
-                    from(modrinthOptions)
-                    file = tasks.jar.flatMap { it.archiveFile }
                     projectId = "67896545"
-                    modLoaders.add("forge")
+                    modLoaders.add("fabric")
                     requires {
                         id = "P7dR8mSH"
                         version = "P7uGFii0"
+                    }
+                    requires {
+                        slug = "fabric-api"
+                        version = "0.92.1+1.20.1"
                     }
                 }
             }
@@ -375,7 +363,11 @@ class ModrinthTest : IntegrationTest {
             .run("publishMods")
         server.close()
 
-        assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinthFabric")!!.outcome)
-        assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinthForge")!!.outcome)
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinth")!!.outcome)
+
+        var dependencies = mockModrinthApi.lastCreateVersion!!.dependencies.map { it.versionId }
+        assertEquals(2, dependencies.size)
+        assertContains(dependencies, "P7uGFii0")
+        assertContains(dependencies, "ba99D9Qf")
     }
 }

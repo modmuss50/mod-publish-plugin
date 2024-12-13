@@ -36,21 +36,21 @@ class MockModrinthApi : MockWebServer.MockApi {
             }
         }
     }
-    
+
     private fun listVersions(context: Context) {
         context.result(
             json.encodeToString(
                 arrayOf(
                     ModrinthApi.ListVersionsResponse(
                         "0.92.2+1.20.1",
-                        "P7uGFii0"
+                        "P7uGFii0",
                     ),
                     ModrinthApi.ListVersionsResponse(
                         "0.92.1+1.20.1",
-                        "ba99D9Qf"
-                    )
-                )
-            )
+                        "ba99D9Qf",
+                    ),
+                ),
+            ),
         )
     }
 

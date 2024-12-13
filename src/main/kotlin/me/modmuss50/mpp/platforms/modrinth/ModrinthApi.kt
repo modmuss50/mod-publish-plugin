@@ -110,13 +110,13 @@ class ModrinthApi(private val accessToken: String, private val baseUrl: String) 
             }
         }
     }
-    
+
     // There's more but we don't need it
     @Serializable
     data class ListVersionsResponse(
         @SerialName("version_number")
         val versionNumber: String,
-        val id: String
+        val id: String,
     )
 
     // There is a lot more to this response, however we dont need it.
@@ -151,7 +151,7 @@ class ModrinthApi(private val accessToken: String, private val baseUrl: String) 
             "Authorization" to accessToken,
             "Content-Type" to "application/json",
         )
-    
+
     fun listVersions(projectSlug: String): Array<ListVersionsResponse> {
         return httpUtils.get("$baseUrl/project/$projectSlug/version", headers)
     }

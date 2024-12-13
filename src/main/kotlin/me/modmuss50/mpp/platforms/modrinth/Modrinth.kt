@@ -282,24 +282,18 @@ abstract class Modrinth @Inject constructor(name: String) : Platform(name), Modr
                 }
 
                 if (version.isPresent) {
-                    val response = HttpUtils.retry(parameters.maxRetries.get(), "Failed to lookup dependency versions from slug/id: ${version.get()}") {
+                    val response = HttpUtils.retry(parameters.maxRetries.get(), "Failed to list versions from slug/id: ${version.get()}") {
                         api.listVersions(projectId)
                     }
 
-                    for (responseVersion in response) {
-                        if (responseVersion.id == version.get()) {
-                            versionId = version.get()
-                            break
-                        }
-                        
-                        if (responseVersion.versionNumber == version.get()) {
-                            versionId = responseVersion.id
-                            break
-                        }
+                    val versions = response.filter {
+                        it.id == version.get() || it.versionNumber == version.get()
                     }
 
-                    if (versionId == null) {
-                        throw IllegalStateException("Modrinth dependency has a version configured but no matching version id or version slug could be found!")
+                    versionId = when (versions.size) {
+                        0 -> throw IllegalStateException("Modrinth dependency has a version configured but no matches found for version: ${version.get()}")
+                        1 -> versions.first().id
+                        else -> throw IllegalStateException("Modrinth dependency has a version configured but multiple matches found for version: ${version.get()}")
                     }
                 }
 
