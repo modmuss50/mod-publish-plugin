@@ -21,6 +21,9 @@ class MockModrinthApi : MockWebServer.MockApi {
 
     override fun routes(): EndpointGroup {
         return EndpointGroup {
+            path("/project/{slug}/version") {
+                get(this::listVersions)
+            }
             path("/version") {
                 before(this::authHandler)
                 post(this::createVersion)
@@ -32,6 +35,23 @@ class MockModrinthApi : MockWebServer.MockApi {
                 get(this::checkProject)
             }
         }
+    }
+
+    private fun listVersions(context: Context) {
+        context.result(
+            json.encodeToString(
+                arrayOf(
+                    ModrinthApi.ListVersionsResponse(
+                        "0.92.2+1.20.1",
+                        "P7uGFii0",
+                    ),
+                    ModrinthApi.ListVersionsResponse(
+                        "0.92.1+1.20.1",
+                        "ba99D9Qf",
+                    ),
+                ),
+            ),
+        )
     }
 
     private fun authHandler(context: Context) {

@@ -257,8 +257,9 @@ abstract class Modrinth @Inject constructor(name: String) : Platform(name), Modr
         private fun toApiDependency(dependency: ModrinthDependency, api: ModrinthApi): ModrinthApi.Dependency {
             with(dependency) {
                 var projectId: String? = null
+                var versionId: String? = null
 
-                // Use the project id if we have it
+                // Use the project ID if we have it
                 if (id.isPresent) {
                     projectId = id.get().modrinthId
                 }
@@ -280,9 +281,25 @@ abstract class Modrinth @Inject constructor(name: String) : Platform(name), Modr
                     throw IllegalStateException("Modrinth dependency has no configured projectId or projectSlug value")
                 }
 
+                if (version.isPresent) {
+                    val response = HttpUtils.retry(parameters.maxRetries.get(), "Failed to list versions from slug/id: ${version.get()}") {
+                        api.listVersions(projectId)
+                    }
+
+                    val versions = response.filter {
+                        it.id == version.get() || it.versionNumber == version.get()
+                    }
+
+                    versionId = when (versions.size) {
+                        0 -> throw IllegalStateException("Modrinth dependency has a version configured but no matches found for version: ${version.get()}")
+                        1 -> versions.first().id
+                        else -> throw IllegalStateException("Modrinth dependency has a version configured but multiple matches found for version: ${version.get()}")
+                    }
+                }
+
                 return ModrinthApi.Dependency(
                     projectId = projectId,
-                    versionId = version.orNull,
+                    versionId = versionId,
                     dependencyType = ModrinthApi.DependencyType.valueOf(type.get()),
                 )
             }
