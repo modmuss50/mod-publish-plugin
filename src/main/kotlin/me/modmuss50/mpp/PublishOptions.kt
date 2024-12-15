@@ -57,7 +57,7 @@ interface PublishOptions {
      */
     fun file(project: Project) {
         var configuration = _thisProject.configurations.detachedConfiguration(
-            _thisProject.dependencyFactory.create(project),
+            _thisProject.dependencyFactory.create(project).setTransitive(false),
         )
         file.fileProvider(
             configuration.elements.map { it.single().asFile },
@@ -69,7 +69,7 @@ interface PublishOptions {
      */
     fun additionalFile(project: Project) {
         var configuration = _thisProject.configurations.detachedConfiguration(
-            _thisProject.dependencyFactory.create(project),
+            _thisProject.dependencyFactory.create(project).setTransitive(false),
         )
         additionalFiles.from(configuration)
     }

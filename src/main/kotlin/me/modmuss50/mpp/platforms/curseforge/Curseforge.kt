@@ -112,7 +112,7 @@ interface CurseforgeOptions : PlatformOptions, PlatformOptionsInternal<Curseforg
             when (file) {
                 is Project -> {
                     val configuration = _thisProject.configurations.detachedConfiguration(
-                        _thisProject.dependencyFactory.create(file),
+                        _thisProject.dependencyFactory.create(file).setTransitive(false),
                     )
                     configuration.elements.map { it.single().asFile }
                 }
