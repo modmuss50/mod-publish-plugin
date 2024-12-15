@@ -1,0 +1,60 @@
+When creating a cross platform mod is it common to have a subproject for each platform. This can lead to a lot of repetition in the buildscript.
+To help with this the plugin supports sharing options between multiple destinations, see the [Shared Options](/shared_options) page for more information.
+The simplest way to configure the publishing of multiple platforms is to configure them all in the root project, this keeps the configuration in one place and allows for easy sharing of options.
+
+See the following fully working example that publishes both the Fabric and Forge versions of a mod to both CurseForge and Modrinth:
+
+```groovy
+publishMods {
+    changelog = "Changelog goes here"
+    type = STABLE
+
+    // CurseForge options used by both Fabric and Forge
+    def cfOptions = curseforgeOptions {
+        accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
+        projectId = "123456"
+        minecraftVersions.add("1.20.1")
+    }
+
+    // Modrinth options used by both Fabric and Forge
+    def mrOptions = modrinthOptions {
+        accessToken = providers.environmentVariable("MODRINTH_TOKEN")
+        projectId = "12345678"
+        minecraftVersions.add("1.20.1")
+    }
+
+    // Fabric specific options for CurseForge
+    curseforge("curseforgeFabric") {
+        from cfOptions
+        file project(":fabric")
+        modLoaders.add("fabric")
+        requires {
+            slug = "fabric-api"
+        }
+    }
+
+    // Forge specific options for CurseForge
+    curseforge("curseforgeForge") {
+        from cfOptions
+        file project(":forge")
+        modLoaders.add("forge")
+    }
+
+    // Fabric specific options for Modrinth
+    modrinth("modrinthFabric") {
+        from mrOptions
+        file project(":fabric")
+        modLoaders.add("fabric")
+        requires {
+            slug = "fabric-api"
+        }
+    }
+
+    // Forge specific options for Modrinth
+    modrinth("modrinthForge") {
+        from mrOptions
+        file project(":forge")
+        modLoaders.add("forge")
+    }
+}
+```

@@ -92,7 +92,7 @@ interface IntegrationTest {
             return this
         }
 
-        fun subProject(name: String, @Language("gradle") script: String): TestBuilder {
+        fun subProject(name: String, @Language("gradle") script: String = ""): TestBuilder {
             val subProjectDir = File(projectDir, name)
 
             if (subProjectDir.exists()) {

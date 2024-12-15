@@ -10,7 +10,7 @@ Add to your gradle plugins block:
 
 ```gradle
 plugins {
-  id "me.modmuss50.mod-publish-plugin" version "0.8.2"
+  id "me.modmuss50.mod-publish-plugin" version "0.8.3"
 }
 ```
 

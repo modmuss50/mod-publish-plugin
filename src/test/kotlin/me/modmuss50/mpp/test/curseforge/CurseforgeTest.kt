@@ -397,4 +397,80 @@ class CurseforgeTest : IntegrationTest {
         assertEquals("Fabric", metadata[1].displayName)
         assertEquals("Forge", metadata[2].displayName)
     }
+
+    @Test
+    fun fileFromSubProject() {
+        val server = MockWebServer(MockCurseforgeApi())
+
+        val result = gradleTest()
+            .buildScript(
+                """
+                publishMods {
+                    file(project(":child"))
+                    changelog = "<p>Hello!</p>"
+                    version = "1.0.0"
+                    type = BETA
+                    modLoaders.add("fabric")
+                
+                    curseforge {
+                        accessToken = "123"
+                        projectId = "123456"
+                        minecraftVersions.add("1.20.1")
+                        apiEndpoint = "${server.endpoint}"
+                    }
+                }
+                """.trimIndent(),
+            )
+            .subProject("child")
+            .run("publishCurseforge")
+        server.close()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":child:jar")!!.outcome)
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishCurseforge")!!.outcome)
+    }
+
+    @Test
+    fun additionalFilesFromSubProject() {
+        val server = MockWebServer(MockCurseforgeApi())
+
+        val result = gradleTest()
+            .buildScript(
+                """
+                publishMods {
+                    file = tasks.jar.flatMap { it.archiveFile }
+                    changelog = "<p>Hello!</p>"
+                    version = "1.0.0"
+                    type = BETA
+                    modLoaders.add("fabric")
+                
+                    curseforge {
+                        accessToken = "123"
+                        projectId = "123456"
+                        minecraftVersions.add("1.20.1")
+                        
+                        additionalFile(project(":fabric")) {
+                            name = "Fabric"
+                        }
+
+                        additionalFile(project(":forge")) {
+                            name = "Forge"
+                        }
+
+                        apiEndpoint = "${server.endpoint}"
+                    }
+                }
+                """.trimIndent(),
+            )
+            .subProject("fabric")
+            .subProject("forge")
+            .run("publishCurseforge")
+        server.close()
+
+        val metadata = server.api.allMetadata
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishCurseforge")!!.outcome)
+        assertEquals(3, metadata.size)
+        assertEquals("Fabric", metadata[1].displayName)
+        assertEquals("Forge", metadata[2].displayName)
+    }
 }

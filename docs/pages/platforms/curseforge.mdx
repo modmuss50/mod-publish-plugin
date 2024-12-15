@@ -79,6 +79,11 @@ publishMods {
         additionalFile(jar) {
             name = "Fabric"
         }
+
+        // Set the display name of an additional file from another project
+        additionalFile(project(":child")) {
+            name = "Fabric"
+        }
     }
 }
 ```

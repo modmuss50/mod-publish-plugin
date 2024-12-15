@@ -1,5 +1,6 @@
 package me.modmuss50.mpp
 
+import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
@@ -7,6 +8,8 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.InputFiles
+import org.jetbrains.annotations.ApiStatus.Internal
+import javax.inject.Inject
 
 // Contains options shared by each platform and the extension
 interface PublishOptions {
@@ -34,6 +37,10 @@ interface PublishOptions {
     @get:Input
     val maxRetries: Property<Int>
 
+    @get:Inject
+    @get:Internal
+    val _thisProject: Project
+
     fun from(other: PublishOptions) {
         file.convention(other.file)
         version.convention(other.version)
@@ -43,5 +50,27 @@ interface PublishOptions {
         modLoaders.convention(other.modLoaders)
         additionalFiles.convention(other.additionalFiles)
         maxRetries.convention(other.maxRetries)
+    }
+
+    /**
+     * A helper function to add a file from the output of another project
+     */
+    fun file(project: Project) {
+        var configuration = _thisProject.configurations.detachedConfiguration(
+            _thisProject.dependencyFactory.create(project),
+        )
+        file.fileProvider(
+            configuration.elements.map { it.single().asFile },
+        )
+    }
+
+    /**
+     * A helper function to add an additional file from the output of another project
+     */
+    fun additionalFile(project: Project) {
+        var configuration = _thisProject.configurations.detachedConfiguration(
+            _thisProject.dependencyFactory.create(project),
+        )
+        additionalFiles.from(configuration)
     }
 }

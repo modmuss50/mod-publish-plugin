@@ -5,6 +5,9 @@ publishMods {
     // Set the main file to be uploaded
     file = jar.archiveFile
 
+    // Or set the main file to be uploaded from another sub project
+    file project(":subproject")
+
     // Markdown changelog
     changelog = "Example changelog"
 

@@ -17,6 +17,7 @@ import me.modmuss50.mpp.Validators
 import me.modmuss50.mpp.path
 import org.gradle.api.Action
 import org.gradle.api.JavaVersion
+import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.logging.Logger
 import org.gradle.api.provider.ListProperty
@@ -107,7 +108,19 @@ interface CurseforgeOptions : PlatformOptions, PlatformOptionsInternal<Curseforg
         action.execute(options)
 
         val fileCollection = objectFactory.fileCollection()
-        fileCollection.from(file)
+        fileCollection.from(
+            when (file) {
+                is Project -> {
+                    val configuration = _thisProject.configurations.detachedConfiguration(
+                        _thisProject.dependencyFactory.create(file),
+                    )
+                    configuration.elements.map { it.single().asFile }
+                }
+                else -> {
+                    file
+                }
+            },
+        )
 
         additionalFiles.from(fileCollection)
         additionalFilesExt.put(fileCollection, options)
