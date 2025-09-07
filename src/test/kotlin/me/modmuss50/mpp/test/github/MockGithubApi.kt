@@ -1,6 +1,7 @@
 package me.modmuss50.mpp.test.github
 
 import io.javalin.apibuilder.ApiBuilder.get
+import io.javalin.apibuilder.ApiBuilder.patch
 import io.javalin.apibuilder.ApiBuilder.path
 import io.javalin.apibuilder.ApiBuilder.post
 import io.javalin.apibuilder.EndpointGroup
@@ -20,6 +21,7 @@ class MockGithubApi : MockWebServer.MockApi {
                             post(this::uploadAsset)
                         }
                         get("{id}", this::getRelease)
+                        patch("{id}", this::updateRelease)
                     }
                 }
             }
@@ -68,6 +70,15 @@ class MockGithubApi : MockWebServer.MockApi {
             "id": $id,
             "upload_url": "http://localhost:${context.port()}/repos/${context.pathParam("owner")}/${context.pathParam("name")}/releases/1/assets{?name,label}",
             "html_url": "https://github.com"
+            }
+            """.trimIndent(),
+        )
+    }
+
+    private fun updateRelease(context: Context) {
+        context.result(
+            """
+            {
             }
             """.trimIndent(),
         )

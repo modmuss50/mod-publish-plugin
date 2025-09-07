@@ -145,7 +145,7 @@ abstract class Github @Inject constructor(name: String) : Platform(name), Github
         override fun publish(): PublishResult {
             with(parameters) {
                 val repo = connect().getRepository(repository.get())
-                val release = getOrCreateRelease(repo)
+                val (release, created) = getOrCreateRelease(repo)
 
                 val files = additionalFiles.files.toMutableList()
 
@@ -163,6 +163,13 @@ abstract class Github @Inject constructor(name: String) : Platform(name), Github
                     release.uploadAsset(file, "application/java-archive")
                 }
 
+                if (created) {
+                    // Publish the release after all assets are uploaded.
+                    release.update()
+                        .draft(false)
+                        .update()
+                }
+
                 return GithubPublishResult(
                     repository = repository.get(),
                     releaseId = release.id,
@@ -172,19 +179,23 @@ abstract class Github @Inject constructor(name: String) : Platform(name), Github
             }
         }
 
-        private fun getOrCreateRelease(repo: GHRepository): GHRelease {
+        data class ReleaseResult(val release: GHRelease, val created: Boolean)
+
+        private fun getOrCreateRelease(repo: GHRepository): ReleaseResult {
             with(parameters) {
                 if (releaseResult.isPresent) {
                     val result = PublishResult.fromJson(releaseResult.get().asFile.readText()) as GithubPublishResult
-                    return repo.getRelease(result.releaseId)
+                    return ReleaseResult(repo.getRelease(result.releaseId), false)
                 }
 
-                return with(GHReleaseBuilder(repo, tagName.get())) {
+                val release = with(GHReleaseBuilder(repo, tagName.get())) {
                     name(displayName.get())
                     body(changelog.get())
                     prerelease(type.get() != ReleaseType.STABLE)
                     commitish(commitish.get())
+                    draft(true) // Create a draft to allow uploading assets before publishing.
                 }.create()
+                return ReleaseResult(release, true)
             }
         }
 
