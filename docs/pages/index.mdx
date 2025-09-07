@@ -8,11 +8,13 @@ A modern Gradle plugin to publish Minecraft mods to a range of destinations. Sta
 - Retry on failure
 - Dry run mode to try and increase confidence in your buildscript before releases
 - Built with modern Gradle features
-- Mod loader independent 
+- Mod loader independent
+- Stable API, backwards compatibility is a high priority.
+  - Breaking changes indicated by a major version bump.
 
 ### FAQ
 - Why use Kotlin?
-  - I wanted to explore using Kotlin for a larger project, as Gradle already includes Kotlin there should be little downside to the end user.
+  - I wanted to explore using Kotlin for a larger project.
   - Gradle includes Kotlin so there is no additional dependency for the end user.
   - Groovy buildscripts are fully supported.
 - Why do I need to specify the minecraft versions for both CurseForge and Modrinth?
@@ -23,6 +25,9 @@ A modern Gradle plugin to publish Minecraft mods to a range of destinations. Sta
   - Please use the mod publish plugin discord channel on the [Team Reborn Discord](https://discord.gg/teamreborn)
 
 ### Changelog
+#### 1.0.0
+- Support GitHub immutable releases
+- Retry on all network failures including timeouts.
 #### 0.8.4
 - Fix project files attempting to include transitive dependencies
 #### 0.8.3
