@@ -7,7 +7,6 @@ import okhttp3.RequestBody
 import okhttp3.Response
 import org.slf4j.LoggerFactory
 import java.io.IOException
-import java.lang.RuntimeException
 import java.time.Duration
 
 class HttpUtils(val exceptionFactory: HttpExceptionFactory = DefaultHttpExceptionFactory(), timeout: Duration = Duration.ofSeconds(30)) {
@@ -87,12 +86,7 @@ class HttpUtils(val exceptionFactory: HttpExceptionFactory = DefaultHttpExceptio
             while (count < maxRetries) {
                 try {
                     return closure()
-                } catch (e: HttpException) {
-                    if (e.response.code / 100 != 5) {
-                        throw e
-                    }
-
-                    // Only retry 5xx server errors
+                } catch (e: Exception) {
                     count++
                     exception = exception ?: RuntimeException("$message after $maxRetries attempts with error: ${e.message}")
                     exception.addSuppressed(e)
