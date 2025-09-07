@@ -192,7 +192,7 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
 
     // Misc
 
-    private inline fun <reified T> PolymorphicDomainObjectContainer<in T>.maybeRegister(name: String, action: Action<T>): NamedDomainObjectProvider<T> {
+    private inline fun <reified T : Any> PolymorphicDomainObjectContainer<in T>.maybeRegister(name: String, action: Action<T>): NamedDomainObjectProvider<T> {
         return if (name in platforms.names) {
             named(name, T::class.java, action)
         } else {
