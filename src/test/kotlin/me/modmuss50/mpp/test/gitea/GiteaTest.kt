@@ -22,9 +22,9 @@ class GiteaTest : IntegrationTest {
                         type = STABLE
                         gitea {
                             accessToken = "123"
+                            host("${server.endpoint}")
                             repository = "test/example"
                             commitish = "main"
-                            apiEndpoint = "${server.endpoint}"
                             tagName = "release/1.0.0"
                         }
                     }
@@ -50,9 +50,9 @@ class GiteaTest : IntegrationTest {
                         type = STABLE
                         forgejo {
                             accessToken = "123"
+                            host("${server.endpoint}")
                             repository = "test/example"
                             commitish = "main"
-                            apiEndpoint = "${server.endpoint}"
                             tagName = "release/1.0.0"
                         }
                     }
@@ -77,9 +77,9 @@ class GiteaTest : IntegrationTest {
                         type = STABLE
                         gitea {
                             accessToken = "123"
+                            host("${server.endpoint}")
                             repository = "test/example"
                             commitish = "main"
-                            apiEndpoint = "${server.endpoint}"
                             tagName = "release/1.0.0"
                             additionalFiles.from(tasks.jar.flatMap { it.archiveFile })
                         }
@@ -106,14 +106,14 @@ class GiteaTest : IntegrationTest {
                         type = STABLE
                         gitea {
                             accessToken = "123"
+                            host("${server.endpoint}")
                             repository = "test/example"
                             commitish = "main"
-                            apiEndpoint = "${server.endpoint}"
                             tagName = "release/1.0.0"
                         }
                         gitea("giteaOther") {
+                            host("${server.endpoint}")
                             accessToken = "123"
-                            apiEndpoint = "${server.endpoint}"
                             parent(tasks.named("publishGitea"))
                         }
                     }
@@ -138,9 +138,9 @@ class GiteaTest : IntegrationTest {
                         type = STABLE
                         gitea {
                             accessToken = "123"
+                            host("${server.endpoint}")
                             repository = "test/example"
                             commitish = "main"
-                            apiEndpoint = "${server.endpoint}"
                             tagName = "release/1.0.0"
                             allowEmptyFiles = true
                         }
@@ -153,7 +153,7 @@ class GiteaTest : IntegrationTest {
                     publishMods {
                         gitea {
                             accessToken = "123"
-                            apiEndpoint = "${server.endpoint}"
+                            host("${server.endpoint}")
                             parent(project(":").tasks.named("publishGitea"))
                             file = tasks.jar.flatMap { it.archiveFile }
                         }
@@ -181,9 +181,9 @@ class GiteaTest : IntegrationTest {
                         dryRun = true
                         gitea {
                             accessToken = "123"
+                            host("${server.endpoint}")
                             repository = "test/example"
                             commitish = "main"
-                            apiEndpoint = "${server.endpoint}"
                             tagName = "release/1.0.0"
                             allowEmptyFiles = true
                         }
@@ -210,9 +210,9 @@ class GiteaTest : IntegrationTest {
                         type = STABLE
                         gitea {
                             accessToken = "123"
+                            host("${server.endpoint}")
                             repository = "test/example"
                             commitish = "main"
-                            apiEndpoint = "${server.endpoint}"
                             tagName = "release/1.0.0"
                             additionalFiles.from(tasks.jar.flatMap { it.archiveFile })
                         }

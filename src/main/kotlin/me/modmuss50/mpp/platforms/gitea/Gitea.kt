@@ -11,7 +11,6 @@ import me.modmuss50.mpp.PublishResult
 import me.modmuss50.mpp.PublishWorkAction
 import me.modmuss50.mpp.PublishWorkParameters
 import me.modmuss50.mpp.ReleaseType
-import me.modmuss50.mpp.platforms.gitea.GiteaOptions.HostType
 import org.gradle.api.Task
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.logging.Logger
@@ -81,7 +80,7 @@ interface GiteaOptions : PlatformOptions, PlatformOptionsInternal<GiteaOptions> 
         allowEmptyFiles.convention(false)
     }
 
-    fun hostUrl(task: Provider<String>) {
+    fun host(task: Provider<String>) {
         apiEndpoint.convention(task.get() + "/api/v1")
     }
 
@@ -113,6 +112,10 @@ interface GiteaOptions : PlatformOptions, PlatformOptionsInternal<GiteaOptions> 
         releaseResult.set(publishTask.flatMap { it.result })
 
         val options = publishTask.map { it.platform as GiteaOptions }
+        if (options.get().hostType.get() != hostType.get()) { // May not be necessary, but should reduce confusion.
+            throw IllegalArgumentException("Unable to parent Gitea with Forgejo, or vice versa.")
+        }
+
         version.set(options.flatMap { it.version })
         version.finalizeValue()
         changelog.set(options.flatMap { it.changelog })
@@ -127,6 +130,10 @@ interface GiteaOptions : PlatformOptions, PlatformOptionsInternal<GiteaOptions> 
         commitish.finalizeValue()
         tagName.set(options.flatMap { it.tagName })
         tagName.finalizeValue()
+
+        // Include this here to make sure that different hosts may resolve correctly when parenting. This is not included in other platforms.
+        apiEndpoint.set(options.flatMap { it.apiEndpoint })
+        apiEndpoint.finalizeValue()
     }
 
     enum class HostType constructor(val friendlyString: String, val defaultBrandColor: Int) {
@@ -193,7 +200,7 @@ abstract class Gitea @Inject constructor(name: String) : Platform(name), GiteaOp
                 val noneUnique = files.groupingBy { it.name }.eachCount().filter { it.value > 1 }
                 if (noneUnique.isNotEmpty()) {
                     val noneUniqueNames = noneUnique.keys.joinToString(", ")
-                    throw IllegalStateException("$hostDisplayName file names must be unique within a release, found duplicates: $noneUniqueNames")
+                    throw IllegalStateException("${hostType.get().friendlyString} file names must be unique within a release, found duplicates: $noneUniqueNames")
                 }
 
                 for (file in files) {

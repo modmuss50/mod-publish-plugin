@@ -11,7 +11,7 @@ import me.modmuss50.mpp.test.MockWebServer
 class MockGiteaApi : MockWebServer.MockApi {
     override fun routes(): EndpointGroup {
         return EndpointGroup {
-            path("repos") {
+            path("api/v1/repos") {
                 path("{owner}/{name}") {
                     path("releases") {
                         post(this::createRelease)
