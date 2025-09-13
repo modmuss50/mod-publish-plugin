@@ -32,7 +32,7 @@ class MockGiteaApi : MockWebServer.MockApi {
             """
             {
             "id": 1,
-            "upload_url": "http://localhost:${context.port()}/repos/${context.pathParam("owner")}/${context.pathParam("name")}/releases/1/assets",
+            "upload_url": "http://localhost:${context.port()}/api/v1/repos/${context.pathParam("owner")}/${context.pathParam("name")}/releases/1/assets",
             "html_url": "https://codeberg.org"
             }
             """.trimIndent(),
@@ -56,7 +56,7 @@ class MockGiteaApi : MockWebServer.MockApi {
             """
             {
             "id": $id,
-            "upload_url": "http://localhost:${context.port()}/repos/${context.pathParam("owner")}/${context.pathParam("name")}/releases/${id}/assets",
+            "upload_url": "http://localhost:${context.port()}/api/v1/repos/${context.pathParam("owner")}/${context.pathParam("name")}/releases/${id}/assets",
             "html_url": "https://codeberg.org"
             }
             """.trimIndent(),
