@@ -230,7 +230,7 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
     }
 
     fun forgejoOptions(@DelegatesTo(value = Gitea::class) closure: Closure<*>): Provider<GiteaOptions> {
-        return giteaOptions {
+        return forgejoOptions {
             project.configure(it, closure)
         }
     }

@@ -32,6 +32,7 @@ class MockGiteaApi : MockWebServer.MockApi {
             """
             {
             "id": 1,
+            "upload_url": "http://localhost:${context.port()}/repos/${context.pathParam("owner")}/${context.pathParam("name")}/releases/1/assets",
             "html_url": "https://codeberg.org"
             }
             """.trimIndent(),

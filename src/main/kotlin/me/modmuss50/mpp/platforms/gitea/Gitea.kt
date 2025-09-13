@@ -50,6 +50,20 @@ interface GiteaOptions : PlatformOptions, PlatformOptionsInternal<GiteaOptions> 
     @get:Input
     val apiEndpoint: Property<String>
 
+	/**
+	 * Specifies the display name for the custom host. For example, Codeberg.
+	 */
+	@get:Input
+	@get:Optional
+	val hostDisplayName: Property<String>
+
+	/**
+	 * Specifies a custom brand color for Discord embeds. Useful for specific hosts.
+	 */
+	@get:Input
+	@get:Optional
+	val hostBrandColor: Property<Int>
+
     @get:Input
     val allowEmptyFiles: Property<Boolean>
 
@@ -58,17 +72,9 @@ interface GiteaOptions : PlatformOptions, PlatformOptionsInternal<GiteaOptions> 
     @get:Internal
     val releaseResult: RegularFileProperty
 
-    /**
-     * Specifies the display name for the custom host. For example, Codeberg.
-     */
-    @get:Input
-    val hostDisplayName: Property<String>
-
-    /**
-     * Specifies a custom brand color for Discord embeds. Useful for specific hosts.
-     */
-    @get:Input
-    val hostBrandColor: Property<Int>
+	@get:Input
+	@get:Internal
+	val hostType: Property<HostType>
 
     override fun setInternalDefaults() {
         tagName.convention(version)
@@ -87,6 +93,7 @@ interface GiteaOptions : PlatformOptions, PlatformOptionsInternal<GiteaOptions> 
         apiEndpoint.convention(other.apiEndpoint)
         allowEmptyFiles.convention(other.allowEmptyFiles)
         releaseResult.convention(other.releaseResult)
+		hostType.convention(other.hostType)
     }
 
     fun from(other: Provider<GiteaOptions>) {
@@ -129,13 +136,7 @@ interface GiteaOptions : PlatformOptions, PlatformOptionsInternal<GiteaOptions> 
     }
 }
 
-interface HostTyped {
-    @get:InputFile
-    @get:Internal
-    val hostType: Property<HostType>
-}
-
-abstract class Gitea @Inject constructor(name: String) : Platform(name), GiteaOptions, HostTyped {
+abstract class Gitea @Inject constructor(name: String) : Platform(name), GiteaOptions {
     override fun publish(context: PublishContext) {
         val files = additionalFiles.files.toMutableList()
 
@@ -172,7 +173,7 @@ abstract class Gitea @Inject constructor(name: String) : Platform(name), GiteaOp
         return name.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }
     }
 
-    interface UploadParams : PublishWorkParameters, GiteaOptions, HostTyped
+    interface UploadParams : PublishWorkParameters, GiteaOptions
 
     abstract class UploadWorkAction : PublishWorkAction<UploadParams> {
         override fun publish(): PublishResult {
