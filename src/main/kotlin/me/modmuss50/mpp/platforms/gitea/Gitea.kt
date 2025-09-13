@@ -21,6 +21,7 @@ import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskProvider
 import org.jetbrains.annotations.ApiStatus.Internal
+import java.net.URI
 import java.util.Locale
 import javax.inject.Inject
 import kotlin.random.Random
@@ -80,8 +81,8 @@ interface GiteaOptions : PlatformOptions, PlatformOptionsInternal<GiteaOptions> 
         allowEmptyFiles.convention(false)
     }
 
-    fun host(task: Provider<String>) {
-        apiEndpoint.convention(task.get() + "/api/v1")
+    fun host(uri: URI) {
+        apiEndpoint.convention("$uri/api/v1")
     }
 
     fun from(other: GiteaOptions) {
@@ -113,7 +114,7 @@ interface GiteaOptions : PlatformOptions, PlatformOptionsInternal<GiteaOptions> 
 
         val options = publishTask.map { it.platform as GiteaOptions }
         if (options.get().hostType.get() != hostType.get()) { // May not be necessary, but should reduce confusion.
-            throw IllegalArgumentException("Unable to parent Gitea with Forgejo, or vice versa.")
+            throw IllegalArgumentException("Unable to parent a ${hostType.get()} instance to a ${options.get().hostType.get()} instance")
         }
 
         version.set(options.flatMap { it.version })
