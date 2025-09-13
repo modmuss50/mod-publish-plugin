@@ -114,7 +114,7 @@ interface GiteaOptions : PlatformOptions, PlatformOptionsInternal<GiteaOptions> 
 
         val options = publishTask.map { it.platform as GiteaOptions }
         if (options.get().hostType.get() != hostType.get()) { // May not be necessary, but should reduce confusion.
-            throw IllegalArgumentException("Unable to parent a ${hostType.get()} instance to a ${options.get().hostType.get()} instance")
+            throw IllegalStateException("Unable to make a ${options.get().hostType.get().friendlyString} instance a parent of a ${hostType.get().friendlyString} instance")
         }
 
         version.set(options.flatMap { it.version })

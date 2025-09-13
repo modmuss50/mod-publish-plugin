@@ -254,7 +254,8 @@ class GiteaTest : IntegrationTest {
             .run("publishGitea")
         server.close()
 
+        // TODO: This will always throw an exception and fail. I don't really know how to fix it. - Calico
         assertEquals(TaskOutcome.FAILED, result.task(":publishGitea")!!.outcome)
-        assertContains(result.output, "Unable to parent a Forgejo instance to a Gitea instance")
+        assertContains(result.output, "Unable to make a Gitea instance a parent of a Forgejo instance")
     }
 }
