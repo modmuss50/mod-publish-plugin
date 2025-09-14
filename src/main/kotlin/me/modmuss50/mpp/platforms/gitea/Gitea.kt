@@ -205,7 +205,7 @@ abstract class Gitea @Inject constructor(name: String) : Platform(name), GiteaOp
                 }
 
                 for (file in files) {
-                    api.uploadAsset(release,  displayName.get(), file)
+                    api.uploadAsset(release, file)
                 }
 
                 if (created) {

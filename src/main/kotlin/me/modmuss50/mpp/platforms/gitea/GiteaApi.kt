@@ -60,12 +60,12 @@ class GiteaApi(private val accessToken: String, private val baseUrl: String, pri
         return httpUtils.get("$baseUrl/repos/$repository/releases/$id", headers)
     }
 
-    fun uploadAsset(release: Release, name: String, file: File) {
+    fun uploadAsset(release: Release, file: File) {
         val mediaType = "application/java-archive".toMediaTypeOrNull()
 
         val bodyBuilder = MultipartBody.Builder()
             .setType(MultipartBody.FORM)
-            .addFormDataPart("attachment", name, file.asRequestBody(mediaType))
+            .addFormDataPart("attachment", file.name, file.asRequestBody(mediaType))
 
         return httpUtils.post(release.uploadUrl, bodyBuilder.build(), headers)
     }
