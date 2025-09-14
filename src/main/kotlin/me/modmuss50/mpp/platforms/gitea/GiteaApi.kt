@@ -47,7 +47,7 @@ class GiteaApi(private val accessToken: String, private val baseUrl: String, pri
 
     private val headers: Map<String, String>
         get() = mapOf(
-            "AuthorizationHeaderToken" to "Token $accessToken",
+            "Authorization" to "token $accessToken",
             "Content-Type" to "application/json",
         )
 
