@@ -19,6 +19,7 @@ class GiteaApi(private val accessToken: String, private val baseUrl: String, pri
     )
 
     @Serializable
+    // https://docs.gitea.com/api/1.24/#tag/repository/operation/repoGetRelease
     data class Release(
         val id: Long,
         @SerialName("html_url")
@@ -28,6 +29,7 @@ class GiteaApi(private val accessToken: String, private val baseUrl: String, pri
     )
 
     // Some of the below are nullable, but we don't need their nullability here.
+    // https://docs.gitea.com/api/1.24/#tag/repository/operation/repoCreateRelease
     @Serializable
     data class CreateRelease(
         val body: String? = null,
@@ -39,6 +41,7 @@ class GiteaApi(private val accessToken: String, private val baseUrl: String, pri
         val targetCommitish: String,
     )
 
+    // Error responses are consistent between hooks.
     @Serializable
     data class ErrorResponse(
         val message: String,
@@ -83,6 +86,7 @@ class GiteaApi(private val accessToken: String, private val baseUrl: String, pri
         return httpUtils.patch("$baseUrl/repos/$repository/releases/${release.id}", body, headers)
     }
 
+    // Error responses are consistent between hooks.
     private class GiteaHttpExceptionFactory : HttpUtils.HttpExceptionFactory {
         val json = Json { ignoreUnknownKeys = true }
 
