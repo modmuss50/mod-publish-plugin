@@ -51,15 +51,18 @@ class GiteaApi(private val accessToken: String, private val baseUrl: String, pri
             "Content-Type" to "application/json",
         )
 
+    // https://docs.gitea.com/api/1.24/#tag/repository/operation/repoCreateRelease
     fun createRelease(metadata: CreateRelease): Release {
         val body = Json.encodeToString(metadata).toRequestBody()
         return httpUtils.post("$baseUrl/repos/$repository/releases", body, headers)
     }
 
+    // https://docs.gitea.com/api/1.24/#tag/repository/operation/repoGetRelease
     fun getRelease(id: Long): Release {
         return httpUtils.get("$baseUrl/repos/$repository/releases/$id", headers)
     }
 
+    // https://docs.gitea.com/api/1.24/#tag/repository/operation/repoCreateReleaseAttachment
     fun uploadAsset(release: Release, file: File) {
         val mediaType = "application/java-archive".toMediaTypeOrNull()
 
@@ -70,6 +73,7 @@ class GiteaApi(private val accessToken: String, private val baseUrl: String, pri
         return httpUtils.post(release.uploadUrl, bodyBuilder.build(), headers)
     }
 
+    // https://docs.gitea.com/api/1.24/#tag/repository/operation/repoEditRelease
     fun publishRelease(release: Release) {
         val body = """
             {
