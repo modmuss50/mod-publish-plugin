@@ -6,6 +6,7 @@ import org.gradle.testkit.runner.TaskOutcome
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 class GiteaTest : IntegrationTest {
     @Test
@@ -254,8 +255,7 @@ class GiteaTest : IntegrationTest {
             .run("publishGitea")
         server.close()
 
-        // TODO: This will always throw an exception and fail. I don't really know how to fix it. - Calico
-        assertEquals(TaskOutcome.FAILED, result.task(":publishGitea")!!.outcome)
+        assertNull(result.task(":publishGitea"))
         assertContains(result.output, "Unable to make a Gitea instance a parent of a Forgejo instance")
     }
 }

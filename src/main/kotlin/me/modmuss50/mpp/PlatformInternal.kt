@@ -103,7 +103,6 @@ data class ModrinthPublishResult(
         get() = 0x1BD96A
 }
 
-
 @Serializable
 @SerialName("gitea")
 data class GiteaPublishResult(

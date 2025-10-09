@@ -203,7 +203,6 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
         }
     }
 
-
     // Forgejo
 
     fun forgejo(@DelegatesTo(value = Gitea::class) closure: Closure<*>): NamedDomainObjectProvider<Gitea> {

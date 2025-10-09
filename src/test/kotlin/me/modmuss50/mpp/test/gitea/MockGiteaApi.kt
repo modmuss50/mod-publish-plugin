@@ -1,4 +1,4 @@
-package me.modmuss50.mpp.test.gitea;
+package me.modmuss50.mpp.test.gitea
 
 import io.javalin.apibuilder.ApiBuilder.get
 import io.javalin.apibuilder.ApiBuilder.patch
@@ -56,7 +56,7 @@ class MockGiteaApi : MockWebServer.MockApi {
             """
             {
             "id": $id,
-            "upload_url": "http://localhost:${context.port()}/api/v1/repos/${context.pathParam("owner")}/${context.pathParam("name")}/releases/${id}/assets",
+            "upload_url": "http://localhost:${context.port()}/api/v1/repos/${context.pathParam("owner")}/${context.pathParam("name")}/releases/$id/assets",
             "html_url": "https://codeberg.org"
             }
             """.trimIndent(),
@@ -73,4 +73,3 @@ class MockGiteaApi : MockWebServer.MockApi {
         )
     }
 }
-

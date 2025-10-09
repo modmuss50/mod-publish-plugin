@@ -50,19 +50,19 @@ interface GiteaOptions : PlatformOptions, PlatformOptionsInternal<GiteaOptions> 
     @get:Input
     val apiEndpoint: Property<String>
 
-	/**
-	 * Specifies the display name for the custom host. For example, Codeberg.
-	 */
-	@get:Input
-	@get:Optional
-	val hostDisplayName: Property<String>
+    /**
+     * Specifies the display name for the custom host. For example, Codeberg.
+     */
+    @get:Input
+    @get:Optional
+    val hostDisplayName: Property<String>
 
-	/**
-	 * Specifies a custom brand color for Discord embeds. Useful for specific hosts.
-	 */
-	@get:Input
-	@get:Optional
-	val hostBrandColor: Property<Int>
+    /**
+     * Specifies a custom brand color for Discord embeds. Useful for specific hosts.
+     */
+    @get:Input
+    @get:Optional
+    val hostBrandColor: Property<Int>
 
     @get:Input
     val allowEmptyFiles: Property<Boolean>
@@ -72,9 +72,9 @@ interface GiteaOptions : PlatformOptions, PlatformOptionsInternal<GiteaOptions> 
     @get:Internal
     val releaseResult: RegularFileProperty
 
-	@get:Input
-	@get:Internal
-	val hostType: Property<HostType>
+    @get:Input
+    @get:Internal
+    val hostType: Property<HostType>
 
     override fun setInternalDefaults() {
         tagName.convention(version)
@@ -93,7 +93,7 @@ interface GiteaOptions : PlatformOptions, PlatformOptionsInternal<GiteaOptions> 
         apiEndpoint.convention(other.apiEndpoint)
         allowEmptyFiles.convention(other.allowEmptyFiles)
         releaseResult.convention(other.releaseResult)
-		hostType.convention(other.hostType)
+        hostType.convention(other.hostType)
     }
 
     fun from(other: Provider<GiteaOptions>) {
@@ -140,7 +140,7 @@ interface GiteaOptions : PlatformOptions, PlatformOptionsInternal<GiteaOptions> 
     enum class HostType constructor(val friendlyString: String, val defaultBrandColor: Int) {
         GITEA("Gitea", 0x1d8f4a),
 
-        FORGEJO("Forgejo", 0xff5500);
+        FORGEJO("Forgejo", 0xff5500),
     }
 }
 
@@ -170,7 +170,7 @@ abstract class Gitea @Inject constructor(name: String) : Platform(name), GiteaOp
             releaseId = 0,
             url = "https://github.com/modmuss50/mod-publish-plugin/dry-run?random=${Random.nextInt(0, 1000000)}",
             title = announcementTitle.getOrElse("Download from $hostDisplayName"),
-            brandColor = brandColor
+            brandColor = brandColor,
         )
     }
 
@@ -218,7 +218,7 @@ abstract class Gitea @Inject constructor(name: String) : Platform(name), GiteaOp
                     releaseId = release.id,
                     url = release.htmlUrl,
                     title = announcementTitle.getOrElse("Download from $hostDisplayName"),
-                    brandColor = brandColor
+                    brandColor = brandColor,
                 )
             }
         }
@@ -232,14 +232,13 @@ abstract class Gitea @Inject constructor(name: String) : Platform(name), GiteaOp
                     return ReleaseResult(api.getRelease(result.releaseId), false)
                 }
 
-
                 val metadata = GiteaApi.CreateRelease(
                     body = changelog.orNull,
                     draft = true,
                     name = displayName.get(),
                     prerelease = type.get() != ReleaseType.STABLE,
                     tagName = tagName.get(),
-                    targetCommitish = commitish.get()
+                    targetCommitish = commitish.get(),
                 )
 
                 return ReleaseResult(api.createRelease(metadata), true)

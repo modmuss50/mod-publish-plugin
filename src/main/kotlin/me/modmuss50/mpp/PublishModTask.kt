@@ -93,12 +93,12 @@ abstract class PublishModTask @Inject constructor(@Nested val platform: Platform
             }
         }
 
-		// Repeat the hack for Gitea.
-		if (platform is GiteaOptions) {
-			if (!platform.file.isPresent && platform.allowEmptyFiles.get()) {
-				return
-			}
-		}
+        // Repeat the hack for Gitea.
+        if (platform is GiteaOptions) {
+            if (!platform.file.isPresent && platform.allowEmptyFiles.get()) {
+                return
+            }
+        }
 
         val file = platform.file.get().asFile
 
