@@ -103,6 +103,21 @@ data class ModrinthPublishResult(
         get() = 0x1BD96A
 }
 
+@Serializable
+@SerialName("gitea")
+data class GiteaPublishResult(
+    val repository: String,
+    val releaseId: Long,
+    val url: String,
+    override val title: String,
+    override val brandColor: Int,
+) : PublishResult() {
+    override val type: String
+        get() = "gitea"
+    override val link: String
+        get() = url
+}
+
 @ApiStatus.Internal
 class PublishContext(private val queue: WorkQueue, private val result: RegularFile) {
     fun <T : PublishWorkParameters> submit(workActionClass: KClass<out PublishWorkAction<T>>, parameterAction: Action<in T>) {

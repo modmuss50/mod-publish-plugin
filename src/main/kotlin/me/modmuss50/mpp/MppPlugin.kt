@@ -1,6 +1,7 @@
 package me.modmuss50.mpp
 
 import me.modmuss50.mpp.platforms.curseforge.Curseforge
+import me.modmuss50.mpp.platforms.gitea.Gitea
 import me.modmuss50.mpp.platforms.github.Github
 import me.modmuss50.mpp.platforms.modrinth.Modrinth
 import org.gradle.api.Plugin
@@ -21,6 +22,9 @@ class MppPlugin : Plugin<Project> {
         }
         extension.platforms.registerFactory(Modrinth::class.java) {
             project.objects.newInstance(Modrinth::class.java, it)
+        }
+        extension.platforms.registerFactory(Gitea::class.java) {
+            project.objects.newInstance(Gitea::class.java, it)
         }
 
         val publishModsTask = project.tasks.register("publishMods") {

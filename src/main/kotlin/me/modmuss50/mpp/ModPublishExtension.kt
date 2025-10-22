@@ -5,6 +5,9 @@ import groovy.lang.DelegatesTo
 import me.modmuss50.mpp.platforms.curseforge.Curseforge
 import me.modmuss50.mpp.platforms.curseforge.CurseforgeOptions
 import me.modmuss50.mpp.platforms.discord.DiscordWebhookTask
+import me.modmuss50.mpp.platforms.gitea.Gitea
+import me.modmuss50.mpp.platforms.gitea.GiteaOptions
+import me.modmuss50.mpp.platforms.gitea.GiteaOptions.HostType
 import me.modmuss50.mpp.platforms.github.Github
 import me.modmuss50.mpp.platforms.github.GithubOptions
 import me.modmuss50.mpp.platforms.modrinth.Modrinth
@@ -157,6 +160,82 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
 
     fun githubOptions(action: Action<GithubOptions>): Provider<GithubOptions> {
         return configureOptions(GithubOptions::class) {
+            it.from(this)
+            action.execute(it)
+        }
+    }
+
+    // Gitea
+
+    fun gitea(@DelegatesTo(value = Gitea::class) closure: Closure<*>): NamedDomainObjectProvider<Gitea> {
+        return gitea {
+            project.configure(it, closure)
+        }
+    }
+
+    fun gitea(action: Action<Gitea>): NamedDomainObjectProvider<Gitea> {
+        return gitea("gitea", action)
+    }
+
+    fun gitea(name: String, @DelegatesTo(value = Gitea::class) closure: Closure<*>): NamedDomainObjectProvider<Gitea> {
+        return gitea(name) {
+            project.configure(it, closure)
+        }
+    }
+
+    fun gitea(name: String, action: Action<Gitea>): NamedDomainObjectProvider<Gitea> {
+        return platforms.maybeRegister(name) { it ->
+            it.hostType.set(HostType.GITEA)
+            action.execute(it)
+        }
+    }
+
+    fun giteaOptions(@DelegatesTo(value = Gitea::class) closure: Closure<*>): Provider<GiteaOptions> {
+        return giteaOptions {
+            project.configure(it, closure)
+        }
+    }
+
+    fun giteaOptions(action: Action<GiteaOptions>): Provider<GiteaOptions> {
+        return configureOptions(GiteaOptions::class) {
+            it.from(this)
+            action.execute(it)
+        }
+    }
+
+    // Forgejo
+
+    fun forgejo(@DelegatesTo(value = Gitea::class) closure: Closure<*>): NamedDomainObjectProvider<Gitea> {
+        return forgejo {
+            project.configure(it, closure)
+        }
+    }
+
+    fun forgejo(action: Action<Gitea>): NamedDomainObjectProvider<Gitea> {
+        return forgejo("forgejo", action)
+    }
+
+    fun forgejo(name: String, @DelegatesTo(value = Gitea::class) closure: Closure<*>): NamedDomainObjectProvider<Gitea> {
+        return forgejo(name) {
+            project.configure(it, closure)
+        }
+    }
+
+    fun forgejo(name: String, action: Action<Gitea>): NamedDomainObjectProvider<Gitea> {
+        return platforms.maybeRegister(name) { it ->
+            it.hostType.set(HostType.FORGEJO)
+            action.execute(it)
+        }
+    }
+
+    fun forgejoOptions(@DelegatesTo(value = Gitea::class) closure: Closure<*>): Provider<GiteaOptions> {
+        return forgejoOptions {
+            project.configure(it, closure)
+        }
+    }
+
+    fun forgejoOptions(action: Action<GiteaOptions>): Provider<GiteaOptions> {
+        return configureOptions(GiteaOptions::class) {
             it.from(this)
             action.execute(it)
         }
