@@ -151,7 +151,7 @@ class CurseforgeApi(private val accessToken: String, private val baseUrl: String
     private val headers: Map<String, String>
         get() = mapOf(
             "X-Api-Token" to accessToken,
-            "User-Agent" to "mod-publish-plugin"
+            "User-Agent" to "mod-publish-plugin",
         )
 
     fun getVersionTypes(): List<GameVersionType> {
