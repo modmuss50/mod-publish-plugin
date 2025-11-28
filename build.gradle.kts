@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     `java-gradle-plugin`
     `maven-publish`
-    embeddedKotlin("jvm")
+    embeddedKotlin("jvm") version "2.2.21"
     embeddedKotlin("plugin.serialization")
     id("com.diffplug.spotless") version "6.18.0"
     id("com.gradle.plugin-publish") version "1.2.1"
@@ -19,7 +19,7 @@ repositories {
 
 dependencies {
     implementation(gradleApi())
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("org.kohsuke:github-api:1.330")
 
