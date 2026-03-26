@@ -44,6 +44,7 @@ class MockGithubApi : MockWebServer.MockApi {
         context.result(
             """
             {
+            "id": 1,
             "upload_url": "http://localhost:${context.port()}/repos/${context.pathParam("owner")}/${context.pathParam("name")}/releases/1/assets{?name,label}",
             "html_url": "https://github.com"
             }
@@ -76,9 +77,13 @@ class MockGithubApi : MockWebServer.MockApi {
     }
 
     private fun updateRelease(context: Context) {
+        val id = context.pathParam("id")
         context.result(
             """
             {
+            "id": $id,
+            "upload_url": "http://localhost:${context.port()}/repos/${context.pathParam("owner")}/${context.pathParam("name")}/releases/$id/assets{?name,label}",
+            "html_url": "https://github.com"
             }
             """.trimIndent(),
         )

@@ -21,10 +21,6 @@ import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskProvider
 import org.jetbrains.annotations.ApiStatus.Internal
-import org.kohsuke.github.GHRelease
-import org.kohsuke.github.GHReleaseBuilder
-import org.kohsuke.github.GHRepository
-import org.kohsuke.github.GitHub
 import javax.inject.Inject
 import kotlin.random.Random
 
@@ -141,11 +137,15 @@ abstract class Github @Inject constructor(name: String) : Platform(name), Github
     interface UploadParams : PublishWorkParameters, GithubOptions
 
     abstract class UploadWorkAction : PublishWorkAction<UploadParams> {
-        // TODO: Maybe look at moving away from using a large library for this.
         override fun publish(): PublishResult {
             with(parameters) {
-                val repo = connect().getRepository(repository.get())
-                val (release, created) = getOrCreateRelease(repo)
+                val api = GithubApi(
+                    accessToken = accessToken.get(),
+                    apiEndpoint = apiEndpoint.orNull ?: "https://api.github.com",
+                )
+
+                val repo = api.getRepository(repository.get())
+                val (release, created) = getOrCreateRelease(api, repo)
 
                 val files = additionalFiles.files.toMutableList()
 
@@ -160,54 +160,45 @@ abstract class Github @Inject constructor(name: String) : Platform(name), Github
                 }
 
                 for (file in files) {
-                    release.uploadAsset(file, "application/java-archive")
+                    api.uploadAsset(release, file)
                 }
 
                 if (created) {
                     // Publish the release after all assets are uploaded.
-                    release.update()
-                        .draft(false)
-                        .update()
+                    api.updateRelease(repo.fullName, release.id, GithubApi.UpdateReleaseRequest(draft = false))
                 }
 
                 return GithubPublishResult(
                     repository = repository.get(),
                     releaseId = release.id,
-                    url = release.htmlUrl.toString(),
+                    url = release.htmlUrl,
                     title = announcementTitle.getOrElse("Download from GitHub"),
                 )
             }
         }
 
-        data class ReleaseResult(val release: GHRelease, val created: Boolean)
+        data class ReleaseResult(val release: GithubApi.Release, val created: Boolean)
 
-        private fun getOrCreateRelease(repo: GHRepository): ReleaseResult {
+        private fun getOrCreateRelease(api: GithubApi, repo: GithubApi.Repository): ReleaseResult {
             with(parameters) {
                 if (releaseResult.isPresent) {
                     val result = PublishResult.fromJson(releaseResult.get().asFile.readText()) as GithubPublishResult
-                    return ReleaseResult(repo.getRelease(result.releaseId), false)
+                    return ReleaseResult(api.getRelease(repo.fullName, result.releaseId), false)
                 }
 
-                val release = with(GHReleaseBuilder(repo, tagName.get())) {
-                    name(displayName.get())
-                    body(changelog.get())
-                    prerelease(type.get() != ReleaseType.STABLE)
-                    commitish(commitish.get())
-                    draft(true) // Create a draft to allow uploading assets before publishing.
-                }.create()
+                val release = api.createRelease(
+                    repo.fullName,
+                    GithubApi.CreateReleaseRequest(
+                        tagName = tagName.get(),
+                        targetCommitish = commitish.get(),
+                        name = displayName.get(),
+                        body = changelog.get(),
+                        draft = true, // Create a draft to allow uploading assets before publishing.
+                        prerelease = type.get() != ReleaseType.STABLE,
+                    ),
+                )
                 return ReleaseResult(release, true)
             }
-        }
-
-        private fun connect(): GitHub {
-            val accessToken = parameters.accessToken.get()
-            val endpoint = parameters.apiEndpoint.orNull
-
-            if (endpoint != null) {
-                return GitHub.connectUsingOAuth(endpoint, accessToken)
-            }
-
-            return GitHub.connectUsingOAuth(accessToken)
         }
     }
 }
