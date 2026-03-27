@@ -42,24 +42,23 @@ publishMods {
 
 Next you need to specify the input file and supported modloaders, this changes based on the mod loader you are using.
 
-- On Fabric uses the `remapJar` task
-- On Forge uses the `jar` task
+- On Fabric 26.1+ and Forge uses the `jar` task
+- On Fabric 1.21.11 and below uses the `remapJar` task
 
-### Fabric
+### Fabric 26.1+ and Forge
+
+```groovy
+publishMods {
+    file = jar.archiveFile
+}
+```
+
+### Fabric 1.21.11 and below
 
 ```groovy
 publishMods {
     file = remapJar.archiveFile
     modLoaders.add("fabric")
-}
-```
-
-### Forge
-
-```groovy
-publishMods {
-    file = jar.archiveFile
-    modLoaders.add("forge")
 }
 ```
 
