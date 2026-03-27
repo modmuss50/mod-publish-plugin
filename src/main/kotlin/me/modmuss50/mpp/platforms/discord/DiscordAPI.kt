@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import me.modmuss50.mpp.HttpUtils
-import okhttp3.RequestBody.Companion.toRequestBody
+import java.net.http.HttpRequest
 
 object DiscordAPI {
     @OptIn(ExperimentalSerializationApi::class)
@@ -16,7 +16,7 @@ object DiscordAPI {
 
     // https://discord.com/developers/docs/resources/webhook#execute-webhook
     fun executeWebhook(url: String, webhook: Webhook) {
-        val body = json.encodeToString(webhook).toRequestBody()
+        val body = HttpRequest.BodyPublishers.ofString(json.encodeToString(webhook))
         httpUtils.post<String>(url, body, headers)
     }
 

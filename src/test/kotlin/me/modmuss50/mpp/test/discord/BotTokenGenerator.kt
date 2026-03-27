@@ -4,8 +4,8 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import me.modmuss50.mpp.HttpUtils
-import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
+import java.net.http.HttpRequest
 
 val json = Json { ignoreUnknownKeys = true }
 val httpUtils = HttpUtils()
@@ -30,7 +30,7 @@ fun main(args: Array<String>) {
     )
 
     val request = CreateWebhookRequest("test")
-    val body = json.encodeToString(request).toRequestBody()
+    val body = HttpRequest.BodyPublishers.ofString(json.encodeToString(request))
     val response = httpUtils.post<CreateWebhookResponse>("https://discord.com/api/v9/channels/$channelId/webhooks", body, headers)
 
     println(response)
