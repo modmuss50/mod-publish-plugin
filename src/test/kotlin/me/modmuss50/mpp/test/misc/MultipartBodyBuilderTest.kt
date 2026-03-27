@@ -145,10 +145,10 @@ class MultipartBodyBuilderTest {
             // Verify the builder can create the body without errors
             val body = builder.build()
             val contentType = builder.getContentType()
-            
+
             // Verify content type is set
             assertTrue(contentType.startsWith("multipart/form-data"), "Content type should be multipart")
-            
+
             // The body publisher doesn't expose size directly, but we can verify it was created
             // This confirms that large files don't cause memory issues or crashes
             assertTrue(true, "Large file multipart body created successfully")
@@ -178,10 +178,10 @@ class MultipartBodyBuilderTest {
             // Verify the builder can create the body without errors
             val body = builder.build()
             val contentType = builder.getContentType()
-            
+
             // Verify content type is set
             assertTrue(contentType.startsWith("multipart/form-data"), "Content type should be multipart")
-            
+
             // Successfully handling multiple large files (total 4MB) confirms
             // the implementation can handle real-world mod file uploads
             assertTrue(true, "Multiple large files multipart body created successfully")
