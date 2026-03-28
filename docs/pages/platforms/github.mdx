@@ -1,8 +1,8 @@
 ## Basic example
-See the following minimal example showing how to publish the `remapJar` task to GitHub:
+See the following minimal example showing how to publish the `jar` task to GitHub:
 ```groovy
 publishMods {
-    file = remapJar.archiveFile
+    file = jar.archiveFile
     changelog = "Changelog"
     type = STABLE
     modLoaders.add("fabric")
