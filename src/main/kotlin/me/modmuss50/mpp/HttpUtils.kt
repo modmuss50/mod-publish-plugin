@@ -1,76 +1,71 @@
 package me.modmuss50.mpp
 
 import kotlinx.serialization.json.Json
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody
-import okhttp3.Response
 import org.slf4j.LoggerFactory
 import java.io.IOException
+import java.net.URI
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
 import java.time.Duration
 
 class HttpUtils(val exceptionFactory: HttpExceptionFactory = DefaultHttpExceptionFactory(), timeout: Duration = Duration.ofSeconds(30)) {
-    val httpClient = OkHttpClient.Builder()
+    val httpClient: HttpClient = HttpClient.newBuilder()
         .connectTimeout(timeout)
-        .readTimeout(timeout)
-        .writeTimeout(timeout)
-        .addNetworkInterceptor { chain ->
-            chain.proceed(
-                chain.request()
-                    .newBuilder()
-                    .header("User-Agent", "modmuss50/mod-publish-plugin/${HttpUtils::class.java.`package`.implementationVersion}")
-                    .build(),
-            )
-        }
         .build()
     val json = Json { ignoreUnknownKeys = true }
 
+    val userAgent = "modmuss50/mod-publish-plugin/${HttpUtils::class.java.`package`.implementationVersion}"
+
     inline fun <reified T> get(url: String, headers: Map<String, String>): T {
         return request(
-            Request.Builder()
-                .url(url),
+            HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .GET(),
             headers,
         )
     }
 
-    inline fun <reified T> post(url: String, body: RequestBody, headers: Map<String, String>): T {
+    inline fun <reified T> post(url: String, body: HttpRequest.BodyPublisher, headers: Map<String, String>): T {
         return request(
-            Request.Builder()
-                .url(url)
-                .post(body),
+            HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .POST(body),
             headers,
         )
     }
 
-    inline fun <reified T> patch(url: String, body: RequestBody, headers: Map<String, String>): T {
+    inline fun <reified T> patch(url: String, body: HttpRequest.BodyPublisher, headers: Map<String, String>): T {
         return request(
-            Request.Builder()
-                .url(url)
-                .patch(body),
+            HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .method("PATCH", body),
             headers,
         )
     }
 
-    inline fun <reified T> request(requestBuilder: Request.Builder, headers: Map<String, String>): T {
+    inline fun <reified T> request(requestBuilder: HttpRequest.Builder, headers: Map<String, String>): T {
+        requestBuilder.header("User-Agent", userAgent)
+
         for ((name, value) in headers) {
             requestBuilder.header(name, value)
         }
 
         val request = requestBuilder.build()
-        httpClient.newCall(request).execute().use { response ->
-            if (!response.isSuccessful) {
-                throw exceptionFactory.createException(response)
-            }
+        val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
 
-            var body = response.body!!.string()
-
-            if (body.isBlank()) {
-                // Bit of a hack, but handle empty body's as an empty string.
-                body = "\"\""
-            }
-
-            return json.decodeFromString<T>(body)
+        if (response.statusCode() !in 200..299) {
+            throw exceptionFactory.createException(response)
         }
+
+        var body = response.body()
+
+        if (body.isBlank()) {
+            // Bit of a hack, but handle empty body's as an empty string.
+            body = "\"\""
+        }
+
+        return json.decodeFromString<T>(body)
     }
 
     companion object {
@@ -99,14 +94,14 @@ class HttpUtils(val exceptionFactory: HttpExceptionFactory = DefaultHttpExceptio
     }
 
     interface HttpExceptionFactory {
-        fun createException(response: Response): HttpException
+        fun createException(response: HttpResponse<String>): HttpException
     }
 
     private class DefaultHttpExceptionFactory : HttpExceptionFactory {
-        override fun createException(response: Response): HttpException {
-            return HttpException(response, response.body?.string() ?: response.message)
+        override fun createException(response: HttpResponse<String>): HttpException {
+            return HttpException(response, response.body() ?: "No response body")
         }
     }
 
-    class HttpException(val response: Response, message: String) : IOException("Request failed, status: ${response.code} message: $message url: ${response.request.url}")
+    class HttpException(val response: HttpResponse<String>, message: String) : IOException("Request failed, status: ${response.statusCode()} message: $message url: ${response.uri()}")
 }

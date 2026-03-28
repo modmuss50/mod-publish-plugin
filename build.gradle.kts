@@ -20,7 +20,6 @@ repositories {
 dependencies {
     implementation(gradleApi())
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
     testImplementation(kotlin("test"))
     testImplementation("io.javalin:javalin:6.3.0")
@@ -30,7 +29,7 @@ dependencies {
 
 kotlin {
     compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_1_8)
+        jvmTarget.set(JvmTarget.JVM_17)
         freeCompilerArgs = listOf("-Xjvm-default=all")
     }
 }
@@ -46,7 +45,7 @@ tasks.withType(Test::class.java).configureEach {
 }
 
 tasks.withType(JavaCompile::class.java).all {
-    options.release = 8
+    options.release = 17
 }
 
 tasks.test {

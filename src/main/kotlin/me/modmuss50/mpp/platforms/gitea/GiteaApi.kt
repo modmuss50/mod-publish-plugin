@@ -6,12 +6,10 @@ import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import me.modmuss50.mpp.HttpUtils
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.MultipartBody
-import okhttp3.RequestBody.Companion.asRequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.Response
+import me.modmuss50.mpp.MultipartBodyBuilder
 import java.io.File
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
 
 class GiteaApi(private val accessToken: String, private val baseUrl: String, private val repository: String) {
     private val httpUtils = HttpUtils(
@@ -56,7 +54,7 @@ class GiteaApi(private val accessToken: String, private val baseUrl: String, pri
 
     // https://docs.gitea.com/api/1.24/#tag/repository/operation/repoCreateRelease
     fun createRelease(metadata: CreateRelease): Release {
-        val body = Json.encodeToString(metadata).toRequestBody()
+        val body = HttpRequest.BodyPublishers.ofString(Json.encodeToString(metadata))
         return httpUtils.post("$baseUrl/repos/$repository/releases", body, headers)
     }
 
@@ -67,22 +65,24 @@ class GiteaApi(private val accessToken: String, private val baseUrl: String, pri
 
     // https://docs.gitea.com/api/1.24/#tag/repository/operation/repoCreateReleaseAttachment
     fun uploadAsset(release: Release, file: File) {
-        val mediaType = "application/java-archive".toMediaTypeOrNull()
+        val bodyBuilder = MultipartBodyBuilder()
+            .addFormDataPart("attachment", file.name, file, "application/java-archive")
 
-        val bodyBuilder = MultipartBody.Builder()
-            .setType(MultipartBody.FORM)
-            .addFormDataPart("attachment", file.name, file.asRequestBody(mediaType))
+        val multipartHeaders = headers.toMutableMap()
+        multipartHeaders["Content-Type"] = bodyBuilder.getContentType()
 
-        return httpUtils.post(release.uploadUrl, bodyBuilder.build(), headers)
+        return httpUtils.post(release.uploadUrl, bodyBuilder.build(), multipartHeaders)
     }
 
     // https://docs.gitea.com/api/1.24/#tag/repository/operation/repoEditRelease
     fun publishRelease(release: Release) {
-        val body = """
+        val body = HttpRequest.BodyPublishers.ofString(
+            """
             {
             "draft": false
             }
-        """.trimIndent().toRequestBody()
+            """.trimIndent(),
+        )
         return httpUtils.patch("$baseUrl/repos/$repository/releases/${release.id}", body, headers)
     }
 
@@ -90,9 +90,9 @@ class GiteaApi(private val accessToken: String, private val baseUrl: String, pri
     private class GiteaHttpExceptionFactory : HttpUtils.HttpExceptionFactory {
         val json = Json { ignoreUnknownKeys = true }
 
-        override fun createException(response: Response): HttpUtils.HttpException {
+        override fun createException(response: HttpResponse<String>): HttpUtils.HttpException {
             return try {
-                val errorResponse = json.decodeFromString<ErrorResponse>(response.body!!.string())
+                val errorResponse = json.decodeFromString<ErrorResponse>(response.body())
                 HttpUtils.HttpException(response, errorResponse.message)
             } catch (e: SerializationException) {
                 HttpUtils.HttpException(response, "Unknown error")

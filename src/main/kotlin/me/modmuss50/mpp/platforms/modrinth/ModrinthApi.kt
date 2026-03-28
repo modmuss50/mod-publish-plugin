@@ -6,13 +6,11 @@ import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import me.modmuss50.mpp.HttpUtils
+import me.modmuss50.mpp.MultipartBodyBuilder
 import me.modmuss50.mpp.PlatformDependency
 import me.modmuss50.mpp.ReleaseType
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.MultipartBody
-import okhttp3.RequestBody.Companion.asRequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.Response
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
 import java.nio.file.Path
 import java.time.Duration
 import kotlin.io.path.name
@@ -157,18 +155,19 @@ class ModrinthApi(private val accessToken: String, private val baseUrl: String) 
     }
 
     fun createVersion(metadata: CreateVersion, files: Map<String, Path>): CreateVersionResponse {
-        val mediaType = "application/java-archive".toMediaTypeOrNull()
         val metadataJson = Json.encodeToString(metadata)
 
-        val bodyBuilder = MultipartBody.Builder()
-            .setType(MultipartBody.FORM)
+        val bodyBuilder = MultipartBodyBuilder()
             .addFormDataPart("data", metadataJson)
 
         for ((name, path) in files) {
-            bodyBuilder.addFormDataPart(name, path.name, path.toFile().asRequestBody(mediaType))
+            bodyBuilder.addFormDataPart(name, path.name, path, "application/java-archive")
         }
 
-        return httpUtils.post("$baseUrl/version", bodyBuilder.build(), headers)
+        val multipartHeaders = headers.toMutableMap()
+        multipartHeaders["Content-Type"] = bodyBuilder.getContentType()
+
+        return httpUtils.post("$baseUrl/version", bodyBuilder.build(), multipartHeaders)
     }
 
     fun checkProject(projectSlug: String): ProjectCheckResponse {
@@ -176,16 +175,16 @@ class ModrinthApi(private val accessToken: String, private val baseUrl: String) 
     }
 
     fun modifyProject(projectSlug: String, modifyProject: ModifyProject) {
-        val body = Json.encodeToString(modifyProject).toRequestBody()
+        val body = HttpRequest.BodyPublishers.ofString(Json.encodeToString(modifyProject))
         httpUtils.patch<String>("$baseUrl/project/$projectSlug", body, headers)
     }
 
     private class ModrinthHttpExceptionFactory : HttpUtils.HttpExceptionFactory {
         val json = Json { ignoreUnknownKeys = true }
 
-        override fun createException(response: Response): HttpUtils.HttpException {
+        override fun createException(response: HttpResponse<String>): HttpUtils.HttpException {
             return try {
-                val errorResponse = json.decodeFromString<ErrorResponse>(response.body!!.string())
+                val errorResponse = json.decodeFromString<ErrorResponse>(response.body())
                 HttpUtils.HttpException(response, errorResponse.description)
             } catch (e: SerializationException) {
                 HttpUtils.HttpException(response, "Unknown error")

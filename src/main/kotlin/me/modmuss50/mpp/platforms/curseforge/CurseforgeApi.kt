@@ -7,11 +7,9 @@ import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import me.modmuss50.mpp.HttpUtils
+import me.modmuss50.mpp.MultipartBodyBuilder
 import me.modmuss50.mpp.PlatformDependency
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.MultipartBody
-import okhttp3.RequestBody.Companion.asRequestBody
-import okhttp3.Response
+import java.net.http.HttpResponse
 import java.nio.file.Path
 import kotlin.io.path.name
 
@@ -160,25 +158,24 @@ class CurseforgeApi(private val accessToken: String, private val baseUrl: String
     }
 
     fun uploadFile(projectId: String, path: Path, uploadMetadata: UploadFileMetadata): UploadFileResponse {
-        val mediaType = "application/java-archive".toMediaTypeOrNull()
-        val fileBody = path.toFile().asRequestBody(mediaType)
         val metadataJson = json.encodeToString(uploadMetadata)
 
-        val requestBody = MultipartBody.Builder()
-            .setType(MultipartBody.FORM)
-            .addFormDataPart("file", path.name, fileBody)
+        val bodyBuilder = MultipartBodyBuilder()
+            .addFormDataPart("file", path.name, path, "application/java-archive")
             .addFormDataPart("metadata", metadataJson)
-            .build()
 
-        return httpUtils.post("$baseUrl/api/projects/$projectId/upload-file", requestBody, headers)
+        val multipartHeaders = headers.toMutableMap()
+        multipartHeaders["Content-Type"] = bodyBuilder.getContentType()
+
+        return httpUtils.post("$baseUrl/api/projects/$projectId/upload-file", bodyBuilder.build(), multipartHeaders)
     }
 
     private class CurseforgeHttpExceptionFactory : HttpUtils.HttpExceptionFactory {
         val json = Json { ignoreUnknownKeys = true }
 
-        override fun createException(response: Response): HttpUtils.HttpException {
+        override fun createException(response: HttpResponse<String>): HttpUtils.HttpException {
             return try {
-                val errorResponse = json.decodeFromString<ErrorResponse>(response.body!!.string())
+                val errorResponse = json.decodeFromString<ErrorResponse>(response.body())
                 HttpUtils.HttpException(response, errorResponse.errorMessage)
             } catch (e: SerializationException) {
                 HttpUtils.HttpException(response, "Unknown error")

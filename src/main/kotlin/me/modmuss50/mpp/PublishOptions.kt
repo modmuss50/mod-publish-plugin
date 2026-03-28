@@ -8,12 +8,15 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.jetbrains.annotations.ApiStatus.Internal
 import javax.inject.Inject
 
 // Contains options shared by each platform and the extension
 interface PublishOptions {
     @get:InputFile
+    @get:PathSensitive(PathSensitivity.NAME_ONLY)
     val file: RegularFileProperty
 
     @get:Input
@@ -32,6 +35,7 @@ interface PublishOptions {
     val modLoaders: ListProperty<String>
 
     @get:InputFiles
+    @get:PathSensitive(PathSensitivity.NAME_ONLY)
     val additionalFiles: ConfigurableFileCollection
 
     @get:Input
