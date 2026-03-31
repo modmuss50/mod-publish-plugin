@@ -94,7 +94,7 @@ interface PlatformDependency {
     }
 
     @ApiStatus.Internal
-    fun validate();
+    fun validate()
 }
 
 abstract class Platform @Inject constructor(private val name: String) : Named, PlatformOptions {

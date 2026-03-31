@@ -156,9 +156,6 @@ interface ModrinthDependency : PlatformDependency {
     @get:Optional
     val version: Property<String>
 
-    @Deprecated("For removal", ReplaceWith("id"))
-    val projectId: Property<String> get() = id
-
     override fun validate() {
         if (slug.orNull.isNullOrBlank() && id.orNull.isNullOrBlank()) {
             throw IllegalStateException("Modrinth dependency must have either an id or slug specified")
