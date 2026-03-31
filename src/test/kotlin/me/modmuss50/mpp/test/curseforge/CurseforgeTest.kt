@@ -430,6 +430,35 @@ class CurseforgeTest : IntegrationTest {
     }
 
     @Test
+    fun invalidDependency() {
+        val result = gradleTest()
+            .buildScript(
+                """
+                publishMods {
+                    file = tasks.jar.flatMap { it.archiveFile }
+                    changelog = "Hello!"
+                    version = "1.0.0"
+                    type = BETA
+                    modLoaders.add("fabric")
+                    dryRun = true
+
+                    curseforge {
+                        accessToken = providers.environmentVariable("TEST_TOKEN_THAT_DOES_NOT_EXISTS")
+                        projectId = "123456"
+                        minecraftVersions.add("1.20.1")
+                        requires {
+                            // slug not set
+                        }
+                    }
+                }
+                """.trimIndent(),
+            )
+            .run("publishCurseforge")
+
+        assertContains(result.output, "Dependency slug cannot be null or blank")
+    }
+
+    @Test
     fun additionalFilesFromSubProject() {
         val server = MockWebServer(MockCurseforgeApi())
 

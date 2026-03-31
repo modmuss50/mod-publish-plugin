@@ -78,6 +78,7 @@ interface PlatformDependencyContainer<T : PlatformDependency> {
         dep.type.set(type)
         dep.type.finalizeValue()
         action.execute(dep)
+        dep.validate()
         dependencies.add(dep)
     }
 }
@@ -91,6 +92,9 @@ interface PlatformDependency {
         INCOMPATIBLE,
         EMBEDDED,
     }
+
+    @ApiStatus.Internal
+    fun validate();
 }
 
 abstract class Platform @Inject constructor(private val name: String) : Named, PlatformOptions {

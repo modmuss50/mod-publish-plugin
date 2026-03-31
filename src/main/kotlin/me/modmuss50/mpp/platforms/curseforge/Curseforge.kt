@@ -138,6 +138,12 @@ interface CurseforgeOptions : PlatformOptions, PlatformOptionsInternal<Curseforg
 interface CurseforgeDependency : PlatformDependency {
     @get:Input
     val slug: Property<String>
+
+    override fun validate() {
+        if (slug.orNull.isNullOrBlank()) {
+            throw IllegalArgumentException("Dependency slug cannot be null or blank")
+        }
+    }
 }
 
 interface CurseforgeVersionRangeOptions {

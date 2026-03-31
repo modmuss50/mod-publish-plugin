@@ -329,6 +329,35 @@ class ModrinthTest : IntegrationTest {
     }
 
     @Test
+    fun invalidDependency() {
+        val result = gradleTest()
+            .buildScript(
+                """
+            publishMods {
+                file = tasks.jar.flatMap { it.archiveFile }
+                changelog = "Hello!"
+                version = "1.0.0"
+                type = STABLE
+                modLoaders.add("fabric")
+                dryRun = true
+
+                modrinth {
+                    accessToken = providers.environmentVariable("TEST_TOKEN_THAT_DOES_NOT_EXISTS")
+                    projectId = "12345678"
+                    minecraftVersions.add("1.20.1")
+                    requires {
+                        // neither id nor slug set
+                    }
+                }
+            }
+                """.trimIndent(),
+            )
+            .run("publishModrinth")
+
+        assertContains(result.output, "Modrinth dependency must have either an id or slug specified")
+    }
+
+    @Test
     fun uploadModrinthSlugDependency() {
         val mockModrinthApi = MockModrinthApi()
         val server = MockWebServer(mockModrinthApi)
