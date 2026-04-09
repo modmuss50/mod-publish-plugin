@@ -44,6 +44,15 @@ class HttpUtils(val exceptionFactory: HttpExceptionFactory = DefaultHttpExceptio
         )
     }
 
+    inline fun <reified T> put(url: String, body: HttpRequest.BodyPublisher, headers: Map<String, String>): T {
+        return request(
+            HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .PUT(body),
+            headers
+        )
+    }
+
     inline fun <reified T> request(requestBuilder: HttpRequest.Builder, headers: Map<String, String>): T {
         requestBuilder.header("User-Agent", userAgent)
 

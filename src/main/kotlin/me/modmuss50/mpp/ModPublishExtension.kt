@@ -10,6 +10,7 @@ import me.modmuss50.mpp.platforms.gitea.GiteaOptions
 import me.modmuss50.mpp.platforms.gitea.GiteaOptions.HostType
 import me.modmuss50.mpp.platforms.github.Github
 import me.modmuss50.mpp.platforms.github.GithubOptions
+import me.modmuss50.mpp.platforms.gitlab.Gitlab
 import me.modmuss50.mpp.platforms.modrinth.Modrinth
 import me.modmuss50.mpp.platforms.modrinth.ModrinthOptions
 import org.gradle.api.Action
@@ -95,7 +96,7 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
         }
     }
 
-    // Modirth
+    // Modrinth
 
     fun modrinth(@DelegatesTo(value = Modrinth::class) closure: Closure<*>): NamedDomainObjectProvider<Modrinth> {
         return modrinth {
@@ -201,6 +202,28 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
             it.from(this)
             action.execute(it)
         }
+    }
+
+    // GitLab
+
+    fun gitlab(@DelegatesTo(value = Gitlab::class) closure: Closure<*>): NamedDomainObjectProvider<Gitlab> {
+        return gitlab("gitlab") {
+            project.configure(it, closure)
+        }
+    }
+
+    fun gitlab(action: Action<Gitlab>): NamedDomainObjectProvider<Gitlab> {
+        return gitlab("gitlab", action)
+    }
+
+    fun gitlab(name: String, @DelegatesTo(value = Gitlab::class) closure: Closure<*>): NamedDomainObjectProvider<Gitlab> {
+        return gitlab(name) {
+            project.configure(it, closure)
+        }
+    }
+
+    fun gitlab(name: String, action: Action<Gitlab>): NamedDomainObjectProvider<Gitlab> {
+        return platforms.maybeRegister(name, action)
     }
 
     // Forgejo
