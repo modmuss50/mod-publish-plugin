@@ -44,6 +44,7 @@ class HttpUtils(val exceptionFactory: HttpExceptionFactory = DefaultHttpExceptio
         )
     }
 
+    // Added for GitLab's REST API
     inline fun <reified T> put(url: String, body: HttpRequest.BodyPublisher, headers: Map<String, String>): T {
         return request(
             HttpRequest.newBuilder()
