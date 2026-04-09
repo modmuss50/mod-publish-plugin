@@ -29,6 +29,9 @@ interface GitlabOptions : PlatformOptions, PlatformOptionsInternal<GitlabOptions
     @get:Optional
     override val file: RegularFileProperty
 
+    /**
+     * GitLab uses project IDs as opposed to repository links.
+     */
     @get:Input
     val projectId: Property<Long>
 
@@ -81,6 +84,9 @@ interface GitlabOptions : PlatformOptions, PlatformOptionsInternal<GitlabOptions
         from(publishOptions.get())
     }
 
+    /**
+     * Publish to an existing release, created by another task.
+     */
     fun parent(
         task: TaskProvider<Task>
     ) {
@@ -116,14 +122,6 @@ abstract class Gitlab @Inject constructor(name: String) : Platform(name), Gitlab
             throw IllegalStateException("No files to upload to GitLab.")
         }
 
-        val duplicates = files.groupingBy { it.name }.eachCount().filter { it.value > 1 }
-        if (duplicates.isNotEmpty()) {
-            val duplicateNames = duplicates.keys.joinToString(", ")
-            throw IllegalStateException(
-                "GitLab file names must be unique within a release, found duplicates: $duplicateNames"
-            )
-        }
-
         context.submit(UploadWorkAction::class) {
             it.from(this)
         }
@@ -150,15 +148,26 @@ abstract class Gitlab @Inject constructor(name: String) : Platform(name), Gitlab
                     apiEndpoint = apiEndpoint.orNull ?: "https://gitlab.com/api/v4"
                 )
 
-                val (_, _) = getOrCreateRelease(api)
+                getOrCreateRelease(api)
 
                 val files = additionalFiles.files.toMutableList()
-                if (file.isPresent) files.add(file.get().asFile)
+                if (file.isPresent) {
+                    files.add(file.get().asFile)
+                }
 
-                val duplicates = files.groupingBy { it.name }.eachCount().filter { it.value > 1 }
+                if (files.isEmpty() && !allowEmptyFiles.get()) {
+                    throw IllegalStateException("No files to upload to GitLab.")
+                }
+
+                val duplicates = files.groupingBy { it.name }
+                    .eachCount()
+                    .filter { it.value > 1 }
+
                 if (duplicates.isNotEmpty()) {
                     val duplicateNames = duplicates.keys.joinToString(", ")
-                    throw IllegalStateException("GitLab file names must be unique within a release, found duplicates: $duplicateNames")
+                    throw IllegalStateException(
+                        "GitLab file names must be unique within a release, found duplicates: $duplicateNames"
+                    )
                 }
 
                 for (f in files) {
@@ -169,7 +178,7 @@ abstract class Gitlab @Inject constructor(name: String) : Platform(name), Gitlab
                 return GitlabPublishResult(
                     projectId = projectId.get(),
                     tagName = tagName.get(),
-                    url = "https://gitlab.com/projects/$projectId/releases/$tagName",
+                    url = "https://gitlab.com/projects/${projectId.get()}/releases/${tagName.get()}",
                     title = announcementTitle.getOrElse("Download from GitLab")
                 )
             }
@@ -192,6 +201,7 @@ abstract class Gitlab @Inject constructor(name: String) : Platform(name), Gitlab
                     )
                 }
 
+                // This is a little more complicated than GitHub due to how GitLab treats tags as unique per release
                 return try {
                     val release = api.createRelease(
                         projectId.get(),
@@ -202,13 +212,10 @@ abstract class Gitlab @Inject constructor(name: String) : Platform(name), Gitlab
                             ref = commitish.get()
                         )
                     )
-
                     ReleaseResult(release, true)
 
                 } catch (e: Exception) {
-                    if (e.message?.contains("409") == true ||
-                        e.message?.contains("already exists") == true
-                    ) {
+                    if (true == e.message?.contains("409") || true == e.message?.contains("already exists")) {
                         val existing = api.getRelease(projectId.get(), tagName.get())
                         ReleaseResult(existing, false)
                     } else {

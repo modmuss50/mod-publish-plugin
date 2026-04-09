@@ -7,22 +7,12 @@ import me.modmuss50.mpp.HttpUtils
 import me.modmuss50.mpp.MultipartBodyBuilder
 import java.io.File
 import java.net.http.HttpRequest
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
 
 class GitlabApi(
     private val accessToken: String,
     private val apiEndpoint: String = "https://gitlab.com/api/v4"
 ) {
     private val httpUtils = HttpUtils()
-
-    @Serializable
-    data class Repository(
-        val id: Long,
-        val name: String,
-        @SerialName("path_with_namespace")
-        val pathWithNamespace: String,
-    )
 
     @Serializable
     data class Release(
@@ -71,15 +61,6 @@ class GitlabApi(
     private val headers: Map<String, String>
         get() = mapOf("PRIVATE-TOKEN" to accessToken)
 
-    private fun String.encodeUrl(): String = URLEncoder.encode(this, StandardCharsets.UTF_8)
-
-    fun getRepository(
-        projectPath: String
-    ): Repository {
-        val url = "$apiEndpoint/projects/${projectPath.encodeUrl()}"
-        return httpUtils.get(url, headers)
-    }
-
     fun createRelease(
         projectId: Long,
         request: CreateReleaseRequest
@@ -126,6 +107,9 @@ class GitlabApi(
         )
     }
 
+    /**
+     * Needed to update existing releases through the GitLab tag system.
+     */
     fun addAssetToRelease(
         projectId: Long,
         tagName: String,
