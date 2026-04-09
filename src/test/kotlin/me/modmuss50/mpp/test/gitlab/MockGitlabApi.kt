@@ -92,7 +92,9 @@ class MockGitlabApi : MockWebServer.MockApi {
         )
     }
 
-    private fun uploadAsset(context: Context) {
+    private fun uploadAsset(
+        context: Context
+    ) {
         val projectId = context.pathParam("projectId")
         val fileName = context.queryParam("name") ?: "mock-file.txt"
         context.result(
