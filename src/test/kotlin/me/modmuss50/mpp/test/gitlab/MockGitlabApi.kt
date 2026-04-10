@@ -1,8 +1,8 @@
 package me.modmuss50.mpp.test.gitlab
 
 import io.javalin.apibuilder.ApiBuilder.get
-import io.javalin.apibuilder.ApiBuilder.post
 import io.javalin.apibuilder.ApiBuilder.path
+import io.javalin.apibuilder.ApiBuilder.post
 import io.javalin.apibuilder.ApiBuilder.put
 import io.javalin.apibuilder.EndpointGroup
 import io.javalin.http.Context
@@ -24,10 +24,10 @@ class MockGitlabApi : MockWebServer.MockApi {
                     }
                 }
             }
-    }
+        }
 
     private fun getProject(
-        context: Context
+        context: Context,
     ) {
         val id = context.pathParam("projectId")
         context.result(
@@ -37,12 +37,12 @@ class MockGitlabApi : MockWebServer.MockApi {
               "name": "mock-project",
               "path_with_namespace": "mock/namespace/mock-project"
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
     private fun createRelease(
-        context: Context
+        context: Context,
     ) {
         val tagName = context.queryParam("tag_name") ?: "v1.0"
         val projectId = context.pathParam("projectId")
@@ -54,12 +54,12 @@ class MockGitlabApi : MockWebServer.MockApi {
               "description": "Mock release for project $projectId",
               "assets": { "links": [] }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
     private fun updateRelease(
-        context: Context
+        context: Context,
     ) {
         val tagName = context.pathParam("tagName")
         val projectId = context.pathParam("projectId")
@@ -71,12 +71,12 @@ class MockGitlabApi : MockWebServer.MockApi {
               "description": "Updated mock release for project $projectId",
               "assets": { "links": [] }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
     private fun getRelease(
-        context: Context
+        context: Context,
     ) {
         val tagName = context.pathParam("tagName")
         val projectId = context.pathParam("projectId")
@@ -88,12 +88,12 @@ class MockGitlabApi : MockWebServer.MockApi {
               "description": "Mock release for project $projectId",
               "assets": { "links": [] }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
     private fun uploadAsset(
-        context: Context
+        context: Context,
     ) {
         val projectId = context.pathParam("projectId")
         val fileName = context.queryParam("name") ?: "mock-file.txt"
@@ -104,7 +104,7 @@ class MockGitlabApi : MockWebServer.MockApi {
           "alt": "$fileName",
           "url": "http://localhost:${context.port()}/projects/$projectId/uploads/$fileName"
         }
-        """.trimIndent()
+            """.trimIndent(),
         )
     }
 }

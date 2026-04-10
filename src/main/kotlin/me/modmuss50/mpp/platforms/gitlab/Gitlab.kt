@@ -59,7 +59,7 @@ interface GitlabOptions : PlatformOptions, PlatformOptionsInternal<GitlabOptions
     }
 
     fun from(
-        other: GitlabOptions
+        other: GitlabOptions,
     ) {
         super.from(other)
         projectId.convention(other.projectId)
@@ -71,14 +71,14 @@ interface GitlabOptions : PlatformOptions, PlatformOptionsInternal<GitlabOptions
     }
 
     fun from(
-        other: Provider<GitlabOptions>
+        other: Provider<GitlabOptions>,
     ) {
         from(other.get())
     }
 
     fun from(
         other: Provider<GitlabOptions>,
-        publishOptions: Provider<PublishOptions>
+        publishOptions: Provider<PublishOptions>,
     ) {
         from(other)
         from(publishOptions.get())
@@ -88,7 +88,7 @@ interface GitlabOptions : PlatformOptions, PlatformOptionsInternal<GitlabOptions
      * Publish to an existing release, created by another task.
      */
     fun parent(
-        task: TaskProvider<Task>
+        task: TaskProvider<Task>,
     ) {
         val publishTask = task.map { it as PublishModTask }
         releaseResult.set(publishTask.flatMap { it.result })
@@ -113,7 +113,7 @@ interface GitlabOptions : PlatformOptions, PlatformOptionsInternal<GitlabOptions
 
 abstract class Gitlab @Inject constructor(name: String) : Platform(name), GitlabOptions {
     override fun publish(
-        context: PublishContext
+        context: PublishContext,
     ) {
         val files = additionalFiles.files.toMutableList()
         if (file.isPresent) files.add(file.get().asFile)
@@ -145,7 +145,7 @@ abstract class Gitlab @Inject constructor(name: String) : Platform(name), Gitlab
             with(parameters) {
                 val api = GitlabApi(
                     accessToken = accessToken.get(),
-                    apiEndpoint = apiEndpoint.orNull ?: "https://gitlab.com/api/v4"
+                    apiEndpoint = apiEndpoint.orNull ?: "https://gitlab.com/api/v4",
                 )
 
                 getOrCreateRelease(api)
@@ -166,7 +166,7 @@ abstract class Gitlab @Inject constructor(name: String) : Platform(name), Gitlab
                 if (duplicates.isNotEmpty()) {
                     val duplicateNames = duplicates.keys.joinToString(", ")
                     throw IllegalStateException(
-                        "GitLab file names must be unique within a release, found duplicates: $duplicateNames"
+                        "GitLab file names must be unique within a release, found duplicates: $duplicateNames",
                     )
                 }
 
@@ -179,7 +179,7 @@ abstract class Gitlab @Inject constructor(name: String) : Platform(name), Gitlab
                     projectId = projectId.get(),
                     tagName = tagName.get(),
                     url = "https://gitlab.com/projects/${projectId.get()}/releases/${tagName.get()}",
-                    title = announcementTitle.getOrElse("Download from GitLab")
+                    title = announcementTitle.getOrElse("Download from GitLab"),
                 )
             }
         }
@@ -187,17 +187,17 @@ abstract class Gitlab @Inject constructor(name: String) : Platform(name), Gitlab
         data class ReleaseResult(val release: GitlabApi.Release, val created: Boolean)
 
         private fun getOrCreateRelease(
-            api: GitlabApi
+            api: GitlabApi,
         ): ReleaseResult {
             with(parameters) {
                 if (releaseResult.isPresent) {
                     val result = PublishResult.fromJson(
-                        releaseResult.get().asFile.readText()
+                        releaseResult.get().asFile.readText(),
                     ) as GitlabPublishResult
 
                     return ReleaseResult(
                         api.getRelease(projectId.get(), result.tagName),
-                        false
+                        false,
                     )
                 }
 
@@ -209,11 +209,10 @@ abstract class Gitlab @Inject constructor(name: String) : Platform(name), Gitlab
                             name = displayName.get(),
                             tagName = tagName.get(),
                             description = changelog.get(),
-                            ref = commitish.get()
-                        )
+                            ref = commitish.get(),
+                        ),
                     )
                     ReleaseResult(release, true)
-
                 } catch (e: Exception) {
                     if (true == e.message?.contains("409") || true == e.message?.contains("already exists")) {
                         val existing = api.getRelease(projectId.get(), tagName.get())

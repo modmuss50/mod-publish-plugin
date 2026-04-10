@@ -50,7 +50,7 @@ class HttpUtils(val exceptionFactory: HttpExceptionFactory = DefaultHttpExceptio
             HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .PUT(body),
-            headers
+            headers,
         )
     }
 

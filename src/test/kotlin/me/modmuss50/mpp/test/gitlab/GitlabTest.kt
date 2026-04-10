@@ -28,7 +28,7 @@ class GitlabTest : IntegrationTest {
                             tagName = "release-1.0.0"
                         }
                     }
-                """.trimIndent()
+                """.trimIndent(),
             )
             .run("publishGitlab")
         server.close()
@@ -56,7 +56,7 @@ class GitlabTest : IntegrationTest {
                             additionalFiles.from(tasks.jar.flatMap { it.archiveFile })
                         }
                     }
-                """.trimIndent()
+                """.trimIndent(),
             )
             .run("publishGitlab")
         server.close()
@@ -89,7 +89,7 @@ class GitlabTest : IntegrationTest {
                             parent(tasks.named("publishGitlab"))
                         }
                     }
-                """.trimIndent()
+                """.trimIndent(),
             )
             .run("publishGitlabOther")
         server.close()
@@ -117,7 +117,7 @@ class GitlabTest : IntegrationTest {
                             allowEmptyFiles = true
                         }
                     }
-                """.trimIndent()
+                """.trimIndent(),
             )
             .subProject(
                 "child",
@@ -130,7 +130,7 @@ class GitlabTest : IntegrationTest {
                             file = tasks.jar.flatMap { it.archiveFile }
                         }
                     }
-                """.trimIndent()
+                """.trimIndent(),
             )
             .run("publishMods")
         server.close()
@@ -160,7 +160,7 @@ class GitlabTest : IntegrationTest {
                             allowEmptyFiles = true
                         }
                     }
-                """.trimIndent()
+                """.trimIndent(),
             )
             .run("publishGitlab")
         server.close()
@@ -191,7 +191,7 @@ class GitlabTest : IntegrationTest {
                         additionalFiles.from(tasks.jar.flatMap { it.archiveFile })
                     }
                 }
-            """.trimIndent()
+                """.trimIndent(),
             )
             .run("publishGitlab")
         server.close()

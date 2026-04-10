@@ -10,7 +10,7 @@ import java.net.http.HttpRequest
 
 class GitlabApi(
     private val accessToken: String,
-    private val apiEndpoint: String = "https://gitlab.com/api/v4"
+    private val apiEndpoint: String = "https://gitlab.com/api/v4",
 ) {
     private val httpUtils = HttpUtils()
 
@@ -20,12 +20,12 @@ class GitlabApi(
         val tagName: String,
         val name: String,
         val description: String,
-        val assets: Assets? = null
+        val assets: Assets? = null,
     )
 
     @Serializable
     data class Assets(
-        val links: List<AssetLink> = emptyList()
+        val links: List<AssetLink> = emptyList(),
     )
 
     @Serializable
@@ -33,7 +33,7 @@ class GitlabApi(
         val name: String,
         val url: String,
         @SerialName("link_type")
-        val linkType: String
+        val linkType: String,
     )
 
     @Serializable
@@ -42,20 +42,20 @@ class GitlabApi(
         @SerialName("tag_name")
         val tagName: String,
         val description: String,
-        val ref: String
+        val ref: String,
     )
 
     @Serializable
     data class UpdateReleaseRequest(
         val name: String? = null,
-        val description: String? = null
+        val description: String? = null,
     )
 
     @Serializable
     data class UploadResponse(
         val id: Long,
         val alt: String,
-        val url: String
+        val url: String,
     )
 
     private val headers: Map<String, String>
@@ -63,7 +63,7 @@ class GitlabApi(
 
     fun createRelease(
         projectId: Long,
-        request: CreateReleaseRequest
+        request: CreateReleaseRequest,
     ): Release {
         val url = "$apiEndpoint/projects/$projectId/releases"
         val body = HttpRequest.BodyPublishers.ofString(httpUtils.json.encodeToString(request))
@@ -73,7 +73,7 @@ class GitlabApi(
 
     fun getRelease(
         projectId: Long,
-        tagName: String
+        tagName: String,
     ): Release {
         val url = "$apiEndpoint/projects/$projectId/releases/$tagName"
         return httpUtils.get(url, headers)
@@ -82,7 +82,7 @@ class GitlabApi(
     fun updateRelease(
         projectId: Long,
         tagName: String,
-        request: UpdateReleaseRequest
+        request: UpdateReleaseRequest,
     ): Release {
         val url = "$apiEndpoint/projects/$projectId/releases/$tagName"
         val body = HttpRequest.BodyPublishers.ofString(httpUtils.json.encodeToString(request))
@@ -92,7 +92,7 @@ class GitlabApi(
 
     fun uploadAsset(
         projectId: Long,
-        file: File
+        file: File,
     ): AssetLink {
         val url = "$apiEndpoint/projects/$projectId/uploads"
         val builder = MultipartBodyBuilder().addFormDataPart("file", file.name, file)
@@ -103,7 +103,7 @@ class GitlabApi(
         return AssetLink(
             name = file.name,
             url = response.url,
-            linkType = "other"
+            linkType = "other",
         )
     }
 
@@ -113,7 +113,7 @@ class GitlabApi(
     fun addAssetToRelease(
         projectId: Long,
         tagName: String,
-        asset: AssetLink
+        asset: AssetLink,
     ) {
         val release = getRelease(projectId, tagName)
         val newDescription = buildString {
