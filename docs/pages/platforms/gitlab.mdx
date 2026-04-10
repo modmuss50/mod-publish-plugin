@@ -5,6 +5,7 @@ publishMods {
     file = tasks.named<Jar>("jar").flatMap { it.archiveFile }
     changelog = "Changelog"
     type = STABLE
+    modLoaders.add("fabric")
 
     gitlab {
         accessToken = providers.environmentVariable("GITLAB_TOKEN")
