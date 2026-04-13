@@ -3,6 +3,7 @@ package me.modmuss50.mpp.platforms.gitlab
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import me.modmuss50.mpp.HttpUtils
 import me.modmuss50.mpp.MultipartBodyBuilder
 import java.io.File
@@ -13,6 +14,12 @@ class GitlabApi(
     private val apiEndpoint: String = "https://gitlab.com/api/v4",
 ) {
     private val httpUtils = HttpUtils()
+
+    @OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)
+    private val gitlabJson = Json {
+        ignoreUnknownKeys = true
+        explicitNulls = false
+    }
 
     @Serializable
     data class Release(
@@ -66,7 +73,7 @@ class GitlabApi(
         request: CreateReleaseRequest,
     ): Release {
         val url = "$apiEndpoint/projects/$projectId/releases"
-        val body = HttpRequest.BodyPublishers.ofString(httpUtils.json.encodeToString(request))
+        val body = HttpRequest.BodyPublishers.ofString(gitlabJson.encodeToString(request))
         val headersWithContentType = headers + ("Content-Type" to "application/json")
         return httpUtils.post(url, body, headersWithContentType)
     }
@@ -75,7 +82,8 @@ class GitlabApi(
         projectId: Long,
         tagName: String,
     ): Release {
-        val url = "$apiEndpoint/projects/$projectId/releases/$tagName"
+        val encodedTag = java.net.URLEncoder.encode(tagName, Charsets.UTF_8)
+        val url = "$apiEndpoint/projects/$projectId/releases/$encodedTag"
         return httpUtils.get(url, headers)
     }
 
@@ -84,8 +92,9 @@ class GitlabApi(
         tagName: String,
         request: UpdateReleaseRequest,
     ): Release {
-        val url = "$apiEndpoint/projects/$projectId/releases/$tagName"
-        val body = HttpRequest.BodyPublishers.ofString(httpUtils.json.encodeToString(request))
+        val encodedTag = java.net.URLEncoder.encode(tagName, Charsets.UTF_8)
+        val url = "$apiEndpoint/projects/$projectId/releases/$encodedTag"
+        val body = HttpRequest.BodyPublishers.ofString(gitlabJson.encodeToString(request))
         val headersWithContentType = headers + ("Content-Type" to "application/json")
         return httpUtils.put(url, body, headersWithContentType)
     }
@@ -105,22 +114,5 @@ class GitlabApi(
             url = response.url,
             linkType = "other",
         )
-    }
-
-    /**
-     * Needed to update existing releases through the GitLab tag system.
-     */
-    fun addAssetToRelease(
-        projectId: Long,
-        tagName: String,
-        asset: AssetLink,
-    ) {
-        val release = getRelease(projectId, tagName)
-        val newDescription = buildString {
-            append(release.description)
-            if (!release.description.endsWith("\n")) append("\n")
-            append("[${asset.name}](${asset.url})")
-        }
-        updateRelease(projectId, tagName, UpdateReleaseRequest(description = newDescription))
     }
 }

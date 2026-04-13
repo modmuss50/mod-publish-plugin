@@ -1,6 +1,7 @@
 package me.modmuss50.mpp.platforms.gitlab
 
 import me.modmuss50.mpp.GitlabPublishResult
+import me.modmuss50.mpp.HttpUtils
 import me.modmuss50.mpp.Platform
 import me.modmuss50.mpp.PlatformOptions
 import me.modmuss50.mpp.PlatformOptionsInternal
@@ -148,7 +149,7 @@ abstract class Gitlab @Inject constructor(name: String) : Platform(name), Gitlab
                     apiEndpoint = apiEndpoint.orNull ?: "https://gitlab.com/api/v4",
                 )
 
-                getOrCreateRelease(api)
+                val releaseResult = getOrCreateRelease(api)
 
                 val files = additionalFiles.files.toMutableList()
                 if (file.isPresent) {
@@ -170,10 +171,35 @@ abstract class Gitlab @Inject constructor(name: String) : Platform(name), Gitlab
                     )
                 }
 
-                for (f in files) {
-                    val uploaded = api.uploadAsset(projectId.get(), f)
-                    api.addAssetToRelease(projectId.get(), tagName.get(), uploaded)
+                val uploadedAssets = files.map { file ->
+                    api.uploadAsset(projectId.get(), file)
                 }
+
+                val baseRelease = if (releaseResult.created) {
+                    releaseResult.release
+                } else {
+                    api.getRelease(projectId.get(), tagName.get())
+                }
+
+                val finalDescription = buildString {
+                    append(baseRelease.description)
+
+                    if (!baseRelease.description.endsWith("\n")) {
+                        append("\n")
+                    }
+
+                    uploadedAssets.forEach { asset ->
+                        append("[${asset.name}](${asset.url})\n")
+                    }
+                }
+
+                api.updateRelease(
+                    projectId.get(),
+                    tagName.get(),
+                    GitlabApi.UpdateReleaseRequest(
+                        description = finalDescription
+                    )
+                )
 
                 return GitlabPublishResult(
                     projectId = projectId.get(),
@@ -213,8 +239,8 @@ abstract class Gitlab @Inject constructor(name: String) : Platform(name), Gitlab
                         ),
                     )
                     ReleaseResult(release, true)
-                } catch (e: Exception) {
-                    if (true == e.message?.contains("409") || true == e.message?.contains("already exists")) {
+                } catch (e: HttpUtils.HttpException) {
+                    if (e.response.statusCode() == 409) {
                         val existing = api.getRelease(projectId.get(), tagName.get())
                         ReleaseResult(existing, false)
                     } else {

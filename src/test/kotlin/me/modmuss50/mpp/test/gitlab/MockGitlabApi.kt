@@ -100,7 +100,7 @@ class MockGitlabApi : MockWebServer.MockApi {
         context.result(
             """
         {
-          "id": "1",
+          "id": 1,
           "alt": "$fileName",
           "url": "http://localhost:${context.port()}/projects/$projectId/uploads/$fileName"
         }

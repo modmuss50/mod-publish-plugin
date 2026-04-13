@@ -2,7 +2,7 @@
 See the following minimal example showing how to publish the `jar` task to GitLab:
 ```groovy
 publishMods {
-    file = tasks.named<Jar>("jar").flatMap { it.archiveFile }
+    file = tasks.named("jar").flatMap { it.archiveFile }
     changelog = "Changelog"
     type = STABLE
     modLoaders.add("fabric")
@@ -13,7 +13,6 @@ publishMods {
         commitish = "main" // This is the branch the release tag will be created from
     }
 }
-
 ```
 
 ## Multiple releases
@@ -57,7 +56,7 @@ publishMods {
         accessToken = providers.environmentVariable("GITLAB_TOKEN")
 
         // Specify the root project's gitlab task to upload files to
-        parent project(":").tasks.named("gitlab")
+        parent project(":").tasks.named("publishGitlab")
     }
 }
 ```
