@@ -197,8 +197,8 @@ abstract class Gitlab @Inject constructor(name: String) : Platform(name), Gitlab
                     projectId.get(),
                     tagName.get(),
                     GitlabApi.UpdateReleaseRequest(
-                        description = finalDescription
-                    )
+                        description = finalDescription,
+                    ),
                 )
 
                 return GitlabPublishResult(
