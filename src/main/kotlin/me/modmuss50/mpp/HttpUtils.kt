@@ -44,6 +44,16 @@ class HttpUtils(val exceptionFactory: HttpExceptionFactory = DefaultHttpExceptio
         )
     }
 
+    // Added for GitLab's REST API
+    inline fun <reified T> put(url: String, body: HttpRequest.BodyPublisher, headers: Map<String, String>): T {
+        return request(
+            HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .PUT(body),
+            headers,
+        )
+    }
+
     inline fun <reified T> request(requestBuilder: HttpRequest.Builder, headers: Map<String, String>): T {
         requestBuilder.header("User-Agent", userAgent)
 
@@ -61,7 +71,7 @@ class HttpUtils(val exceptionFactory: HttpExceptionFactory = DefaultHttpExceptio
         var body = response.body()
 
         if (body.isBlank()) {
-            // Bit of a hack, but handle empty body's as an empty string.
+            // A bit of a hack, but handle empty body's as an empty string.
             body = "\"\""
         }
 

@@ -118,6 +118,24 @@ data class GiteaPublishResult(
         get() = url
 }
 
+@Serializable
+@SerialName("gitlab")
+data class GitlabPublishResult(
+    val projectId: Long,
+    val tagName: String,
+    val url: String,
+    override val title: String,
+) : PublishResult() {
+    override val type: String
+        get() = "gitlab"
+
+    override val link: String
+        get() = url
+
+    override val brandColor: Int
+        get() = 0xFC6D26
+}
+
 @ApiStatus.Internal
 class PublishContext(private val queue: WorkQueue, private val result: RegularFile) {
     fun <T : PublishWorkParameters> submit(workActionClass: KClass<out PublishWorkAction<T>>, parameterAction: Action<in T>) {
