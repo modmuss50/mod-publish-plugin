@@ -55,17 +55,17 @@ publishMods {
         projectId = "12345678"
         minecraftVersions.add("1.20.1")
 
-        // Optionally set the announcement title used by the discord publisher
+        // Optionally set the announcement title used by the Discord publisher
         announcementTitle = "Download from Modrinth"
 
         // Optionally update the project description after publishing a file
-        // This can be useful if you want to sync your Github readme with the Modrinth project description
+        // This can be useful if you want to sync your GitHub readme with the Modrinth project description
         projectDescription = providers.fileContents(layout.projectDirectory.file("readme.md")).asText
 
         // You can specify a range of Minecraft versions like so:
         minecraftVersionRange {
             start = "1.19.4"
-            end = "1.20.2" // Set to "latest" to use the latest minecraft version
+            end = "1.20.2" // Set to "latest" to use the latest Minecraft version
 
             // Optionally include snapshot versions, defaults to false
             includeSnapshots = true

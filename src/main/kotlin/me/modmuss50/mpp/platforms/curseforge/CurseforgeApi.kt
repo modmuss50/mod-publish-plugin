@@ -86,7 +86,7 @@ class CurseforgeApi(private val accessToken: String, private val baseUrl: String
 
     @Serializable
     data class UploadFileMetadata(
-        val changelog: String, // Can be HTML or markdown if changelogType is set.
+        val changelog: String, // Can be HTML or Markdown if changelogType is set.
         val changelogType: ChangelogType? = null, // Optional: defaults to text
         val displayName: String? = null, // Optional: A friendly display name used on the site if provided.
         val parentFileID: Int? = null, // Optional: The parent file of this file.

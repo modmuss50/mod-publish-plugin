@@ -21,11 +21,11 @@ You can create multiple Gitea destinations by specifying a name like so:
 ```groovy
 publishMods {
     gitea("giteaProjectA") {
-        // Configure gitea settings for project A here
+        // Configure Gitea settings for project A here
     }
 
     gitea("giteaProjectB") {
-        // Configure gitea settings for project B here
+        // Configure Gitea settings for project B here
     }
 }
 ```
@@ -74,14 +74,14 @@ publishMods {
         commitish = "main"
         tagName = "release/1.0.0"
 
-        // Optionally set the announcement title used by the discord publisher
+        // Optionally set the announcement title used by the Discord publisher
         announcementTitle = "Download from Gitea"
 		// Optionally set the display name for your host, which is used by the discord publisher if no custom title is set
 		hostDisplayName = "Example"
         // Optionally set the brand color used by your host
         hostBrandColor = 0x1d8f4a
 
-        // Upload the files to a previously created release, by providing another gitea publish task
+        // Upload the files to a previously created release, by providing another Gitea publish task
         // This is useful in multi-project builds where you want to publish multiple subprojects to a single release
         parent tasks.named("publishGitea")
 

@@ -61,7 +61,7 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
         }
     }
 
-    // Curseforge
+    // CurseForge
 
     fun curseforge(@DelegatesTo(value = Curseforge::class) closure: Closure<*>): NamedDomainObjectProvider<Curseforge> {
         return curseforge {
@@ -131,7 +131,7 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
         }
     }
 
-    // Github
+    // GitHub
 
     fun github(@DelegatesTo(value = Github::class) closure: Closure<*>): NamedDomainObjectProvider<Github> {
         return github {

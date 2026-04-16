@@ -9,7 +9,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * Enable this test to publish real files, to the real sites! Create a options.json with all the tokens
+ * Enable this test to publish real files, to the real sites! Create an options.json with all the tokens
  */
 @Ignore
 class ProductionTest : IntegrationTest {

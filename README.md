@@ -1,12 +1,12 @@
 # Mod Publish Plugin
 A modern Gradle plugin to publish mods to a range of destinations.
 
-Please make sure to report all issues, and any suggestions on this Github repo!
+Please make sure to report all issues, and any suggestions on this GitHub repo!
 
 ## Basic usage
 Visit the [docs site](https://modmuss50.github.io/mod-publish-plugin/) for more detailed instructions.
 
-Add to your gradle plugins block:
+Add to your Gradle plugins block:
 
 ```gradle
 plugins {
@@ -16,7 +16,7 @@ plugins {
 
 It is recommended to specify an exact version number to prevent unwanted breakages to your build script.
 
-Basic example to publish a jar to CurseForge, Modrinth and Github from a Fabric project:
+Basic example to publish a jar to CurseForge, Modrinth and GitHub from a Fabric project:
 ```gradle
 publishMods {
     file = remapJar.archiveFile

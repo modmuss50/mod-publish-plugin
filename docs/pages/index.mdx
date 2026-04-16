@@ -3,7 +3,7 @@
 A modern Gradle plugin to publish Minecraft mods to a range of destinations. Start with the [Getting Started](/getting_started) page.
 
 ### Features
-- Supports CurseForge, Modrinth, Github, Gitea, GitLab, Forgejo, and Discord
+- Supports CurseForge, Modrinth, GitHub, Gitea, GitLab, Forgejo, and Discord
 - Typesafe DSL to easily publish to multiple locations with minimal repetition
 - Retry on failure
 - Dry run mode to try and increase confidence in your buildscript before releases
@@ -18,16 +18,16 @@ A modern Gradle plugin to publish Minecraft mods to a range of destinations. Sta
   - Gradle includes Kotlin so there is no additional dependency for the end user.
   - Groovy buildscripts are fully supported.
 - Why do I need to specify the minecraft versions for both CurseForge and Modrinth?
-  - Curseforge and Modrinth use different versioning for snapshots, thus they must be defined for each platform.
+  - CurseForge and Modrinth use different versioning for snapshots, thus they must be defined for each platform.
 - Feature x or platform y is not supported
   - Please open an issue on this repo!
 - I have a question and need some help
-  - Please use the mod publish plugin discord channel on the [Team Reborn Discord](https://discord.gg/teamreborn)
+  - Please use the mod publish plugin Discord channel on the [Team Reborn Discord](https://discord.gg/teamreborn)
 
 ### Changelog
 #### 1.1.0
 - Gitea/Forgejo support
-- Update Github library to fix incompatibility with newer jackson.
+- Update GitHub library to fix incompatibility with newer jackson.
 #### 1.0.0
 - Support GitHub immutable releases
 - Retry on all network failures including timeouts.
@@ -37,11 +37,11 @@ A modern Gradle plugin to publish Minecraft mods to a range of destinations. Sta
 - Add helper to depend on files from another subproject
 - Add documentation and tests for the common use case of multi platform setups
 #### 0.8.2
-- Allow providing the version name instead of version id for a modrinth dependency
+- Allow providing the version name instead of version id for a Modrinth dependency
 #### 0.8.1
 - Fix to accommodate a change in Modrinth's API for updating project descriptions
 #### 0.8.0
 - Add modern Discord message styles and link button and inline link support
 - Support setting CurseForge additional file display name.
-- Fail on duplicate Github file names.
+- Fail on duplicate GitHub file names.
 - Use `convention` instead of `set` in `from` functions, removes the need for `from` to be first.

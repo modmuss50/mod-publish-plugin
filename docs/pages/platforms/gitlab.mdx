@@ -20,11 +20,11 @@ You can create multiple GitLab destinations by specifying a name like so:
 ```groovy
 publishMods {
     gitlab("A") {
-            // Configure gitlab settings for project A here
+            // Configure GitLab settings for project A here
     }
 
     gitlab("B") {
-           // Configure gitlab settings for project B here
+           // Configure GitLab settings for project B here
     }
 }
 ```
@@ -70,10 +70,10 @@ publishMods {
         commitish = "main"
         tagName = "TEST_TAG"
 
-       // Optionally set the announcement title used by the discord publisher
+       // Optionally set the announcement title used by the Discord publisher
        announcementTitle = "Download from GitLab"
 
-        // Upload the files to a previously created release, by providing another gitlab publish task
+        // Upload the files to a previously created release, by providing another GitLab publish task
         // This is useful in multi-project builds where you want to publish multiple subprojects to a single release
         parent tasks.named("publishGitlab")
 
