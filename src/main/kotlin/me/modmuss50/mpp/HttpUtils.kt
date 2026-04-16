@@ -71,7 +71,7 @@ class HttpUtils(val exceptionFactory: HttpExceptionFactory = DefaultHttpExceptio
         var body = response.body()
 
         if (body.isBlank()) {
-            // A bit of a hack, but handle empty body's as an empty string.
+            // A bit of a hack, but handle empty bodies as an empty string.
             body = "\"\""
         }
 

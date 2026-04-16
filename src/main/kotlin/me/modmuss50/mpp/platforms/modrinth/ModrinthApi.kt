@@ -117,7 +117,7 @@ class ModrinthApi(private val accessToken: String, private val baseUrl: String) 
         val id: String,
     )
 
-    // There is a lot more to this response, however we dont need it.
+    // There is a lot more to this response, however we don't need it.
     @Serializable
     data class CreateVersionResponse(
         val id: String,

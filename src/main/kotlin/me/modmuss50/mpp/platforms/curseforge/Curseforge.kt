@@ -37,7 +37,7 @@ interface CurseforgeOptions : PlatformOptions, PlatformOptionsInternal<Curseforg
     @get:Input
     val projectId: Property<String>
 
-    // Project slug, used by discord webhook to link to the uploaded file.
+    // Project slug, used by Discord webhook to link to the uploaded file.
     @get:Input
     @get:Optional
     val projectSlug: Property<String>
@@ -170,7 +170,7 @@ interface AdditionalFileOptions {
 }
 
 /**
- * Provides shorthand methods for adding dependencies to curseforge
+ * Provides shorthand methods for adding dependencies to CurseForge
  */
 interface CurseforgeDependencyContainer : PlatformDependencyContainer<CurseforgeDependency> {
     fun requires(vararg slugs: String) {
@@ -216,7 +216,7 @@ abstract class Curseforge @Inject constructor(name: String) : Platform(name), Cu
         return CurseForgePublishResult(
             projectId = projectId.get(),
             projectSlug = projectSlug.map { "dry-run" }.orNull,
-            // Use a random file ID so that the URL is different each time, this is needed because discord drops duplicate URLs
+            // Use a random file ID so that the URL is different each time, this is needed because Discord drops duplicate URLs
             fileId = Random.nextInt(0, 1000000),
             title = announcementTitle.getOrElse("Download from CurseForge"),
         )

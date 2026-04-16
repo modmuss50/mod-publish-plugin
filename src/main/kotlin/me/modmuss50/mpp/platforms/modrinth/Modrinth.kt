@@ -114,7 +114,7 @@ interface ModrinthOptions : PlatformOptions, PlatformOptionsInternal<ModrinthOpt
 }
 
 /**
- * Provides shorthand methods for adding dependencies to modrinth
+ * Provides shorthand methods for adding dependencies to Modrinth
  */
 interface ModrinthDependencyContainer : PlatformDependencyContainer<ModrinthDependency> {
     fun requires(vararg slugs: String) {
@@ -312,7 +312,7 @@ abstract class Modrinth @Inject constructor(name: String) : Platform(name), Modr
 
 private val ID_REGEX = Regex("[0-9a-zA-Z]{8}")
 
-// Returns a validated ModrithID
+// Returns a validated ModrinthID
 private val String.modrinthId: String
     get() {
         if (!this.matches(ID_REGEX)) {
