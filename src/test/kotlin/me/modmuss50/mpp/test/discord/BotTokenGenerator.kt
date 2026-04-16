@@ -3,12 +3,12 @@ package me.modmuss50.mpp.test.discord
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import me.modmuss50.mpp.HttpUtils
+import me.modmuss50.mpp.platforms.context.HttpClients
 import java.io.File
 import java.net.http.HttpRequest
 
 val json = Json { ignoreUnknownKeys = true }
-val httpUtils = HttpUtils()
+val httpUtils = HttpClients.defaultClient
 
 /*
 Use this to generate a bot created webhook URL for testing the discord support
@@ -24,10 +24,11 @@ fun main(args: Array<String>) {
     val options = json.decodeFromString<Options>(File("options.json").readText())
 
     val channelId = args[0]
-    val headers: Map<String, String> = mapOf(
-        "Content-Type" to "application/json",
-        "Authorization" to "Bot ${options.discordBotToken}",
-    )
+    val headers: Map<String, String> =
+        mapOf(
+            "Content-Type" to "application/json",
+            "Authorization" to "Bot ${options.discordBotToken}",
+        )
 
     val request = CreateWebhookRequest("test")
     val body = HttpRequest.BodyPublishers.ofString(json.encodeToString(request))

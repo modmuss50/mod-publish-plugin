@@ -3,9 +3,8 @@ package me.modmuss50.mpp.platforms.gitlab
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-import me.modmuss50.mpp.HttpUtils
 import me.modmuss50.mpp.MultipartBodyBuilder
+import me.modmuss50.mpp.platforms.context.HttpClients
 import java.io.File
 import java.net.http.HttpRequest
 
@@ -13,13 +12,7 @@ class GitlabApi(
     private val accessToken: String,
     private val apiEndpoint: String = "https://gitlab.com/api/v4",
 ) {
-    private val httpUtils = HttpUtils()
-
-    @OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)
-    private val gitlabJson = Json {
-        ignoreUnknownKeys = true
-        explicitNulls = false
-    }
+    private val httpUtils = HttpClients.gitlabClient
 
     @Serializable
     data class Release(
@@ -73,7 +66,7 @@ class GitlabApi(
         request: CreateReleaseRequest,
     ): Release {
         val url = "$apiEndpoint/projects/$projectId/releases"
-        val body = HttpRequest.BodyPublishers.ofString(gitlabJson.encodeToString(request))
+        val body = HttpRequest.BodyPublishers.ofString(httpUtils.json.encodeToString(request))
         val headersWithContentType = headers + ("Content-Type" to "application/json")
         return httpUtils.post(url, body, headersWithContentType)
     }
@@ -94,7 +87,7 @@ class GitlabApi(
     ): Release {
         val encodedTag = java.net.URLEncoder.encode(tagName, Charsets.UTF_8)
         val url = "$apiEndpoint/projects/$projectId/releases/$encodedTag"
-        val body = HttpRequest.BodyPublishers.ofString(gitlabJson.encodeToString(request))
+        val body = HttpRequest.BodyPublishers.ofString(httpUtils.json.encodeToString(request))
         val headersWithContentType = headers + ("Content-Type" to "application/json")
         return httpUtils.put(url, body, headersWithContentType)
     }

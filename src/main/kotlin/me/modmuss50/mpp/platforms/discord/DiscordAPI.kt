@@ -1,22 +1,21 @@
 package me.modmuss50.mpp.platforms.discord
 
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-import me.modmuss50.mpp.HttpUtils
+import me.modmuss50.mpp.platforms.context.HttpClients
 import java.net.http.HttpRequest
 
 object DiscordAPI {
-    @OptIn(ExperimentalSerializationApi::class)
-    val json = Json { explicitNulls = false; classDiscriminator = "class"; encodeDefaults = true }
-    private val httpUtils = HttpUtils()
+    private val httpUtils = HttpClients.discordClient
     private val headers: Map<String, String> = mapOf("Content-Type" to "application/json")
 
     // https://discord.com/developers/docs/resources/webhook#execute-webhook
-    fun executeWebhook(url: String, webhook: Webhook) {
-        val body = HttpRequest.BodyPublishers.ofString(json.encodeToString(webhook))
+    fun executeWebhook(
+        url: String,
+        webhook: Webhook,
+    ) {
+        val body = HttpRequest.BodyPublishers.ofString(httpUtils.json.encodeToString(webhook))
         httpUtils.post<String>(url, body, headers)
     }
 

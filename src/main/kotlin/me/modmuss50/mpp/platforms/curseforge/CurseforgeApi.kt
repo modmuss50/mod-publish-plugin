@@ -1,25 +1,20 @@
 package me.modmuss50.mpp.platforms.curseforge
 
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-import me.modmuss50.mpp.HttpUtils
 import me.modmuss50.mpp.MultipartBodyBuilder
 import me.modmuss50.mpp.PlatformDependency
-import java.net.http.HttpResponse
+import me.modmuss50.mpp.platforms.context.HttpClients
 import java.nio.file.Path
 import kotlin.io.path.name
 
 // https://support.curseforge.com/en/support/solutions/articles/9000197321-curseforge-upload-api
-class CurseforgeApi(private val accessToken: String, private val baseUrl: String) {
-    // dont serialize nulls
-    @OptIn(ExperimentalSerializationApi::class)
-    val json = Json { explicitNulls = false }
-
-    private val httpUtils = HttpUtils(exceptionFactory = CurseforgeHttpExceptionFactory())
+class CurseforgeApi(
+    private val accessToken: String,
+    private val baseUrl: String,
+) {
+    private val httpUtils = HttpClients.curseforgeClient
 
     @Serializable
     data class GameVersionType(
@@ -49,13 +44,12 @@ class CurseforgeApi(private val accessToken: String, private val baseUrl: String
         ;
 
         companion object {
-            fun valueOf(type: me.modmuss50.mpp.ReleaseType): ReleaseType {
-                return when (type) {
+            fun valueOf(type: me.modmuss50.mpp.ReleaseType): ReleaseType =
+                when (type) {
                     me.modmuss50.mpp.ReleaseType.STABLE -> RELEASE
                     me.modmuss50.mpp.ReleaseType.BETA -> BETA
                     me.modmuss50.mpp.ReleaseType.ALPHA -> ALPHA
                 }
-            }
         }
     }
 
@@ -118,14 +112,13 @@ class CurseforgeApi(private val accessToken: String, private val baseUrl: String
         ;
 
         companion object {
-            fun valueOf(type: PlatformDependency.DependencyType): RelationType {
-                return when (type) {
+            fun valueOf(type: PlatformDependency.DependencyType): RelationType =
+                when (type) {
                     PlatformDependency.DependencyType.REQUIRED -> REQUIRED_DEPENDENCY
                     PlatformDependency.DependencyType.OPTIONAL -> OPTIONAL_DEPENDENCY
                     PlatformDependency.DependencyType.INCOMPATIBLE -> INCOMPATIBLE
                     PlatformDependency.DependencyType.EMBEDDED -> EMBEDDED_LIBRARY
                 }
-            }
         }
     }
 
@@ -149,37 +142,39 @@ class CurseforgeApi(private val accessToken: String, private val baseUrl: String
     private val headers: Map<String, String>
         get() = mapOf("X-Api-Token" to accessToken)
 
-    fun getVersionTypes(): List<GameVersionType> {
-        return httpUtils.get("$baseUrl/api/game/version-types", headers)
-    }
+    fun getVersionTypes(): List<GameVersionType> =
+        httpUtils.get(
+            url = "$baseUrl/api/game/version-types",
+            headers = headers,
+        )
 
-    fun getGameVersions(): List<GameVersion> {
-        return httpUtils.get("$baseUrl/api/game/versions", headers)
-    }
+    fun getGameVersions(): List<GameVersion> =
+        httpUtils.get(
+            url = "$baseUrl/api/game/versions",
+            headers = headers,
+        )
 
-    fun uploadFile(projectId: String, path: Path, uploadMetadata: UploadFileMetadata): UploadFileResponse {
-        val metadataJson = json.encodeToString(uploadMetadata)
+    fun uploadFile(
+        projectId: String,
+        path: Path,
+        uploadMetadata: UploadFileMetadata,
+    ): UploadFileResponse {
+        val metadataJson = httpUtils.json.encodeToString(uploadMetadata)
 
-        val bodyBuilder = MultipartBodyBuilder()
-            .addFormDataPart("file", path.name, path, "application/java-archive")
-            .addFormDataPart("metadata", metadataJson)
+        val bodyBuilder =
+            MultipartBodyBuilder()
+                .addFormDataPart("file", path.name, path, "application/java-archive")
+                .addFormDataPart("metadata", metadataJson)
 
-        val multipartHeaders = headers.toMutableMap()
-        multipartHeaders["Content-Type"] = bodyBuilder.getContentType()
-
-        return httpUtils.post("$baseUrl/api/projects/$projectId/upload-file", bodyBuilder.build(), multipartHeaders)
-    }
-
-    private class CurseforgeHttpExceptionFactory : HttpUtils.HttpExceptionFactory {
-        val json = Json { ignoreUnknownKeys = true }
-
-        override fun createException(response: HttpResponse<String>): HttpUtils.HttpException {
-            return try {
-                val errorResponse = json.decodeFromString<ErrorResponse>(response.body())
-                HttpUtils.HttpException(response, errorResponse.errorMessage)
-            } catch (e: SerializationException) {
-                HttpUtils.HttpException(response, "Unknown error")
+        val multipartHeaders =
+            headers.toMutableMap().apply {
+                this["Content-Type"] = bodyBuilder.getContentType()
             }
-        }
+
+        return httpUtils.post(
+            url = "$baseUrl/api/projects/$projectId/upload-file",
+            body = bodyBuilder.build(),
+            headers = multipartHeaders,
+        )
     }
 }

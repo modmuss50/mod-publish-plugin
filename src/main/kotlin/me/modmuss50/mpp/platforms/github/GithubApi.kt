@@ -3,12 +3,12 @@ package me.modmuss50.mpp.platforms.github
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
-import me.modmuss50.mpp.HttpUtils
+import me.modmuss50.mpp.platforms.context.HttpClients
 import java.io.File
 import java.net.http.HttpRequest
 
 class GithubApi(private val accessToken: String, private val apiEndpoint: String = "https://api.github.com") {
-    private val httpUtils = HttpUtils()
+    private val httpUtils = HttpClients.defaultClient
 
     @Serializable
     data class Repository(

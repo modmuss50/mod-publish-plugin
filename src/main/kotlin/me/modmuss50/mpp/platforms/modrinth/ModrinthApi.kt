@@ -2,26 +2,22 @@ package me.modmuss50.mpp.platforms.modrinth
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import me.modmuss50.mpp.HttpUtils
 import me.modmuss50.mpp.MultipartBodyBuilder
 import me.modmuss50.mpp.PlatformDependency
 import me.modmuss50.mpp.ReleaseType
+import me.modmuss50.mpp.platforms.context.HttpClients
 import java.net.http.HttpRequest
-import java.net.http.HttpResponse
 import java.nio.file.Path
-import java.time.Duration
 import kotlin.io.path.name
 
 // https://docs.modrinth.com/api-spec/#tag/versions/operation/createVersion
-class ModrinthApi(private val accessToken: String, private val baseUrl: String) {
-    private val httpUtils = HttpUtils(
-        exceptionFactory = ModrinthHttpExceptionFactory(),
-        // Increase the timeout as Modrinth can be slow
-        timeout = Duration.ofSeconds(60),
-    )
+class ModrinthApi(
+    private val accessToken: String,
+    private val baseUrl: String,
+) {
+    private val httpUtils = HttpClients.modrinthClient
 
     @Serializable
     enum class VersionType {
@@ -36,13 +32,12 @@ class ModrinthApi(private val accessToken: String, private val baseUrl: String) 
         ;
 
         companion object {
-            fun valueOf(type: ReleaseType): VersionType {
-                return when (type) {
+            fun valueOf(type: ReleaseType): VersionType =
+                when (type) {
                     ReleaseType.STABLE -> RELEASE
                     ReleaseType.BETA -> BETA
                     ReleaseType.ALPHA -> ALPHA
                 }
-            }
         }
     }
 
@@ -98,14 +93,13 @@ class ModrinthApi(private val accessToken: String, private val baseUrl: String) 
         ;
 
         companion object {
-            fun valueOf(type: PlatformDependency.DependencyType): DependencyType {
-                return when (type) {
+            fun valueOf(type: PlatformDependency.DependencyType): DependencyType =
+                when (type) {
                     PlatformDependency.DependencyType.REQUIRED -> REQUIRED
                     PlatformDependency.DependencyType.OPTIONAL -> OPTIONAL
                     PlatformDependency.DependencyType.INCOMPATIBLE -> INCOMPATIBLE
                     PlatformDependency.DependencyType.EMBEDDED -> EMBEDDED
                 }
-            }
         }
     }
 
@@ -145,20 +139,23 @@ class ModrinthApi(private val accessToken: String, private val baseUrl: String) 
     )
 
     private val headers: Map<String, String>
-        get() = mapOf(
-            "Authorization" to accessToken,
-            "Content-Type" to "application/json",
-        )
+        get() =
+            mapOf(
+                "Authorization" to accessToken,
+                "Content-Type" to "application/json",
+            )
 
-    fun listVersions(projectSlug: String): Array<ListVersionsResponse> {
-        return httpUtils.get("$baseUrl/project/$projectSlug/version", headers)
-    }
+    fun listVersions(projectSlug: String): Array<ListVersionsResponse> = httpUtils.get("$baseUrl/project/$projectSlug/version", headers)
 
-    fun createVersion(metadata: CreateVersion, files: Map<String, Path>): CreateVersionResponse {
+    fun createVersion(
+        metadata: CreateVersion,
+        files: Map<String, Path>,
+    ): CreateVersionResponse {
         val metadataJson = Json.encodeToString(metadata)
 
-        val bodyBuilder = MultipartBodyBuilder()
-            .addFormDataPart("data", metadataJson)
+        val bodyBuilder =
+            MultipartBodyBuilder()
+                .addFormDataPart("data", metadataJson)
 
         for ((name, path) in files) {
             bodyBuilder.addFormDataPart(name, path.name, path, "application/java-archive")
@@ -170,25 +167,13 @@ class ModrinthApi(private val accessToken: String, private val baseUrl: String) 
         return httpUtils.post("$baseUrl/version", bodyBuilder.build(), multipartHeaders)
     }
 
-    fun checkProject(projectSlug: String): ProjectCheckResponse {
-        return httpUtils.get("$baseUrl/project/$projectSlug/check", headers)
-    }
+    fun checkProject(projectSlug: String): ProjectCheckResponse = httpUtils.get("$baseUrl/project/$projectSlug/check", headers)
 
-    fun modifyProject(projectSlug: String, modifyProject: ModifyProject) {
+    fun modifyProject(
+        projectSlug: String,
+        modifyProject: ModifyProject,
+    ) {
         val body = HttpRequest.BodyPublishers.ofString(Json.encodeToString(modifyProject))
         httpUtils.patch<String>("$baseUrl/project/$projectSlug", body, headers)
-    }
-
-    private class ModrinthHttpExceptionFactory : HttpUtils.HttpExceptionFactory {
-        val json = Json { ignoreUnknownKeys = true }
-
-        override fun createException(response: HttpResponse<String>): HttpUtils.HttpException {
-            return try {
-                val errorResponse = json.decodeFromString<ErrorResponse>(response.body())
-                HttpUtils.HttpException(response, errorResponse.description)
-            } catch (e: SerializationException) {
-                HttpUtils.HttpException(response, "Unknown error")
-            }
-        }
     }
 }
