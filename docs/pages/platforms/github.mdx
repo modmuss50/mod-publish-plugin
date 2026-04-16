@@ -20,11 +20,11 @@ You can create multiple GitHub destinations by specifying a name like so:
 ```groovy
 publishMods {
     github("githubProjectA") {
-        // Configure github settings for project A here
+        // Configure GitHub settings for project A here
     }
 
     github("githubProjectB") {
-        // Configure github settings for project B here
+        // Configure GitHub settings for project B here
     }
 }
 ```
@@ -56,14 +56,14 @@ publishMods {
     github {
         accessToken = providers.environmentVariable("GITHUB_TOKEN")
 
-        // Specify the root project's github task to upload files to
+        // Specify the root project's GitHub task to upload files to
         parent project(":").tasks.named("publishGithub")
     }
 }
 ```
 
 ## All options
-See the following example showing all the Github specific options:
+See the following example showing all the GitHub specific options:
 ```groovy
 publishMods {
     github {
@@ -72,7 +72,7 @@ publishMods {
         commitish = "main"
         tagName = "release/1.0.0"
 
-        // Optionally set the announcement title used by the discord publisher
+        // Optionally set the announcement title used by the Discord publisher
         announcementTitle = "Download from GitHub"
 
         // Upload the files to a previously created release, by providing another github publish task

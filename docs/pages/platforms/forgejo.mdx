@@ -21,11 +21,11 @@ You can create multiple Forgejo destinations by specifying a name like so:
 ```groovy
 publishMods {
     forgejo("forgejoProjectA") {
-        // Configure forgejo settings for project A here
+        // Configure Forgejo settings for project A here
     }
 
     forgejo("forgejoProjectB") {
-        // Configure forgejo settings for project B here
+        // Configure Forgejo settings for project B here
     }
 }
 ```
@@ -57,7 +57,7 @@ publishMods {
     forgejo {
         accessToken = providers.environmentVariable("FORGEJO_TOKEN")
 
-        // Specify the root project's forgejo task to upload files to
+        // Specify the root project's Forgejo task to upload files to
         parent project(":").tasks.named("forgejo")
     }
 }
@@ -81,7 +81,7 @@ publishMods {
         // Optionally set the brand color used by your host
         hostBrandColor = 0xff5500
 
-        // Upload the files to a previously created release, by providing another forgejo publish task
+        // Upload the files to a previously created release, by providing another Forgejo publish task
         // This is useful in multi-project builds where you want to publish multiple subprojects to a single release
         parent tasks.named("publishForgejo")
 

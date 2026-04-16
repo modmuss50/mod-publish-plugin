@@ -41,7 +41,7 @@ publishMods {
 }
 ```
 
-Each platform inherits the above common options, and can all be individually configured. For example if you want to use a different file just for Github you could do the following:
+Each platform inherits the above common options, and can all be individually configured. For example if you want to use a different file just for GitHub you could do the following:
 
 ```groovy
 publishMods {
@@ -49,7 +49,7 @@ publishMods {
     file = jar.archiveFile
 
     github {
-        // The githubJar is only used by the github publish task.
+        // The githubJar is only used by the GitHub publish task.
         file = githubJar.archiveFile
     }
 
