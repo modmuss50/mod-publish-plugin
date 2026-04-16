@@ -50,7 +50,11 @@ object HttpProfiles {
     val curseforge =
         HttpContext(
             client = defaultClient,
-            json = Json { explicitNulls = false },
+            json =
+                Json {
+                    ignoreUnknownKeys = true // Added on 4.16.26, may be re-evaluated later
+                    explicitNulls = false
+                },
             userAgent = defaultAgent,
             exceptionFactory = HttpExceptionFactories.curseforge,
         )
