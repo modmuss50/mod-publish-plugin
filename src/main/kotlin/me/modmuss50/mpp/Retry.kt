@@ -1,4 +1,4 @@
-package me.modmuss50.mpp.platforms.context
+package me.modmuss50.mpp
 
 import org.slf4j.LoggerFactory
 

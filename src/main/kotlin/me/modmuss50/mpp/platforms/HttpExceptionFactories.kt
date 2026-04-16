@@ -1,4 +1,4 @@
-package me.modmuss50.mpp.platforms.context
+package me.modmuss50.mpp.platforms
 
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
@@ -42,7 +42,7 @@ object HttpExceptionFactories {
                 response = response,
                 message = errorResponse.errorMessage,
             )
-        } catch (e: SerializationException) {
+        } catch (_: SerializationException) {
             HttpException(
                 statusCode = response.statusCode(),
                 uri = response.uri(),
@@ -67,7 +67,7 @@ object HttpExceptionFactories {
                 response = response,
                 message = errorResponse.description,
             )
-        } catch (e: SerializationException) {
+        } catch (_: SerializationException) {
             HttpException(
                 statusCode = response.statusCode(),
                 uri = response.uri(),
@@ -92,7 +92,7 @@ object HttpExceptionFactories {
                 response = response,
                 message = errorResponse.message,
             )
-        } catch (e: SerializationException) {
+        } catch (_: SerializationException) {
             HttpException(
                 statusCode = response.statusCode(),
                 uri = response.uri(),

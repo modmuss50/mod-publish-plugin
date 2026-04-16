@@ -1,4 +1,4 @@
-package me.modmuss50.mpp.platforms.context
+package me.modmuss50.mpp.platforms
 
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
@@ -66,7 +66,7 @@ object HttpProfiles {
                     encodeDefaults = true
                 },
             userAgent = defaultAgent,
-            exceptionFactory = HttpExceptionFactories.curseforge,
+            exceptionFactory = HttpExceptionFactories.default,
         )
 
     private fun client(timeout: Duration) =

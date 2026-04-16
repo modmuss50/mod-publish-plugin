@@ -1,4 +1,4 @@
-package me.modmuss50.mpp.platforms.context
+package me.modmuss50.mpp.platforms
 
 import me.modmuss50.mpp.networking.HttpApi
 

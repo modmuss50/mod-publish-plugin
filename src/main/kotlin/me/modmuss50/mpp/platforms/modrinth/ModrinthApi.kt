@@ -7,7 +7,7 @@ import kotlinx.serialization.json.Json
 import me.modmuss50.mpp.MultipartBodyBuilder
 import me.modmuss50.mpp.PlatformDependency
 import me.modmuss50.mpp.ReleaseType
-import me.modmuss50.mpp.platforms.context.HttpClients
+import me.modmuss50.mpp.platforms.HttpClients
 import java.net.http.HttpRequest
 import java.nio.file.Path
 import kotlin.io.path.name

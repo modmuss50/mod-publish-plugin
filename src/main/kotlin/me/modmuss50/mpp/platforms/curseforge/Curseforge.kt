@@ -14,7 +14,7 @@ import me.modmuss50.mpp.PublishWorkAction
 import me.modmuss50.mpp.PublishWorkParameters
 import me.modmuss50.mpp.Validators
 import me.modmuss50.mpp.path
-import me.modmuss50.mpp.platforms.context.Retry
+import me.modmuss50.mpp.Retry
 import org.gradle.api.Action
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project

@@ -3,7 +3,7 @@ package me.modmuss50.mpp.platforms.discord
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
-import me.modmuss50.mpp.platforms.context.HttpClients
+import me.modmuss50.mpp.platforms.HttpClients
 import java.net.http.HttpRequest
 
 object DiscordAPI {

@@ -3,7 +3,7 @@ package me.modmuss50.mpp.test.discord
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import me.modmuss50.mpp.platforms.context.HttpClients
+import me.modmuss50.mpp.platforms.HttpClients
 import java.io.File
 import java.net.http.HttpRequest
 

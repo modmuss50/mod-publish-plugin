@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import me.modmuss50.mpp.MultipartBodyBuilder
 import me.modmuss50.mpp.PlatformDependency
-import me.modmuss50.mpp.platforms.context.HttpClients
+import me.modmuss50.mpp.platforms.HttpClients
 import java.nio.file.Path
 import kotlin.io.path.name
 

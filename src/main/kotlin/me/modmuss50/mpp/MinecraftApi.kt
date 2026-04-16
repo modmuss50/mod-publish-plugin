@@ -1,7 +1,7 @@
 package me.modmuss50.mpp
 
 import kotlinx.serialization.Serializable
-import me.modmuss50.mpp.platforms.context.HttpClients
+import me.modmuss50.mpp.platforms.HttpClients
 
 class MinecraftApi(
     private val baseUrl: String = "https://piston-meta.mojang.com/",
