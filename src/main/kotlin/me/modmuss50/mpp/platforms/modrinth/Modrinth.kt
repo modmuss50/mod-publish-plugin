@@ -1,6 +1,5 @@
 package me.modmuss50.mpp.platforms.modrinth
 
-import me.modmuss50.mpp.HttpUtils
 import me.modmuss50.mpp.MinecraftApi
 import me.modmuss50.mpp.ModrinthPublishResult
 import me.modmuss50.mpp.Platform
@@ -13,6 +12,7 @@ import me.modmuss50.mpp.PublishOptions
 import me.modmuss50.mpp.PublishResult
 import me.modmuss50.mpp.PublishWorkAction
 import me.modmuss50.mpp.PublishWorkParameters
+import me.modmuss50.mpp.Retry
 import me.modmuss50.mpp.Validators
 import me.modmuss50.mpp.path
 import org.gradle.api.Action
@@ -239,12 +239,12 @@ abstract class Modrinth @Inject constructor(name: String) : Platform(name), Modr
                     primaryFile = primaryFileKey,
                 )
 
-                val response = HttpUtils.retry(maxRetries.get(), "Failed to create version") {
+                val response = Retry.run(maxRetries.get(), "Failed to create version") {
                     api.createVersion(metadata, files)
                 }
 
                 if (projectDescription.isPresent) {
-                    HttpUtils.retry(maxRetries.get(), "Failed to update project description") {
+                    Retry.run(maxRetries.get(), "Failed to update project description") {
                         api.modifyProject(projectId.get().modrinthId, ModrinthApi.ModifyProject(body = projectDescription.get()))
                     }
                 }
@@ -274,7 +274,7 @@ abstract class Modrinth @Inject constructor(name: String) : Platform(name), Modr
                         throw IllegalStateException("Modrinth dependency cannot specify both projectId and projectSlug")
                     }
 
-                    projectId = HttpUtils.retry(parameters.maxRetries.get(), "Failed to lookup project id from slug: ${slug.get()}") {
+                    projectId = Retry.run(parameters.maxRetries.get(), "Failed to lookup project id from slug: ${slug.get()}") {
                         api.checkProject(slug.get())
                     }.id
                 }
@@ -285,7 +285,7 @@ abstract class Modrinth @Inject constructor(name: String) : Platform(name), Modr
                 }
 
                 if (version.isPresent) {
-                    val response = HttpUtils.retry(parameters.maxRetries.get(), "Failed to list versions from slug/id: ${version.get()}") {
+                    val response = Retry.run(parameters.maxRetries.get(), "Failed to list versions from slug/id: ${version.get()}") {
                         api.listVersions(projectId)
                     }
 
