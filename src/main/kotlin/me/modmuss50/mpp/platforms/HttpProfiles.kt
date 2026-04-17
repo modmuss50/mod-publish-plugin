@@ -38,10 +38,10 @@ object HttpProfiles {
         HttpContext(
             client = defaultClient,
             json =
-                Json {
-                    ignoreUnknownKeys = true
-                    explicitNulls = false
-                },
+            Json {
+                ignoreUnknownKeys = true
+                explicitNulls = false
+            },
             userAgent = defaultAgent,
             exceptionFactory = HttpExceptionFactories.default,
         )
@@ -51,10 +51,10 @@ object HttpProfiles {
         HttpContext(
             client = defaultClient,
             json =
-                Json {
-                    ignoreUnknownKeys = true // Added on 4.16.26, may be re-evaluated later
-                    explicitNulls = false
-                },
+            Json {
+                ignoreUnknownKeys = true // Added on 4.16.26, may be re-evaluated later
+                explicitNulls = false
+            },
             userAgent = defaultAgent,
             exceptionFactory = HttpExceptionFactories.curseforge,
         )
@@ -64,11 +64,11 @@ object HttpProfiles {
         HttpContext(
             client = defaultClient,
             json =
-                Json {
-                    explicitNulls = false
-                    classDiscriminator = "class"
-                    encodeDefaults = true
-                },
+            Json {
+                explicitNulls = false
+                classDiscriminator = "class"
+                encodeDefaults = true
+            },
             userAgent = defaultAgent,
             exceptionFactory = HttpExceptionFactories.default,
         )

@@ -30,4 +30,4 @@ class HttpException(
  * shaping error messages or extracting additional metadata from the response.
  */
 typealias HttpExceptionFactory =
-    (HttpResponse<String>) -> HttpException
+(HttpResponse<String>) -> HttpException
