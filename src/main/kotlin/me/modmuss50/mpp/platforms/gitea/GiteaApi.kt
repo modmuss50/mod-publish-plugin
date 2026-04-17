@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import me.modmuss50.mpp.MultipartBodyBuilder
+import me.modmuss50.mpp.networking.MultipartBodyBuilder
 import me.modmuss50.mpp.platforms.HttpClients
 import java.io.File
 import java.net.http.HttpRequest

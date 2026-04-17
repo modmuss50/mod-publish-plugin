@@ -3,7 +3,7 @@ package me.modmuss50.mpp.test.misc
 import io.javalin.apibuilder.ApiBuilder.post
 import io.javalin.apibuilder.EndpointGroup
 import io.javalin.http.Context
-import me.modmuss50.mpp.MultipartBodyBuilder
+import me.modmuss50.mpp.networking.MultipartBodyBuilder
 import me.modmuss50.mpp.test.MockWebServer
 import java.net.URI
 import java.net.http.HttpClient
