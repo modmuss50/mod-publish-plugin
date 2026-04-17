@@ -12,95 +12,59 @@ object HttpExceptionFactories {
     val default: HttpExceptionFactory = { response ->
         val body = response.body().orEmpty()
 
+        val message =
+            buildString {
+                append("Request failed (status: ${response.statusCode()}, url: ${response.uri()})")
+                if (body.isNotBlank()) {
+                    append(" message: $body")
+                }
+            }
+
         HttpException(
             statusCode = response.statusCode(),
             uri = response.uri(),
             body = body,
             headers = response.headers().map(),
             response = response,
-            message =
-                buildString {
-                    append("Request failed, status: ${response.statusCode()} ")
-                    append("url: ${response.uri()}")
-                    if (body.isNotBlank()) {
-                        append(" message: $body")
-                    }
-                },
+            message = message,
         )
     }
 
-    val curseforge: HttpExceptionFactory = { response ->
-        val json = Json { ignoreUnknownKeys = true }
+    val curseforge =
+        jsonErrorFactory<CurseforgeApi.ErrorResponse> {
+            it.errorMessage
+        }
 
-        try {
-            val errorResponse = json.decodeFromString<CurseforgeApi.ErrorResponse>(response.body())
+    val modrinth =
+        jsonErrorFactory<ModrinthApi.ErrorResponse> {
+            it.description
+        }
+
+    val gitea =
+        jsonErrorFactory<GiteaApi.ErrorResponse> {
+            it.message
+        }
+
+    private inline fun <reified T> jsonErrorFactory(crossinline messageExtractor: (T) -> String): HttpExceptionFactory =
+        { response ->
+            val body = response.body().orEmpty()
+            val json = Json { ignoreUnknownKeys = true }
+
+            val message =
+                try {
+                    val parsed = json.decodeFromString<T>(body)
+                    messageExtractor(parsed)
+                } catch (_: SerializationException) {
+                    body.ifBlank { "Unknown error" }
+                }
+
             HttpException(
                 statusCode = response.statusCode(),
                 uri = response.uri(),
-                body = response.body().orEmpty(),
+                body = body,
                 headers = response.headers().map(),
                 response = response,
-                message = errorResponse.errorMessage,
-            )
-        } catch (_: SerializationException) {
-            HttpException(
-                statusCode = response.statusCode(),
-                uri = response.uri(),
-                body = response.body().orEmpty(),
-                headers = response.headers().map(),
-                response = response,
-                message = "Unknown error",
+                message = message,
             )
         }
-    }
-
-    val modrinth: HttpExceptionFactory = { response ->
-        val json = Json { ignoreUnknownKeys = true }
-
-        try {
-            val errorResponse = json.decodeFromString<ModrinthApi.ErrorResponse>(response.body())
-            HttpException(
-                statusCode = response.statusCode(),
-                uri = response.uri(),
-                body = response.body().orEmpty(),
-                headers = response.headers().map(),
-                response = response,
-                message = errorResponse.description,
-            )
-        } catch (_: SerializationException) {
-            HttpException(
-                statusCode = response.statusCode(),
-                uri = response.uri(),
-                body = response.body().orEmpty(),
-                headers = response.headers().map(),
-                response = response,
-                message = "Unknown error",
-            )
-        }
-    }
-
-    val gitea: HttpExceptionFactory = { response ->
-        val json = Json { ignoreUnknownKeys = true }
-
-        try {
-            val errorResponse = json.decodeFromString<GiteaApi.ErrorResponse>(response.body())
-            HttpException(
-                statusCode = response.statusCode(),
-                uri = response.uri(),
-                body = response.body().orEmpty(),
-                headers = response.headers().map(),
-                response = response,
-                message = errorResponse.message,
-            )
-        } catch (_: SerializationException) {
-            HttpException(
-                statusCode = response.statusCode(),
-                uri = response.uri(),
-                body = response.body().orEmpty(),
-                headers = response.headers().map(),
-                response = response,
-                message = "Unknown error",
-            )
-        }
-    }
 }
