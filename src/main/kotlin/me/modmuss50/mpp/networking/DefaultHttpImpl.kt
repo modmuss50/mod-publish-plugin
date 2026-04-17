@@ -1,15 +1,16 @@
-package me.modmuss50.mpp.platforms
+package me.modmuss50.mpp.networking
 
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
-import me.modmuss50.mpp.networking.HttpException
-import me.modmuss50.mpp.networking.HttpExceptionFactory
-import me.modmuss50.mpp.platforms.curseforge.CurseforgeApi
-import me.modmuss50.mpp.platforms.gitea.GiteaApi
-import me.modmuss50.mpp.platforms.modrinth.ModrinthApi
+import java.net.http.HttpClient
+import java.time.Duration
 
-object HttpExceptionFactories {
-    val default: HttpExceptionFactory = { response ->
+object DefaultHttpImpl {
+    val defaultJson = Json { ignoreUnknownKeys = true }
+    val defaultAgent = "modmuss50/mod-publish-plugin/${DefaultHttpImpl::class.java.`package`.implementationVersion}"
+    val defaultClient = client(Duration.ofSeconds(30))
+
+    val defaultExceptionFactory: HttpExceptionFactory = { response ->
         val body = response.body().orEmpty()
 
         val message =
@@ -30,22 +31,23 @@ object HttpExceptionFactories {
         )
     }
 
-    val curseforge =
-        jsonErrorFactory<CurseforgeApi.ErrorResponse> {
-            it.errorMessage
-        }
+    val defaultProfile =
+        HttpContext(
+            client = defaultClient,
+            json = defaultJson,
+            userAgent = defaultAgent,
+            exceptionFactory = defaultExceptionFactory,
+        )
 
-    val modrinth =
-        jsonErrorFactory<ModrinthApi.ErrorResponse> {
-            it.description
-        }
+    val defaultConfig = HttpConfig(defaultProfile)
 
-    val gitea =
-        jsonErrorFactory<GiteaApi.ErrorResponse> {
-            it.message
-        }
+    fun client(timeout: Duration) =
+        HttpClient
+            .newBuilder()
+            .connectTimeout(timeout)
+            .build()
 
-    private inline fun <reified T> jsonErrorFactory(crossinline messageExtractor: (T) -> String): HttpExceptionFactory =
+    inline fun <reified T> jsonErrorFactory(crossinline messageExtractor: (T) -> String): HttpExceptionFactory =
         { response ->
             val body = response.body().orEmpty()
             val json = Json { ignoreUnknownKeys = true }

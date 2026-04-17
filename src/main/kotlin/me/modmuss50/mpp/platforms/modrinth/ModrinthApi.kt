@@ -4,12 +4,15 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import me.modmuss50.mpp.networking.MultipartBodyBuilder
 import me.modmuss50.mpp.PlatformDependency
 import me.modmuss50.mpp.ReleaseType
-import me.modmuss50.mpp.platforms.HttpClients
+import me.modmuss50.mpp.networking.DefaultHttpImpl
+import me.modmuss50.mpp.networking.HttpConfig
+import me.modmuss50.mpp.networking.HttpContext
+import me.modmuss50.mpp.networking.MultipartBodyBuilder
 import java.net.http.HttpRequest
 import java.nio.file.Path
+import java.time.Duration
 import kotlin.io.path.name
 
 // https://docs.modrinth.com/api-spec/#tag/versions/operation/createVersion
@@ -17,7 +20,24 @@ class ModrinthApi(
     private val accessToken: String,
     private val baseUrl: String,
 ) {
-    private val httpUtils = HttpClients.modrinthClient
+    companion object {
+        val exceptionFactory =
+            DefaultHttpImpl.jsonErrorFactory<ErrorResponse> {
+                it.description
+            }
+
+        val httpConfig =
+            HttpConfig(
+                HttpContext(
+                    client = DefaultHttpImpl.client(Duration.ofSeconds(60)),
+                    json = DefaultHttpImpl.defaultJson,
+                    userAgent = DefaultHttpImpl.defaultAgent,
+                    exceptionFactory = exceptionFactory,
+                ),
+            )
+    }
+
+    private val httpUtils = httpConfig.httpApi
 
     @Serializable
     enum class VersionType {

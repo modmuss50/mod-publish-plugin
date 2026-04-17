@@ -1,12 +1,12 @@
 package me.modmuss50.mpp
 
 import kotlinx.serialization.Serializable
-import me.modmuss50.mpp.platforms.HttpClients
+import me.modmuss50.mpp.networking.DefaultHttpImpl
 
 class MinecraftApi(
     private val baseUrl: String = "https://piston-meta.mojang.com/",
 ) {
-    private val httpUtils = HttpClients.defaultClient
+    private val httpUtils = DefaultHttpImpl.defaultConfig.httpApi
 
     @Serializable
     data class Version(

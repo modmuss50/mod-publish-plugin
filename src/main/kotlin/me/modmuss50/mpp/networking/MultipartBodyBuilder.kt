@@ -82,8 +82,11 @@ class MultipartBodyBuilder {
             val result = mutableListOf<ByteArray>()
             val contentType = mediaType ?: Files.probeContentType(path) ?: "application/octet-stream"
 
-            result.add("Content-Disposition: form-data; name=\"$name\"; filename=\"$filename\"\r\n".toByteArray(
-                StandardCharsets.UTF_8))
+            result.add(
+                "Content-Disposition: form-data; name=\"$name\"; filename=\"$filename\"\r\n".toByteArray(
+                    StandardCharsets.UTF_8,
+                ),
+            )
             result.add("Content-Type: $contentType\r\n\r\n".toByteArray(StandardCharsets.UTF_8))
             result.add(Files.readAllBytes(path))
             result.add("\r\n".toByteArray(StandardCharsets.UTF_8))

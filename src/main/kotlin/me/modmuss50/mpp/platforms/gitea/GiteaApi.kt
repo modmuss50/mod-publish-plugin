@@ -4,8 +4,11 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import me.modmuss50.mpp.networking.DefaultHttpImpl
+import me.modmuss50.mpp.networking.DefaultHttpImpl.jsonErrorFactory
+import me.modmuss50.mpp.networking.HttpConfig
+import me.modmuss50.mpp.networking.HttpContext
 import me.modmuss50.mpp.networking.MultipartBodyBuilder
-import me.modmuss50.mpp.platforms.HttpClients
 import java.io.File
 import java.net.http.HttpRequest
 
@@ -14,7 +17,24 @@ class GiteaApi(
     private val baseUrl: String,
     private val repository: String,
 ) {
-    private val httpUtils = HttpClients.giteaClient
+    companion object {
+        val giteaExceptionFactory =
+            jsonErrorFactory<ErrorResponse> {
+                it.message
+            }
+
+        val httpConfig =
+            HttpConfig(
+                HttpContext(
+                    client = DefaultHttpImpl.defaultClient,
+                    json = DefaultHttpImpl.defaultJson,
+                    userAgent = DefaultHttpImpl.defaultAgent,
+                    exceptionFactory = giteaExceptionFactory,
+                ),
+            )
+    }
+
+    private val httpUtils = httpConfig.httpApi
 
     @Serializable
     // https://docs.gitea.com/api/1.24/#tag/repository/operation/repoGetRelease

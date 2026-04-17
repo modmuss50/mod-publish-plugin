@@ -1,11 +1,15 @@
 package me.modmuss50.mpp.platforms.curseforge
 
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
-import me.modmuss50.mpp.networking.MultipartBodyBuilder
+import kotlinx.serialization.json.Json
 import me.modmuss50.mpp.PlatformDependency
-import me.modmuss50.mpp.platforms.HttpClients
+import me.modmuss50.mpp.networking.DefaultHttpImpl
+import me.modmuss50.mpp.networking.HttpConfig
+import me.modmuss50.mpp.networking.HttpContext
+import me.modmuss50.mpp.networking.MultipartBodyBuilder
 import java.nio.file.Path
 import kotlin.io.path.name
 
@@ -14,7 +18,31 @@ class CurseforgeApi(
     private val accessToken: String,
     private val baseUrl: String,
 ) {
-    private val httpUtils = HttpClients.curseforgeClient
+    companion object {
+        val exceptionFactory =
+            DefaultHttpImpl.jsonErrorFactory<ErrorResponse> {
+                it.errorMessage
+            }
+
+        @OptIn(ExperimentalSerializationApi::class)
+        val httpConfig =
+            HttpConfig(
+                HttpContext(
+                    client = DefaultHttpImpl.defaultClient,
+                    json =
+                    Json {
+                        ignoreUnknownKeys = true // Added on 4.16.26, may be re-evaluated later
+                        explicitNulls = false
+                    },
+                    userAgent = DefaultHttpImpl.defaultAgent,
+                    exceptionFactory = exceptionFactory,
+                ),
+            )
+
+        val httpClient = httpConfig.httpApi
+    }
+
+    private val httpUtils = httpClient
 
     @Serializable
     data class GameVersionType(
