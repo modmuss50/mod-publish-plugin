@@ -6,14 +6,15 @@ object Retry {
     private val LOGGER = LoggerFactory.getLogger(Retry::class.java)
 
     /**
-     * Retry server errors
+     * Retry on exceptions
      */
     fun <T> run(
         maxRetries: Int,
         message: String,
         closure: () -> T,
     ): T {
-        var exception: RuntimeException? = null
+        require(0 != maxRetries) { "maxRetries cannot be 0" }
+        var exception: RuntimeException? = null // Potentially remove this nullable sentinel later
         var count = 0
 
         while (count < maxRetries) {
@@ -27,6 +28,6 @@ object Retry {
         }
 
         LOGGER.error("$message failed after $maxRetries retries", exception)
-        throw exception!!
+        throw exception ?: error("Retry logic bug: no exception captured despite failures")
     }
 }
