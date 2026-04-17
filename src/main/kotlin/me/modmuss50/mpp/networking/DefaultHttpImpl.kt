@@ -52,13 +52,15 @@ object DefaultHttpImpl {
             val body = response.body().orEmpty()
             val json = Json { ignoreUnknownKeys = true }
 
-            val message =
+            val baseMessage =
                 try {
                     val parsed = json.decodeFromString<T>(body)
                     messageExtractor(parsed)
                 } catch (_: SerializationException) {
                     body.ifBlank { "Unknown error" }
                 }
+
+            val message = "${response.statusCode()} ${response.uri()}: $baseMessage"
 
             HttpException(
                 statusCode = response.statusCode(),
