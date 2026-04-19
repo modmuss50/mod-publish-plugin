@@ -29,24 +29,28 @@ import javax.inject.Inject
 import kotlin.random.Random
 import kotlin.reflect.KClass
 
-interface ModrinthOptions : PlatformOptions, PlatformOptionsInternal<ModrinthOptions>, ModrinthDependencyContainer {
+interface ModrinthOptions :
+    PlatformOptions,
+    PlatformOptionsInternal<ModrinthOptions>,
+    ModrinthDependencyContainer {
     companion object {
         // https://github.com/modrinth/labrinth/blob/ae1c5342f2017c1c93008d1e87f1a29549dca92f/src/scheduler.rs#L112
         @JvmStatic
-        val WALL_OF_SHAME = mapOf(
-            "1.14.2 Pre-Release 4" to "1.14.2-pre4",
-            "1.14.2 Pre-Release 3" to "1.14.2-pre3",
-            "1.14.2 Pre-Release 2" to "1.14.2-pre2",
-            "1.14.2 Pre-Release 1" to "1.14.2-pre1",
-            "1.14.1 Pre-Release 2" to "1.14.1-pre2",
-            "1.14.1 Pre-Release 1" to "1.14.1-pre1",
-            "1.14 Pre-Release 5" to "1.14-pre5",
-            "1.14 Pre-Release 4" to "1.14-pre4",
-            "1.14 Pre-Release 3" to "1.14-pre3",
-            "1.14 Pre-Release 2" to "1.14-pre2",
-            "1.14 Pre-Release 1" to "1.14-pre1",
-            "3D Shareware v1.34" to "3D-Shareware-v1.34",
-        )
+        val WALL_OF_SHAME =
+            mapOf(
+                "1.14.2 Pre-Release 4" to "1.14.2-pre4",
+                "1.14.2 Pre-Release 3" to "1.14.2-pre3",
+                "1.14.2 Pre-Release 2" to "1.14.2-pre2",
+                "1.14.2 Pre-Release 1" to "1.14.2-pre1",
+                "1.14.1 Pre-Release 2" to "1.14.1-pre2",
+                "1.14.1 Pre-Release 1" to "1.14.1-pre1",
+                "1.14 Pre-Release 5" to "1.14-pre5",
+                "1.14 Pre-Release 4" to "1.14-pre4",
+                "1.14 Pre-Release 3" to "1.14-pre3",
+                "1.14 Pre-Release 2" to "1.14-pre2",
+                "1.14 Pre-Release 1" to "1.14-pre1",
+                "3D Shareware v1.34" to "3D-Shareware-v1.34",
+            )
     }
 
     @get:Input
@@ -74,20 +78,33 @@ interface ModrinthOptions : PlatformOptions, PlatformOptionsInternal<ModrinthOpt
         apiEndpoint.convention("https://api.modrinth.com/v2")
     }
 
+    fun minecraftVersionList(csv: String) {
+        addMinecraftVersions(
+            providerFactory.provider {
+                csv.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+            },
+        )
+    }
+
     fun minecraftVersionRange(action: Action<ModrinthVersionRangeOptions>) {
         val options = objectFactory.newInstance(ModrinthVersionRangeOptions::class.java)
         options.includeSnapshots.convention(false)
         action.execute(options)
 
-        val startId = options.start.get()
-        val endId = options.end.get()
-        val includeSnapshots = options.includeSnapshots.get()
-
-        minecraftVersions.addAll(
+        addMinecraftVersions(
             providerFactory.provider {
-                MinecraftApi().getVersionsInRange(startId, endId, includeSnapshots).map { WALL_OF_SHAME.getOrDefault(it, it) }
+                MinecraftApi()
+                    .getVersionsInRange(
+                        options.start.get(),
+                        options.end.get(),
+                        options.includeSnapshots.get(),
+                    ).map { WALL_OF_SHAME.getOrDefault(it, it) }
             },
         )
+    }
+
+    private fun addMinecraftVersions(provider: Provider<List<String>>) {
+        minecraftVersions.addAll(provider)
     }
 
     fun from(other: ModrinthOptions) {
@@ -104,7 +121,10 @@ interface ModrinthOptions : PlatformOptions, PlatformOptionsInternal<ModrinthOpt
         from(other.get())
     }
 
-    fun from(other: Provider<ModrinthOptions>, publishOptions: Provider<PublishOptions>) {
+    fun from(
+        other: Provider<ModrinthOptions>,
+        publishOptions: Provider<PublishOptions>,
+    ) {
         from(other)
         from(publishOptions.get())
     }
@@ -120,18 +140,24 @@ interface ModrinthDependencyContainer : PlatformDependencyContainer<ModrinthDepe
     fun requires(vararg slugs: String) {
         addInternal(PlatformDependency.DependencyType.REQUIRED, slugs)
     }
+
     fun optional(vararg slugs: String) {
         addInternal(PlatformDependency.DependencyType.OPTIONAL, slugs)
     }
+
     fun incompatible(vararg slugs: String) {
         addInternal(PlatformDependency.DependencyType.INCOMPATIBLE, slugs)
     }
+
     fun embeds(vararg slugs: String) {
         addInternal(PlatformDependency.DependencyType.EMBEDDED, slugs)
     }
 
     @Internal
-    fun addInternal(type: PlatformDependency.DependencyType, slugs: Array<out String>) {
+    fun addInternal(
+        type: PlatformDependency.DependencyType,
+        slugs: Array<out String>,
+    ) {
         slugs.forEach {
             dependencies.add(
                 objectFactory.newInstance(ModrinthDependency::class.java).apply {
@@ -180,7 +206,12 @@ interface ModrinthVersionRangeOptions {
     val includeSnapshots: Property<Boolean>
 }
 
-abstract class Modrinth @Inject constructor(name: String) : Platform(name), ModrinthOptions {
+abstract class Modrinth
+@Inject
+constructor(
+    name: String,
+) : Platform(name),
+    ModrinthOptions {
     override fun validateInputs() {
         super.validateInputs()
         Validators.validateUnique("minecraftVersions", minecraftVersions)
@@ -192,14 +223,13 @@ abstract class Modrinth @Inject constructor(name: String) : Platform(name), Modr
         }
     }
 
-    override fun dryRunPublishResult(): PublishResult {
-        return ModrinthPublishResult(
+    override fun dryRunPublishResult(): PublishResult =
+        ModrinthPublishResult(
             // Use a random file ID so that the URL is different each time, this is needed because discord drops duplicate URLs
             id = "${Random.nextInt(0, 1000000)}",
             projectId = "dry-run",
             title = announcementTitle.getOrElse("Download from Modrinth"),
         )
-    }
 
     override fun printDryRunInfo(logger: Logger) {
         for (dependency in dependencies.get()) {
@@ -208,7 +238,9 @@ abstract class Modrinth @Inject constructor(name: String) : Platform(name), Modr
         }
     }
 
-    interface UploadParams : PublishWorkParameters, ModrinthOptions
+    interface UploadParams :
+        PublishWorkParameters,
+        ModrinthOptions
 
     abstract class UploadWorkAction : PublishWorkAction<UploadParams> {
         override fun publish(): PublishResult {
@@ -225,23 +257,25 @@ abstract class Modrinth @Inject constructor(name: String) : Platform(name), Modr
 
                 val dependencies = dependencies.get().map { toApiDependency(it, api) }
 
-                val metadata = ModrinthApi.CreateVersion(
-                    name = displayName.get(),
-                    versionNumber = version.get(),
-                    changelog = changelog.orNull,
-                    dependencies = dependencies,
-                    gameVersions = minecraftVersions.get(),
-                    versionType = ModrinthApi.VersionType.valueOf(type.get()),
-                    loaders = modLoaders.get().map { it.lowercase() },
-                    featured = featured.get(),
-                    projectId = projectId.get().modrinthId,
-                    fileParts = files.keys.toList(),
-                    primaryFile = primaryFileKey,
-                )
+                val metadata =
+                    ModrinthApi.CreateVersion(
+                        name = displayName.get(),
+                        versionNumber = version.get(),
+                        changelog = changelog.orNull,
+                        dependencies = dependencies,
+                        gameVersions = minecraftVersions.get(),
+                        versionType = ModrinthApi.VersionType.valueOf(type.get()),
+                        loaders = modLoaders.get().map { it.lowercase() },
+                        featured = featured.get(),
+                        projectId = projectId.get().modrinthId,
+                        fileParts = files.keys.toList(),
+                        primaryFile = primaryFileKey,
+                    )
 
-                val response = Retry.run(maxRetries.get(), "Failed to create version") {
-                    api.createVersion(metadata, files)
-                }
+                val response =
+                    Retry.run(maxRetries.get(), "Failed to create version") {
+                        api.createVersion(metadata, files)
+                    }
 
                 if (projectDescription.isPresent) {
                     Retry.run(maxRetries.get(), "Failed to update project description") {
@@ -257,7 +291,10 @@ abstract class Modrinth @Inject constructor(name: String) : Platform(name), Modr
             }
         }
 
-        private fun toApiDependency(dependency: ModrinthDependency, api: ModrinthApi): ModrinthApi.Dependency {
+        private fun toApiDependency(
+            dependency: ModrinthDependency,
+            api: ModrinthApi,
+        ): ModrinthApi.Dependency {
             with(dependency) {
                 var projectId: String? = null
                 var versionId: String? = null
@@ -274,9 +311,11 @@ abstract class Modrinth @Inject constructor(name: String) : Platform(name), Modr
                         throw IllegalStateException("Modrinth dependency cannot specify both projectId and projectSlug")
                     }
 
-                    projectId = Retry.run(parameters.maxRetries.get(), "Failed to lookup project id from slug: ${slug.get()}") {
-                        api.checkProject(slug.get())
-                    }.id
+                    projectId =
+                        Retry
+                            .run(parameters.maxRetries.get(), "Failed to lookup project id from slug: ${slug.get()}") {
+                                api.checkProject(slug.get())
+                            }.id
                 }
 
                 // Ensure we have an id
@@ -285,19 +324,28 @@ abstract class Modrinth @Inject constructor(name: String) : Platform(name), Modr
                 }
 
                 if (version.isPresent) {
-                    val response = Retry.run(parameters.maxRetries.get(), "Failed to list versions from slug/id: ${version.get()}") {
-                        api.listVersions(projectId)
-                    }
+                    val response =
+                        Retry.run(parameters.maxRetries.get(), "Failed to list versions from slug/id: ${version.get()}") {
+                            api.listVersions(projectId)
+                        }
 
-                    val versions = response.filter {
-                        it.id == version.get() || it.versionNumber == version.get()
-                    }
+                    val versions =
+                        response.filter {
+                            it.id == version.get() || it.versionNumber == version.get()
+                        }
 
-                    versionId = when (versions.size) {
-                        0 -> throw IllegalStateException("Modrinth dependency has a version configured but no matches found for version: ${version.get()}")
-                        1 -> versions.first().id
-                        else -> throw IllegalStateException("Modrinth dependency has a version configured but multiple matches found for version: ${version.get()}")
-                    }
+                    versionId =
+                        when (versions.size) {
+                            0 -> throw IllegalStateException(
+                                "Modrinth dependency has a version configured but no matches found for version: ${version.get()}",
+                            )
+
+                            1 -> versions.first().id
+
+                            else -> throw IllegalStateException(
+                                "Modrinth dependency has a version configured but multiple matches found for version: ${version.get()}",
+                            )
+                        }
                 }
 
                 return ModrinthApi.Dependency(

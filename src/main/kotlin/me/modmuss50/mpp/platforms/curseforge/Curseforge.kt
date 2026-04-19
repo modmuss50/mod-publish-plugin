@@ -95,18 +95,31 @@ interface CurseforgeOptions :
         from(publishOptions.get())
     }
 
+    fun minecraftVersionList(csv: String) {
+        addMinecraftVersions(
+            providerFactory.provider {
+                csv
+                    .split(",")
+                    .map { it.trim() }
+                    .filter { it.isNotEmpty() }
+            },
+        )
+    }
+
     fun minecraftVersionRange(action: Action<CurseforgeVersionRangeOptions>) {
         val options = objectFactory.newInstance(CurseforgeVersionRangeOptions::class.java)
         action.execute(options)
 
-        val startId = options.start.get()
-        val endId = options.end.get()
-
-        minecraftVersions.addAll(
+        addMinecraftVersions(
             providerFactory.provider {
-                MinecraftApi().getVersionsInRange(startId, endId)
+                MinecraftApi()
+                    .getVersionsInRange(options.start.get(), options.end.get())
             },
         )
+    }
+
+    private fun addMinecraftVersions(provider: Provider<List<String>>) {
+        minecraftVersions.addAll(provider)
     }
 
     fun additionalFile(
