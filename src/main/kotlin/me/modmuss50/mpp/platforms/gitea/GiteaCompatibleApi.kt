@@ -12,7 +12,7 @@ import me.modmuss50.mpp.networking.MultipartBodyBuilder
 import java.io.File
 import java.net.http.HttpRequest
 
-class GiteaApi(
+class GiteaCompatibleApi(
     private val accessToken: String,
     private val baseUrl: String,
     private val repository: String,

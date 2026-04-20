@@ -1,7 +1,7 @@
 package me.modmuss50.mpp
 
 import me.modmuss50.mpp.platforms.curseforge.Curseforge
-import me.modmuss50.mpp.platforms.gitea.Gitea
+import me.modmuss50.mpp.platforms.gitea.GiteaCompatible
 import me.modmuss50.mpp.platforms.github.Github
 import me.modmuss50.mpp.platforms.gitlab.Gitlab
 import me.modmuss50.mpp.platforms.modrinth.Modrinth
@@ -24,8 +24,8 @@ class MppPlugin : Plugin<Project> {
         extension.platforms.registerFactory(Modrinth::class.java) {
             project.objects.newInstance(Modrinth::class.java, it)
         }
-        extension.platforms.registerFactory(Gitea::class.java) {
-            project.objects.newInstance(Gitea::class.java, it)
+        extension.platforms.registerFactory(GiteaCompatible::class.java) {
+            project.objects.newInstance(GiteaCompatible::class.java, it)
         }
         extension.platforms.registerFactory(Gitlab::class.java) {
             project.objects.newInstance(Gitlab::class.java, it)

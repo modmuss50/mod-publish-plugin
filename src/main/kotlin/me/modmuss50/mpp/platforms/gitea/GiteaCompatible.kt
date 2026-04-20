@@ -1,6 +1,6 @@
 package me.modmuss50.mpp.platforms.gitea
 
-import me.modmuss50.mpp.GiteaPublishResult
+import me.modmuss50.mpp.GiteaCompatiblePublishResult
 import me.modmuss50.mpp.Platform
 import me.modmuss50.mpp.PlatformOptions
 import me.modmuss50.mpp.PlatformOptionsInternal
@@ -26,7 +26,7 @@ import java.util.Locale
 import javax.inject.Inject
 import kotlin.random.Random
 
-interface GiteaOptions : PlatformOptions, PlatformOptionsInternal<GiteaOptions> {
+interface GiteaCompatibleOptions : PlatformOptions, PlatformOptionsInternal<GiteaCompatibleOptions> {
     @get:InputFile
     @get:Optional
     override val file: RegularFileProperty
@@ -74,7 +74,7 @@ interface GiteaOptions : PlatformOptions, PlatformOptionsInternal<GiteaOptions> 
 
     @get:Input
     @get:Internal
-    val hostType: Property<HostType>
+    val hostType: Property<GiteaCompatiblePlatform>
 
     override fun setInternalDefaults() {
         tagName.convention(version)
@@ -85,7 +85,7 @@ interface GiteaOptions : PlatformOptions, PlatformOptionsInternal<GiteaOptions> 
         apiEndpoint.convention("$uri/api/v1")
     }
 
-    fun from(other: GiteaOptions) {
+    fun from(other: GiteaCompatibleOptions) {
         super.from(other)
         repository.convention(other.repository)
         commitish.convention(other.commitish)
@@ -96,11 +96,11 @@ interface GiteaOptions : PlatformOptions, PlatformOptionsInternal<GiteaOptions> 
         hostType.convention(other.hostType)
     }
 
-    fun from(other: Provider<GiteaOptions>) {
+    fun from(other: Provider<GiteaCompatibleOptions>) {
         from(other.get())
     }
 
-    fun from(other: Provider<GiteaOptions>, publishOptions: Provider<PublishOptions>) {
+    fun from(other: Provider<GiteaCompatibleOptions>, publishOptions: Provider<PublishOptions>) {
         from(other)
         from(publishOptions.get())
     }
@@ -112,7 +112,7 @@ interface GiteaOptions : PlatformOptions, PlatformOptionsInternal<GiteaOptions> 
         val publishTask = task.map { it as PublishModTask }
         releaseResult.set(publishTask.flatMap { it.result })
 
-        val options = publishTask.map { it.platform as GiteaOptions }
+        val options = publishTask.map { it.platform as GiteaCompatibleOptions }
         if (options.get().hostType.get() != hostType.get()) { // May not be necessary, but should reduce confusion.
             throw IllegalStateException("Unable to make a ${options.get().hostType.get().friendlyString} instance a parent of a ${hostType.get().friendlyString} instance")
         }
@@ -136,15 +136,9 @@ interface GiteaOptions : PlatformOptions, PlatformOptionsInternal<GiteaOptions> 
         apiEndpoint.set(options.flatMap { it.apiEndpoint })
         apiEndpoint.finalizeValue()
     }
-
-    enum class HostType constructor(val friendlyString: String, val defaultBrandColor: Int) {
-        GITEA("Gitea", 0x1d8f4a),
-
-        FORGEJO("Forgejo", 0xff5500),
-    }
 }
 
-abstract class Gitea @Inject constructor(name: String) : Platform(name), GiteaOptions {
+abstract class GiteaCompatible @Inject constructor(name: String) : Platform(name), GiteaCompatibleOptions {
     override fun publish(context: PublishContext) {
         val files = additionalFiles.files.toMutableList()
 
@@ -165,7 +159,7 @@ abstract class Gitea @Inject constructor(name: String) : Platform(name), GiteaOp
         val hostDisplayName = hostDisplayName.getOrElse(hostType.get().friendlyString)
         val brandColor = hostBrandColor.getOrElse(hostType.get().defaultBrandColor)
 
-        return GiteaPublishResult(
+        return GiteaCompatiblePublishResult(
             repository = repository.get(),
             releaseId = 0,
             url = "https://github.com/modmuss50/mod-publish-plugin/dry-run?random=${Random.nextInt(0, 1000000)}",
@@ -181,7 +175,7 @@ abstract class Gitea @Inject constructor(name: String) : Platform(name), GiteaOp
         return name.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }
     }
 
-    interface UploadParams : PublishWorkParameters, GiteaOptions
+    interface UploadParams : PublishWorkParameters, GiteaCompatibleOptions
 
     abstract class UploadWorkAction : PublishWorkAction<UploadParams> {
         override fun publish(): PublishResult {
@@ -189,7 +183,7 @@ abstract class Gitea @Inject constructor(name: String) : Platform(name), GiteaOp
                 val hostDisplayName = hostDisplayName.getOrElse(hostType.get().friendlyString)
                 val brandColor = hostBrandColor.getOrElse(hostType.get().defaultBrandColor)
 
-                val api = GiteaApi(accessToken.get(), apiEndpoint.get(), repository.get())
+                val api = GiteaCompatibleApi(accessToken.get(), apiEndpoint.get(), repository.get())
                 val (release, created) = getOrCreateRelease(api)
 
                 val files = additionalFiles.files.toMutableList()
@@ -213,7 +207,7 @@ abstract class Gitea @Inject constructor(name: String) : Platform(name), GiteaOp
                     api.publishRelease(release)
                 }
 
-                return GiteaPublishResult(
+                return GiteaCompatiblePublishResult(
                     repository = repository.get(),
                     releaseId = release.id,
                     url = release.htmlUrl,
@@ -223,16 +217,16 @@ abstract class Gitea @Inject constructor(name: String) : Platform(name), GiteaOp
             }
         }
 
-        data class ReleaseResult(val release: GiteaApi.Release, val created: Boolean)
+        data class ReleaseResult(val release: GiteaCompatibleApi.Release, val created: Boolean)
 
-        private fun getOrCreateRelease(api: GiteaApi): ReleaseResult {
+        private fun getOrCreateRelease(api: GiteaCompatibleApi): ReleaseResult {
             with(parameters) {
                 if (releaseResult.isPresent) {
-                    val result = PublishResult.fromJson(releaseResult.get().asFile.readText()) as GiteaPublishResult
+                    val result = PublishResult.fromJson(releaseResult.get().asFile.readText()) as GiteaCompatiblePublishResult
                     return ReleaseResult(api.getRelease(result.releaseId), false)
                 }
 
-                val metadata = GiteaApi.CreateRelease(
+                val metadata = GiteaCompatibleApi.CreateRelease(
                     body = changelog.orNull,
                     draft = true,
                     name = displayName.get(),

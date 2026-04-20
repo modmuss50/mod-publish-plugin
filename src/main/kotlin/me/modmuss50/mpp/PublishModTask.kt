@@ -2,7 +2,7 @@ package me.modmuss50.mpp
 
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import me.modmuss50.mpp.platforms.gitea.GiteaOptions
+import me.modmuss50.mpp.platforms.gitea.GiteaCompatibleOptions
 import me.modmuss50.mpp.platforms.github.GithubOptions
 import me.modmuss50.mpp.platforms.gitlab.GitlabOptions
 import org.gradle.api.DefaultTask
@@ -95,7 +95,7 @@ abstract class PublishModTask @Inject constructor(@Nested val platform: Platform
         }
 
         // Repeat the hack for Gitea.
-        if (platform is GiteaOptions) {
+        if (platform is GiteaCompatibleOptions) {
             if (!platform.file.isPresent && platform.allowEmptyFiles.get()) {
                 return
             }
