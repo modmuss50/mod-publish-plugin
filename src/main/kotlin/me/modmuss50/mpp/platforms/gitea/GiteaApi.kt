@@ -56,6 +56,7 @@ class GiteaApi(
         val prerelease: Boolean,
         @SerialName("tag_name")
         val tagName: String,
+        @SerialName("target_commitish")
         val targetCommitish: String,
     )
 

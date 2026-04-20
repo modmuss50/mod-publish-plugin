@@ -127,6 +127,42 @@ class CurseforgeTest : IntegrationTest {
         assertEquals(CurseforgeApi.ChangelogType.TEXT, metadata.changelogType)
     }
 
+    @Test
+    fun uploadCurseforgeMinecraftVersionList() {
+        val server = MockWebServer(MockCurseforgeApi())
+
+        val result = gradleTest()
+            .buildScript(
+                """
+                publishMods {
+                    file = tasks.jar.flatMap { it.archiveFile }
+                    changelog = "<p>Hello!</p>"
+                    version = "1.0.0"
+                    type = BETA
+                    modLoaders.add("fabric")
+                    displayName = "Test Upload"
+                    
+                    curseforge {
+                        accessToken = "123"
+                        projectId = "123456"
+                        minecraftVersionList("1.19.4, 1.20, 1.20.1")
+                        
+                        apiEndpoint = "${server.endpoint}"
+                    }
+                }
+                """.trimIndent(),
+            )
+            .run("publishMods")
+        server.close()
+
+        val metadata = server.api.lastMetadata!!
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishCurseforge")!!.outcome)
+        assertContains(metadata.gameVersions!!, 9776) // 1.19.4
+        assertContains(metadata.gameVersions!!, 9971) // 1.20
+        assertContains(metadata.gameVersions!!, 9990) // 1.20.1
+    }
+
     // Also test in groovy to ensure that the closures are working as expected
     @Test
     fun uploadCurseforgeWithOptionsGroovy() {

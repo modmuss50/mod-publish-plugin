@@ -255,6 +255,43 @@ class ModrinthTest : IntegrationTest {
     }
 
     @Test
+    fun uploadModrinthMinecraftVersionList() {
+        val mockModrinthApi = MockModrinthApi()
+        val server = MockWebServer(mockModrinthApi)
+
+        val result = gradleTest()
+            .buildScript(
+                """
+            publishMods {
+                file = tasks.jar.flatMap { it.archiveFile }
+                changelog = "Hello!"
+                version = "1.0.0"
+                type = STABLE
+                modLoaders.add("fabric")
+            
+                modrinth {
+                    accessToken = "123"
+                    projectId = "12345678"
+
+                    minecraftVersionList("26.1, 26.1.1, 26.1.2, 26.2-snapshot-1")
+
+                    apiEndpoint = "${server.endpoint}"
+                }
+            }
+                """.trimIndent(),
+            )
+            .run("publishModrinth")
+        server.close()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinth")!!.outcome)
+        val gameVersions = mockModrinthApi.lastCreateVersion!!.gameVersions
+        assertContains(gameVersions, "26.1")
+        assertContains(gameVersions, "26.1.1")
+        assertContains(gameVersions, "26.1.2")
+        assertContains(gameVersions, "26.2-snapshot-1")
+    }
+
+    @Test
     fun uploadModrinthMinecraftVersionRangeNoSnapshots() {
         val mockModrinthApi = MockModrinthApi()
         val server = MockWebServer(mockModrinthApi)
