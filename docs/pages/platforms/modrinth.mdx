@@ -71,6 +71,9 @@ publishMods {
             includeSnapshots = true
         }
 
+        // Alternatively, you can specify a range of Minecraft versions as a list:
+        minecraftVersionList("26.1, 26.1.1, 26.1.2")
+
         // You can specify either the project id OR slug, but not both.
         requires {
             id = "12345678"
