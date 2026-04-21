@@ -15,106 +15,106 @@ import javax.inject.Inject
 import kotlin.random.Random
 
 abstract class Codeberg
-    @Inject
-    constructor(
-        name: String,
-    ) : Platform(name),
-        GiteaCompatibleOptions {
-        override fun publish(context: PublishContext) {
-            val files = additionalFiles.files.toMutableList()
+@Inject
+constructor(
+    name: String,
+) : Platform(name),
+    GiteaCompatibleOptions {
+    override fun publish(context: PublishContext) {
+        val files = additionalFiles.files.toMutableList()
 
-            if (file.isPresent) {
-                files.add(file.get().asFile)
-            }
-
-            if (files.isEmpty() && !allowEmptyFiles.get()) {
-                throw IllegalStateException("No files to upload to ${GiteaCompatiblePlatform.CODEBERG.friendlyString}.")
-            }
-
-            context.submit(UploadWorkAction::class) {
-                it.from(this)
-            }
+        if (file.isPresent) {
+            files.add(file.get().asFile)
         }
 
-        override fun dryRunPublishResult(): PublishResult =
-            GiteaCompatiblePublishResult(
-                repository = repository.get(),
-                releaseId = 0,
-                url = "https://github.com/modmuss50/mod-publish-plugin/dry-run?random=${Random.nextInt(0, 1000000)}",
-                title = announcementTitle.getOrElse("Download from ${GiteaCompatiblePlatform.CODEBERG.friendlyString}"),
-                brandColor = GiteaCompatiblePlatform.CODEBERG.defaultBrandColor,
-            )
-
-        override fun printDryRunInfo(logger: Logger) {
+        if (files.isEmpty() && !allowEmptyFiles.get()) {
+            throw IllegalStateException("No files to upload to ${GiteaCompatiblePlatform.CODEBERG.friendlyString}.")
         }
 
-        interface UploadParams :
-            PublishWorkParameters,
-            GiteaCompatibleOptions
+        context.submit(UploadWorkAction::class) {
+            it.from(this)
+        }
+    }
 
-        abstract class UploadWorkAction : PublishWorkAction<UploadParams> {
-            override fun publish(): PublishResult {
-                with(parameters) {
-                    val api = GiteaCompatibleApi(accessToken.get(), "https://codeberg.org/api/v1", repository.get())
-                    val (release, created) = getOrCreateRelease(api)
+    override fun dryRunPublishResult(): PublishResult =
+        GiteaCompatiblePublishResult(
+            repository = repository.get(),
+            releaseId = 0,
+            url = "https://github.com/modmuss50/mod-publish-plugin/dry-run?random=${Random.nextInt(0, 1000000)}",
+            title = announcementTitle.getOrElse("Download from ${GiteaCompatiblePlatform.CODEBERG.friendlyString}"),
+            brandColor = GiteaCompatiblePlatform.CODEBERG.defaultBrandColor,
+        )
 
-                    val files = additionalFiles.files.toMutableList()
+    override fun printDryRunInfo(logger: Logger) {
+    }
 
-                    if (file.isPresent) {
-                        files.add(file.get().asFile)
-                    }
+    interface UploadParams :
+        PublishWorkParameters,
+        GiteaCompatibleOptions
 
-                    val noneUnique = files.groupingBy { it.name }.eachCount().filter { it.value > 1 }
-                    if (noneUnique.isNotEmpty()) {
-                        val noneUniqueNames = noneUnique.keys.joinToString(", ")
-                        throw IllegalStateException(
-                            "${hostType.get().friendlyString} file names must be unique within a release, found duplicates: $noneUniqueNames",
-                        )
-                    }
+    abstract class UploadWorkAction : PublishWorkAction<UploadParams> {
+        override fun publish(): PublishResult {
+            with(parameters) {
+                val api = GiteaCompatibleApi(accessToken.get(), "https://codeberg.org/api/v1", repository.get())
+                val (release, created) = getOrCreateRelease(api)
 
-                    for (file in files) {
-                        api.uploadAsset(release, file)
-                    }
+                val files = additionalFiles.files.toMutableList()
 
-                    if (created) {
-                        // Publish the release after all assets are uploaded.
-                        api.publishRelease(release)
-                    }
+                if (file.isPresent) {
+                    files.add(file.get().asFile)
+                }
 
-                    return GiteaCompatiblePublishResult(
-                        repository = repository.get(),
-                        releaseId = release.id,
-                        url = release.htmlUrl,
-                        title = announcementTitle.getOrElse("Download from ${GiteaCompatiblePlatform.CODEBERG.friendlyString}"),
-                        brandColor = GiteaCompatiblePlatform.CODEBERG.defaultBrandColor,
+                val noneUnique = files.groupingBy { it.name }.eachCount().filter { it.value > 1 }
+                if (noneUnique.isNotEmpty()) {
+                    val noneUniqueNames = noneUnique.keys.joinToString(", ")
+                    throw IllegalStateException(
+                        "${hostType.get().friendlyString} file names must be unique within a release, found duplicates: $noneUniqueNames",
                     )
                 }
-            }
 
-            data class ReleaseResult(
-                val release: GiteaCompatibleApi.Release,
-                val created: Boolean,
-            )
-
-            private fun getOrCreateRelease(api: GiteaCompatibleApi): ReleaseResult {
-                with(parameters) {
-                    if (releaseResult.isPresent) {
-                        val result = PublishResult.fromJson(releaseResult.get().asFile.readText()) as GiteaCompatiblePublishResult
-                        return ReleaseResult(api.getRelease(result.releaseId), false)
-                    }
-
-                    val metadata =
-                        GiteaCompatibleApi.CreateRelease(
-                            body = changelog.orNull,
-                            draft = true,
-                            name = displayName.get(),
-                            prerelease = type.get() != ReleaseType.STABLE,
-                            tagName = tagName.get(),
-                            targetCommitish = commitish.get(),
-                        )
-
-                    return ReleaseResult(api.createRelease(metadata), true)
+                for (file in files) {
+                    api.uploadAsset(release, file)
                 }
+
+                if (created) {
+                    // Publish the release after all assets are uploaded.
+                    api.publishRelease(release)
+                }
+
+                return GiteaCompatiblePublishResult(
+                    repository = repository.get(),
+                    releaseId = release.id,
+                    url = release.htmlUrl,
+                    title = announcementTitle.getOrElse("Download from ${GiteaCompatiblePlatform.CODEBERG.friendlyString}"),
+                    brandColor = GiteaCompatiblePlatform.CODEBERG.defaultBrandColor,
+                )
+            }
+        }
+
+        data class ReleaseResult(
+            val release: GiteaCompatibleApi.Release,
+            val created: Boolean,
+        )
+
+        private fun getOrCreateRelease(api: GiteaCompatibleApi): ReleaseResult {
+            with(parameters) {
+                if (releaseResult.isPresent) {
+                    val result = PublishResult.fromJson(releaseResult.get().asFile.readText()) as GiteaCompatiblePublishResult
+                    return ReleaseResult(api.getRelease(result.releaseId), false)
+                }
+
+                val metadata =
+                    GiteaCompatibleApi.CreateRelease(
+                        body = changelog.orNull,
+                        draft = true,
+                        name = displayName.get(),
+                        prerelease = type.get() != ReleaseType.STABLE,
+                        tagName = tagName.get(),
+                        targetCommitish = commitish.get(),
+                    )
+
+                return ReleaseResult(api.createRelease(metadata), true)
             }
         }
     }
+}

@@ -169,7 +169,7 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
 
     // Gitea
 
-    fun gitea(@DelegatesTo(value = SelfHostedGitea ::class) closure: Closure<*>): NamedDomainObjectProvider<SelfHostedGitea> {
+    fun gitea(@DelegatesTo(value = SelfHostedGitea::class) closure: Closure<*>): NamedDomainObjectProvider<SelfHostedGitea> {
         return gitea {
             project.configure(it, closure)
         }
@@ -245,7 +245,7 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
 
     // Codeberg
 
-    fun codeberg(@DelegatesTo(value = Codeberg ::class) closure: Closure<*>): NamedDomainObjectProvider<Codeberg> {
+    fun codeberg(@DelegatesTo(value = Codeberg::class) closure: Closure<*>): NamedDomainObjectProvider<Codeberg> {
         return codeberg {
             project.configure(it, closure)
         }

@@ -15,115 +15,115 @@ import javax.inject.Inject
 import kotlin.random.Random
 
 abstract class SelfHostedGitea
-    @Inject
-    constructor(
-        name: String,
-    ) : Platform(name),
-        GiteaCompatibleOptions {
-        override fun publish(context: PublishContext) {
-            val files = additionalFiles.files.toMutableList()
+@Inject
+constructor(
+    name: String,
+) : Platform(name),
+    GiteaCompatibleOptions {
+    override fun publish(context: PublishContext) {
+        val files = additionalFiles.files.toMutableList()
 
-            if (file.isPresent) {
-                files.add(file.get().asFile)
-            }
-
-            if (files.isEmpty() && !allowEmptyFiles.get()) {
-                throw IllegalStateException("No files to upload to ${capitalizedName()}.")
-            }
-
-            context.submit(UploadWorkAction::class) {
-                it.from(this)
-            }
+        if (file.isPresent) {
+            files.add(file.get().asFile)
         }
 
-        override fun dryRunPublishResult(): PublishResult {
-            val hostDisplayName = hostDisplayName.getOrElse(hostType.get().friendlyString)
-            val brandColor = hostBrandColor.getOrElse(hostType.get().defaultBrandColor)
-
-            return GiteaCompatiblePublishResult(
-                repository = repository.get(),
-                releaseId = 0,
-                url = "https://github.com/modmuss50/mod-publish-plugin/dry-run?random=${Random.nextInt(0, 1000000)}",
-                title = announcementTitle.getOrElse("Download from $hostDisplayName"),
-                brandColor = brandColor,
-            )
+        if (files.isEmpty() && !allowEmptyFiles.get()) {
+            throw IllegalStateException("No files to upload to ${capitalizedName()}.")
         }
 
-        override fun printDryRunInfo(logger: Logger) {
+        context.submit(UploadWorkAction::class) {
+            it.from(this)
         }
+    }
 
-        fun capitalizedName(): String = name.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }
+    override fun dryRunPublishResult(): PublishResult {
+        val hostDisplayName = hostDisplayName.getOrElse(hostType.get().friendlyString)
+        val brandColor = hostBrandColor.getOrElse(hostType.get().defaultBrandColor)
 
-        interface UploadParams :
-            PublishWorkParameters,
-            GiteaCompatibleOptions
+        return GiteaCompatiblePublishResult(
+            repository = repository.get(),
+            releaseId = 0,
+            url = "https://github.com/modmuss50/mod-publish-plugin/dry-run?random=${Random.nextInt(0, 1000000)}",
+            title = announcementTitle.getOrElse("Download from $hostDisplayName"),
+            brandColor = brandColor,
+        )
+    }
 
-        abstract class UploadWorkAction : PublishWorkAction<UploadParams> {
-            override fun publish(): PublishResult {
-                with(parameters) {
-                    val hostDisplayName = hostDisplayName.getOrElse(hostType.get().friendlyString)
-                    val brandColor = hostBrandColor.getOrElse(hostType.get().defaultBrandColor)
+    override fun printDryRunInfo(logger: Logger) {
+    }
 
-                    val api = GiteaCompatibleApi(accessToken.get(), apiEndpoint.get(), repository.get())
-                    val (release, created) = getOrCreateRelease(api)
+    fun capitalizedName(): String = name.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }
 
-                    val files = additionalFiles.files.toMutableList()
+    interface UploadParams :
+        PublishWorkParameters,
+        GiteaCompatibleOptions
 
-                    if (file.isPresent) {
-                        files.add(file.get().asFile)
-                    }
+    abstract class UploadWorkAction : PublishWorkAction<UploadParams> {
+        override fun publish(): PublishResult {
+            with(parameters) {
+                val hostDisplayName = hostDisplayName.getOrElse(hostType.get().friendlyString)
+                val brandColor = hostBrandColor.getOrElse(hostType.get().defaultBrandColor)
 
-                    val noneUnique = files.groupingBy { it.name }.eachCount().filter { it.value > 1 }
-                    if (noneUnique.isNotEmpty()) {
-                        val noneUniqueNames = noneUnique.keys.joinToString(", ")
-                        throw IllegalStateException(
-                            "${hostType.get().friendlyString} file names must be unique within a release, found duplicates: $noneUniqueNames",
-                        )
-                    }
+                val api = GiteaCompatibleApi(accessToken.get(), apiEndpoint.get(), repository.get())
+                val (release, created) = getOrCreateRelease(api)
 
-                    for (file in files) {
-                        api.uploadAsset(release, file)
-                    }
+                val files = additionalFiles.files.toMutableList()
 
-                    if (created) {
-                        // Publish the release after all assets are uploaded.
-                        api.publishRelease(release)
-                    }
+                if (file.isPresent) {
+                    files.add(file.get().asFile)
+                }
 
-                    return GiteaCompatiblePublishResult(
-                        repository = repository.get(),
-                        releaseId = release.id,
-                        url = release.htmlUrl,
-                        title = announcementTitle.getOrElse("Download from $hostDisplayName"),
-                        brandColor = brandColor,
+                val noneUnique = files.groupingBy { it.name }.eachCount().filter { it.value > 1 }
+                if (noneUnique.isNotEmpty()) {
+                    val noneUniqueNames = noneUnique.keys.joinToString(", ")
+                    throw IllegalStateException(
+                        "${hostType.get().friendlyString} file names must be unique within a release, found duplicates: $noneUniqueNames",
                     )
                 }
-            }
 
-            data class ReleaseResult(
-                val release: GiteaCompatibleApi.Release,
-                val created: Boolean,
-            )
-
-            private fun getOrCreateRelease(api: GiteaCompatibleApi): ReleaseResult {
-                with(parameters) {
-                    if (releaseResult.isPresent) {
-                        val result = PublishResult.fromJson(releaseResult.get().asFile.readText()) as GiteaCompatiblePublishResult
-                        return ReleaseResult(api.getRelease(result.releaseId), false)
-                    }
-
-                    val metadata =
-                        GiteaCompatibleApi.CreateRelease(
-                            body = changelog.orNull,
-                            draft = true,
-                            name = displayName.get(),
-                            prerelease = type.get() != ReleaseType.STABLE,
-                            tagName = tagName.get(),
-                            targetCommitish = commitish.get(),
-                        )
-
-                    return ReleaseResult(api.createRelease(metadata), true)
+                for (file in files) {
+                    api.uploadAsset(release, file)
                 }
+
+                if (created) {
+                    // Publish the release after all assets are uploaded.
+                    api.publishRelease(release)
+                }
+
+                return GiteaCompatiblePublishResult(
+                    repository = repository.get(),
+                    releaseId = release.id,
+                    url = release.htmlUrl,
+                    title = announcementTitle.getOrElse("Download from $hostDisplayName"),
+                    brandColor = brandColor,
+                )
+            }
+        }
+
+        data class ReleaseResult(
+            val release: GiteaCompatibleApi.Release,
+            val created: Boolean,
+        )
+
+        private fun getOrCreateRelease(api: GiteaCompatibleApi): ReleaseResult {
+            with(parameters) {
+                if (releaseResult.isPresent) {
+                    val result = PublishResult.fromJson(releaseResult.get().asFile.readText()) as GiteaCompatiblePublishResult
+                    return ReleaseResult(api.getRelease(result.releaseId), false)
+                }
+
+                val metadata =
+                    GiteaCompatibleApi.CreateRelease(
+                        body = changelog.orNull,
+                        draft = true,
+                        name = displayName.get(),
+                        prerelease = type.get() != ReleaseType.STABLE,
+                        tagName = tagName.get(),
+                        targetCommitish = commitish.get(),
+                    )
+
+                return ReleaseResult(api.createRelease(metadata), true)
             }
         }
     }
+}
