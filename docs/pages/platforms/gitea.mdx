@@ -9,7 +9,7 @@ publishMods {
 
     gitea {
         accessToken = providers.environmentVariable("GITEA_TOKEN")
-        hostUrl(new URI("https://gitea.example.com")) // This is the link for your Gitea host.
+        host(new URI("https://gitea.example.com")) // This is the link for your Gitea host.
         repository = "Example/MyMod"
         commitish = "main" // This is the branch the release tag will be created from
     }
@@ -69,7 +69,7 @@ See the following example showing all the Gitea specific options:
 publishMods {
     gitea {
         accessToken = providers.environmentVariable("GITEA_TOKEN")
-        hostUrl(new URI("https://gitea.example.com"))
+        host(new URI("https://gitea.example.com"))
         repository = "Example/MyMod"
         commitish = "main"
         tagName = "release/1.0.0"
