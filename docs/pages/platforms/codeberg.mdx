@@ -1,0 +1,91 @@
+## Basic example
+See the following minimal example showing how to publish the `jar` task to Codeberg:
+```groovy
+publishMods {
+    file = jar.archiveFile
+    changelog = "Changelog"
+    type = STABLE
+    modLoaders.add("fabric")
+
+    codeberg {
+        accessToken = providers.environmentVariable("CODEBERG_TOKEN")
+        repository = "Example/MyMod"
+        commitish = "main" // This is the branch the release tag will be created from
+    }
+}
+
+```
+## Multiple releases
+You can create multiple Codeberg destinations by specifying a name like so:
+```groovy
+publishMods {
+    codeberg("codebergProjectA") {
+        // Configure Codeberg settings for project A here
+    }
+
+    codeberg("codebergProjectB") {
+        // Configure Codeberg settings for project B here
+    }
+}
+```
+This will create 2 separate Codeberg releases.
+
+## Parent releases
+If you wish to upload files to a Codeberg release created by another task either in the same project or another subproject, you can use the `parent` option.
+This is useful where you have multiple subprojects that you want to publish to a single release, the following example shows how a root project can create the release and subprojects can upload files to it:
+
+#### Root project
+```groovy
+publishMods {
+    codeberg {
+        accessToken = providers.environmentVariable("CODEBERG_TOKEN")
+        repository = "Example/MyMod"
+        commitish = "main"
+        tagName = "release/1.0.0"
+
+        // Allow the release to be initially created without any files.
+        allowEmptyFiles = true
+    }
+}
+```
+
+#### Subproject
+When using the `parent` option, only the `accessToken` and files are required, the other options are forcefully inherited from the parent task.
+```groovy
+publishMods {
+    codeberg {
+        accessToken = providers.environmentVariable("CODEBERG_TOKEN")
+
+        // Specify the root project's Codeberg task to upload files to
+        parent project(":").tasks.named("codeberg")
+    }
+}
+```
+
+## All options
+See the following example showing all the Codeberg specific options:
+```groovy
+publishMods {
+    codeberg {
+        accessToken = providers.environmentVariable("CODEBERG_TOKEN")
+        repository = "Example/MyMod"
+        commitish = "main"
+        tagName = "release/1.0.0"
+
+        // Optionally set the announcement title used by the Discord publisher
+        announcementTitle = "Download from Codeberg"
+		// Optionally set the display name for your host, which is used by the Discord publisher if no custom title is set
+		hostDisplayName = "Example"
+        // Optionally set the brand color used by your host
+        hostBrandColor = 0x1d8f4a
+
+        // Upload the files to a previously created release, by providing another Codeberg publish task
+        // This is useful in multi-project builds where you want to publish multiple subprojects to a single release
+        parent tasks.named("publishCodeberg")
+
+        // Optionally allow the release to be created without any attached files.
+        // This is useful when you have subprojects using the parent option that you want to publish a single release.
+        allowEmptyFiles = true
+    }
+}
+```
