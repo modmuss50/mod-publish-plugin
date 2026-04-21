@@ -55,7 +55,7 @@ constructor(
     abstract class UploadWorkAction : PublishWorkAction<UploadParams> {
         override fun publish(): PublishResult {
             with(parameters) {
-                val api = GiteaCompatibleApi(accessToken.get(), "https://codeberg.org/api/v1", repository.get())
+                val api = GiteaCompatibleApi(accessToken.get(), apiEndpoint.orNull ?: "https://codeberg.org/api/v1", repository.get())
                 val (release, created) = getOrCreateRelease(api)
 
                 val files = additionalFiles.files.toMutableList()

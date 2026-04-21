@@ -66,6 +66,35 @@ class GiteaTest : IntegrationTest {
     }
 
     @Test
+    fun uploadCodeberg() {
+        val server = MockWebServer(MockGiteaApi())
+
+        // host(...) call is not needed in production repos since the apiEndpoint is static
+        val result = gradleTest()
+            .buildScript(
+                """
+                    publishMods {
+                        file = tasks.jar.flatMap { it.archiveFile }
+                        changelog = "Hello!"
+                        version = "1.0.0"
+                        type = STABLE
+                        codeberg {
+                            accessToken = "123"
+                            host(uri("${server.endpoint}"))
+                            repository = "test/example"
+                            commitish = "main"
+                            tagName = "release/1.0.0"
+                        }
+                    }
+                """.trimIndent(),
+            )
+            .run("publishCodeberg")
+        server.close()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishCodeberg")!!.outcome)
+    }
+
+    @Test
     fun noMainFile() {
         val server = MockWebServer(MockGiteaApi())
 
