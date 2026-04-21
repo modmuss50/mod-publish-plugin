@@ -2,7 +2,7 @@ package me.modmuss50.mpp
 
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import me.modmuss50.mpp.platforms.gitea.GiteaCompatibleOptions
+import me.modmuss50.mpp.platforms.gitea.base.GiteaCompatibleOptions
 import me.modmuss50.mpp.platforms.github.GithubOptions
 import me.modmuss50.mpp.platforms.gitlab.GitlabOptions
 import org.gradle.api.DefaultTask

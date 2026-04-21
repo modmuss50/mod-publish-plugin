@@ -5,9 +5,10 @@ import groovy.lang.DelegatesTo
 import me.modmuss50.mpp.platforms.curseforge.Curseforge
 import me.modmuss50.mpp.platforms.curseforge.CurseforgeOptions
 import me.modmuss50.mpp.platforms.discord.DiscordWebhookTask
-import me.modmuss50.mpp.platforms.gitea.GiteaCompatible
-import me.modmuss50.mpp.platforms.gitea.GiteaCompatibleOptions
-import me.modmuss50.mpp.platforms.gitea.GiteaCompatiblePlatform
+import me.modmuss50.mpp.platforms.gitea.Codeberg
+import me.modmuss50.mpp.platforms.gitea.SelfHostedGitea
+import me.modmuss50.mpp.platforms.gitea.base.GiteaCompatibleOptions
+import me.modmuss50.mpp.platforms.gitea.base.GiteaCompatiblePlatform
 import me.modmuss50.mpp.platforms.github.Github
 import me.modmuss50.mpp.platforms.github.GithubOptions
 import me.modmuss50.mpp.platforms.gitlab.Gitlab
@@ -168,30 +169,30 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
 
     // Gitea
 
-    fun gitea(@DelegatesTo(value = GiteaCompatible::class) closure: Closure<*>): NamedDomainObjectProvider<GiteaCompatible> {
+    fun gitea(@DelegatesTo(value = SelfHostedGitea ::class) closure: Closure<*>): NamedDomainObjectProvider<SelfHostedGitea> {
         return gitea {
             project.configure(it, closure)
         }
     }
 
-    fun gitea(action: Action<GiteaCompatible>): NamedDomainObjectProvider<GiteaCompatible> {
+    fun gitea(action: Action<SelfHostedGitea>): NamedDomainObjectProvider<SelfHostedGitea> {
         return gitea("gitea", action)
     }
 
-    fun gitea(name: String, @DelegatesTo(value = GiteaCompatible::class) closure: Closure<*>): NamedDomainObjectProvider<GiteaCompatible> {
+    fun gitea(name: String, @DelegatesTo(value = SelfHostedGitea::class) closure: Closure<*>): NamedDomainObjectProvider<SelfHostedGitea> {
         return gitea(name) {
             project.configure(it, closure)
         }
     }
 
-    fun gitea(name: String, action: Action<GiteaCompatible>): NamedDomainObjectProvider<GiteaCompatible> {
+    fun gitea(name: String, action: Action<SelfHostedGitea>): NamedDomainObjectProvider<SelfHostedGitea> {
         return platforms.maybeRegister(name) { it ->
             it.hostType.set(GiteaCompatiblePlatform.GITEA)
             action.execute(it)
         }
     }
 
-    fun giteaOptions(@DelegatesTo(value = GiteaCompatible::class) closure: Closure<*>): Provider<GiteaCompatibleOptions> {
+    fun giteaOptions(@DelegatesTo(value = SelfHostedGitea::class) closure: Closure<*>): Provider<GiteaCompatibleOptions> {
         return giteaOptions {
             project.configure(it, closure)
         }
@@ -206,30 +207,30 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
 
     // Forgejo
 
-    fun forgejo(@DelegatesTo(value = GiteaCompatible::class) closure: Closure<*>): NamedDomainObjectProvider<GiteaCompatible> {
+    fun forgejo(@DelegatesTo(value = SelfHostedGitea::class) closure: Closure<*>): NamedDomainObjectProvider<SelfHostedGitea> {
         return forgejo {
             project.configure(it, closure)
         }
     }
 
-    fun forgejo(action: Action<GiteaCompatible>): NamedDomainObjectProvider<GiteaCompatible> {
+    fun forgejo(action: Action<SelfHostedGitea>): NamedDomainObjectProvider<SelfHostedGitea> {
         return forgejo("forgejo", action)
     }
 
-    fun forgejo(name: String, @DelegatesTo(value = GiteaCompatible::class) closure: Closure<*>): NamedDomainObjectProvider<GiteaCompatible> {
+    fun forgejo(name: String, @DelegatesTo(value = SelfHostedGitea::class) closure: Closure<*>): NamedDomainObjectProvider<SelfHostedGitea> {
         return forgejo(name) {
             project.configure(it, closure)
         }
     }
 
-    fun forgejo(name: String, action: Action<GiteaCompatible>): NamedDomainObjectProvider<GiteaCompatible> {
+    fun forgejo(name: String, action: Action<SelfHostedGitea>): NamedDomainObjectProvider<SelfHostedGitea> {
         return platforms.maybeRegister(name) { it ->
             it.hostType.set(GiteaCompatiblePlatform.FORGEJO)
             action.execute(it)
         }
     }
 
-    fun forgejoOptions(@DelegatesTo(value = GiteaCompatible::class) closure: Closure<*>): Provider<GiteaCompatibleOptions> {
+    fun forgejoOptions(@DelegatesTo(value = SelfHostedGitea::class) closure: Closure<*>): Provider<GiteaCompatibleOptions> {
         return forgejoOptions {
             project.configure(it, closure)
         }
@@ -244,30 +245,27 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
 
     // Codeberg
 
-    fun codeberg(@DelegatesTo(value = GiteaCompatible::class) closure: Closure<*>): NamedDomainObjectProvider<GiteaCompatible> {
+    fun codeberg(@DelegatesTo(value = Codeberg ::class) closure: Closure<*>): NamedDomainObjectProvider<Codeberg> {
         return codeberg {
             project.configure(it, closure)
         }
     }
 
-    fun codeberg(action: Action<GiteaCompatible>): NamedDomainObjectProvider<GiteaCompatible> {
+    fun codeberg(action: Action<Codeberg>): NamedDomainObjectProvider<Codeberg> {
         return codeberg("codeberg", action)
     }
 
-    fun codeberg(name: String, @DelegatesTo(value = GiteaCompatible::class) closure: Closure<*>): NamedDomainObjectProvider<GiteaCompatible> {
+    fun codeberg(name: String, @DelegatesTo(value = Codeberg::class) closure: Closure<*>): NamedDomainObjectProvider<Codeberg> {
         return codeberg(name) {
             project.configure(it, closure)
         }
     }
 
-    fun codeberg(name: String, action: Action<GiteaCompatible>): NamedDomainObjectProvider<GiteaCompatible> {
-        return platforms.maybeRegister(name) { it ->
-            it.hostType.set(GiteaCompatiblePlatform.CODEBERG)
-            action.execute(it)
-        }
+    fun codeberg(name: String, action: Action<Codeberg>): NamedDomainObjectProvider<Codeberg> {
+        return platforms.maybeRegister(name, action)
     }
 
-    fun codebergOptions(@DelegatesTo(value = GiteaCompatible::class) closure: Closure<*>): Provider<GiteaCompatibleOptions> {
+    fun codebergOptions(@DelegatesTo(value = Codeberg::class) closure: Closure<*>): Provider<GiteaCompatibleOptions> {
         return codebergOptions {
             project.configure(it, closure)
         }

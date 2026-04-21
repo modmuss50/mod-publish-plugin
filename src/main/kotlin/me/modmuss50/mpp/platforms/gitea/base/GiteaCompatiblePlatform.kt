@@ -1,4 +1,4 @@
-package me.modmuss50.mpp.platforms.gitea
+package me.modmuss50.mpp.platforms.gitea.base
 
 enum class GiteaCompatiblePlatform(
     val friendlyString: String,
