@@ -10,7 +10,6 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
-import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskProvider
 import java.net.URI
@@ -18,6 +17,7 @@ import java.net.URI
 interface GiteaCompatibleOptions :
     PlatformOptions,
     PlatformOptionsInternal<GiteaCompatibleOptions> {
+
     @get:InputFile
     @get:Optional
     override val file: RegularFileProperty
@@ -61,12 +61,10 @@ interface GiteaCompatibleOptions :
 
     @get:InputFile
     @get:Optional
-    @get:Internal
     val releaseResult: RegularFileProperty
 
     @get:Input
     @get:Optional
-    @get:Internal
     val hostType: Property<GiteaCompatiblePlatform>
 
     override fun setInternalDefaults() {
