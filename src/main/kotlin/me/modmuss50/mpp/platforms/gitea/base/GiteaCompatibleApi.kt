@@ -1,25 +1,24 @@
-package me.modmuss50.mpp.platforms.gitea
+package me.modmuss50.mpp.platforms.gitea.base
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import me.modmuss50.mpp.networking.DefaultHttpImpl
-import me.modmuss50.mpp.networking.DefaultHttpImpl.jsonErrorFactory
 import me.modmuss50.mpp.networking.HttpConfig
 import me.modmuss50.mpp.networking.HttpContext
 import me.modmuss50.mpp.networking.MultipartBodyBuilder
 import java.io.File
 import java.net.http.HttpRequest
 
-class GiteaApi(
+class GiteaCompatibleApi(
     private val accessToken: String,
     private val baseUrl: String,
     private val repository: String,
 ) {
     companion object {
         val giteaExceptionFactory =
-            jsonErrorFactory<ErrorResponse> {
+            DefaultHttpImpl.jsonErrorFactory<ErrorResponse> {
                 it.message
             }
 

@@ -105,7 +105,7 @@ data class ModrinthPublishResult(
 
 @Serializable
 @SerialName("gitea")
-data class GiteaPublishResult(
+data class GiteaCompatiblePublishResult(
     val repository: String,
     val releaseId: Long,
     val url: String,

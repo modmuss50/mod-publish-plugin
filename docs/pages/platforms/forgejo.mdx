@@ -9,7 +9,7 @@ publishMods {
 
     forgejo {
         accessToken = providers.environmentVariable("FORGEJO_TOKEN")
-        hostUrl(new URI("https://codeberg.org")) // This is the link for your Forgejo host.
+        host(new URI("https://codeberg.org")) // This is the link for your Forgejo host.
         repository = "Example/MyMod"
         commitish = "main" // This is the branch the release tag will be created from
     }
@@ -69,7 +69,7 @@ See the following example showing all the Forgejo specific options:
 publishMods {
     forgejo {
         accessToken = providers.environmentVariable("FORGEJO_TOKEN")
-        hostUrl(new URI("https://forgejo.example.com"))
+        host(new URI("https://forgejo.example.com"))
         repository = "Example/MyMod"
         commitish = "main"
         tagName = "release/1.0.0"

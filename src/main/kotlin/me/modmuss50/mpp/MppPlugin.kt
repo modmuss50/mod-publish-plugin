@@ -1,7 +1,8 @@
 package me.modmuss50.mpp
 
 import me.modmuss50.mpp.platforms.curseforge.Curseforge
-import me.modmuss50.mpp.platforms.gitea.Gitea
+import me.modmuss50.mpp.platforms.gitea.Codeberg
+import me.modmuss50.mpp.platforms.gitea.SelfHostedGitea
 import me.modmuss50.mpp.platforms.github.Github
 import me.modmuss50.mpp.platforms.gitlab.Gitlab
 import me.modmuss50.mpp.platforms.modrinth.Modrinth
@@ -13,27 +14,37 @@ import org.gradle.api.tasks.TaskProvider
 @Suppress("unused")
 class MppPlugin : Plugin<Project> {
     override fun apply(project: Project) {
-        val extension = project.extensions.create(TypeOf.typeOf(ModPublishExtension::class.java), "publishMods", ModPublishExtension::class.java, project)
+        val extension =
+            project.extensions.create(
+                TypeOf.typeOf(ModPublishExtension::class.java),
+                "publishMods",
+                ModPublishExtension::class.java,
+                project,
+            )
 
         extension.platforms.registerFactory(Curseforge::class.java) {
             project.objects.newInstance(Curseforge::class.java, it)
         }
-        extension.platforms.registerFactory(Github::class.java) {
-            project.objects.newInstance(Github::class.java, it)
-        }
         extension.platforms.registerFactory(Modrinth::class.java) {
             project.objects.newInstance(Modrinth::class.java, it)
         }
-        extension.platforms.registerFactory(Gitea::class.java) {
-            project.objects.newInstance(Gitea::class.java, it)
+        extension.platforms.registerFactory(Github::class.java) {
+            project.objects.newInstance(Github::class.java, it)
         }
         extension.platforms.registerFactory(Gitlab::class.java) {
             project.objects.newInstance(Gitlab::class.java, it)
         }
-
-        val publishModsTask = project.tasks.register("publishMods") {
-            it.group = "publishing"
+        extension.platforms.registerFactory(SelfHostedGitea::class.java) {
+            project.objects.newInstance(SelfHostedGitea::class.java, it)
         }
+        extension.platforms.registerFactory(Codeberg::class.java) {
+            project.objects.newInstance(Codeberg::class.java, it)
+        }
+
+        val publishModsTask =
+            project.tasks.register("publishMods") {
+                it.group = "publishing"
+            }
 
         extension.platforms.whenObjectAdded { platform ->
             val publishPlatformTask = configureTask(project, platform)
@@ -44,7 +55,8 @@ class MppPlugin : Plugin<Project> {
         }
     }
 
-    private fun configureTask(project: Project, platform: Platform): TaskProvider<PublishModTask> {
-        return project.tasks.register(platform.taskName, PublishModTask::class.java, platform)
-    }
+    private fun configureTask(
+        project: Project,
+        platform: Platform,
+    ): TaskProvider<PublishModTask> = project.tasks.register(platform.taskName, PublishModTask::class.java, platform)
 }
