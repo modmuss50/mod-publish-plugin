@@ -5,7 +5,7 @@ import io.javalin.apibuilder.EndpointGroup
 
 class MockWebServer<T : MockWebServer.MockApi>(val api: T) : AutoCloseable {
     private val server: Javalin = Javalin.create { config ->
-        config.router.apiBuilder(api.routes())
+        config.routes.apiBuilder(api.routes())
     }.start(9082)
 
     val endpoint: String
