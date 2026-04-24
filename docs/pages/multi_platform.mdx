@@ -4,57 +4,118 @@ The simplest way to configure the publishing of multiple platforms is to configu
 
 See the following fully working example that publishes both the Fabric and Forge versions of a mod to both CurseForge and Modrinth:
 
-```groovy
-publishMods {
-    changelog = "Changelog goes here"
-    type = STABLE
 
-    // CurseForge options used by both Fabric and Forge
-    def cfOptions = curseforgeOptions {
-        accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
-        projectId = "123456"
-        minecraftVersions.add("1.20.1")
-    }
+<Tabs items={['Groovy', 'Kotlin']}>
+  <Tab>
+    ```groovy
+    publishMods {
+        changelog = "Changelog goes here"
+        type = STABLE
 
-    // Modrinth options used by both Fabric and Forge
-    def mrOptions = modrinthOptions {
-        accessToken = providers.environmentVariable("MODRINTH_TOKEN")
-        projectId = "12345678"
-        minecraftVersions.add("1.20.1")
-    }
+        // CurseForge options used by both Fabric and Forge
+        def cfOptions = curseforgeOptions {
+            accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
+            projectId = "123456"
+            minecraftVersions.add("1.20.1")
+        }
 
-    // Fabric specific options for CurseForge
-    curseforge("curseforgeFabric") {
-        from cfOptions
-        file project(":fabric")
-        modLoaders.add("fabric")
-        requires {
-            slug = "fabric-api"
+        // Modrinth options used by both Fabric and Forge
+        def mrOptions = modrinthOptions {
+            accessToken = providers.environmentVariable("MODRINTH_TOKEN")
+            projectId = "12345678"
+            minecraftVersions.add("1.20.1")
+        }
+
+        // Fabric specific options for CurseForge
+        curseforge("curseforgeFabric") {
+            from cfOptions
+            file project(":fabric")
+            modLoaders.add("fabric")
+            requires {
+                slug = "fabric-api"
+            }
+        }
+
+        // Forge specific options for CurseForge
+        curseforge("curseforgeForge") {
+            from cfOptions
+            file project(":forge")
+            modLoaders.add("forge")
+        }
+
+        // Fabric specific options for Modrinth
+        modrinth("modrinthFabric") {
+            from mrOptions
+            file project(":fabric")
+            modLoaders.add("fabric")
+            requires {
+                slug = "fabric-api"
+            }
+        }
+
+        // Forge specific options for Modrinth
+        modrinth("modrinthForge") {
+            from mrOptions
+            file project(":forge")
+            modLoaders.add("forge")
         }
     }
+    ```
+  </Tab>
+  <Tab>
+   ```kotlin
+   publishMods {
+       changelog.set("Changelog goes here")
+       type.set(STABLE)
 
-    // Forge specific options for CurseForge
-    curseforge("curseforgeForge") {
-        from cfOptions
-        file project(":forge")
-        modLoaders.add("forge")
-    }
+       // CurseForge options used by both Fabric and Forge
+       val cfOptions = curseforgeOptions {
+           accessToken.set(providers.environmentVariable("CURSEFORGE_TOKEN"))
+           projectId.set("123456")
+           minecraftVersions.add("1.20.1")
+       }
 
-    // Fabric specific options for Modrinth
-    modrinth("modrinthFabric") {
-        from mrOptions
-        file project(":fabric")
-        modLoaders.add("fabric")
-        requires {
-            slug = "fabric-api"
-        }
-    }
+       // Modrinth options used by both Fabric and Forge
+       val mrOptions = modrinthOptions {
+           accessToken.set(providers.environmentVariable("MODRINTH_TOKEN"))
+           projectId.set("12345678")
+           minecraftVersions.add("1.20.1")
+       }
 
-    // Forge specific options for Modrinth
-    modrinth("modrinthForge") {
-        from mrOptions
-        file project(":forge")
-        modLoaders.add("forge")
-    }
-}
-```
+       // Fabric specific options for CurseForge
+       curseforge("curseforgeFabric") {
+           from cfOptions
+           file project(":fabric")
+           modLoaders.add("fabric")
+           requires {
+               slug.set("fabric-api")
+           }
+       }
+
+       // Forge specific options for CurseForge
+       curseforge("curseforgeForge") {
+           from cfOptions
+           file project(":forge")
+           modLoaders.add("forge")
+       }
+
+       // Fabric specific options for Modrinth
+       modrinth("modrinthFabric") {
+           from mrOptions
+           file project(":fabric")
+           modLoaders.add("fabric")
+           requires {
+               slug.set("fabric-api")
+           }
+       }
+
+       // Forge specific options for Modrinth
+       modrinth("modrinthForge") {
+           from mrOptions
+           file project(":forge")
+           modLoaders.add("forge")
+       }
+   }
+   ```
+  </Tab>
+</Tabs>
