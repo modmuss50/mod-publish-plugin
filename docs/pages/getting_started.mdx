@@ -31,12 +31,24 @@ import { Callout } from 'nextra/components'
 
 By default, the plugin does nothing. First you must configure the basic platform-agnostic options within the `publishMods` extension block.
 
-```groovy
-publishMods {
-    changelog = "# Markdown changelog content"
-    type = STABLE
-}
-```
+<Tabs items={['Groovy', 'Kotlin']}>
+  <Tab>
+    ```groovy
+    publishMods {
+        changelog = "# Markdown changelog content"
+        type = STABLE
+    }
+    ```
+  </Tab>
+  <Tab>
+    ```kotlin
+    publishMods {
+        changelog.set("# Markdown changelog content")
+        type.set(STABLE)
+    }
+    ```
+  </Tab>
+</Tabs>
 
 ## Input file
 
@@ -47,34 +59,74 @@ Next you need to specify the input file and supported modloaders, this changes b
 
 ### Fabric 26.1+ and Forge
 
-```groovy
-publishMods {
-    file = jar.archiveFile
-}
-```
+
+<Tabs items={['Groovy', 'Kotlin']}>
+  <Tab>
+    ```groovy
+    publishMods {
+        file = jar.archiveFile
+    }
+    ```
+  </Tab>
+  <Tab>
+    ```kotlin
+    publishMods {
+        file.set(jar.archiveFile)
+    }
+    ```
+  </Tab>
+</Tabs>
 
 ### Fabric 1.21.11 and below
 
-```groovy
-publishMods {
-    file = remapJar.archiveFile
-    modLoaders.add("fabric")
-}
-```
+<Tabs items={['Groovy', 'Kotlin']}>
+  <Tab>
+    ```groovy
+    publishMods {
+        file = remapJar.archiveFile
+        modLoaders.add("fabric")
+    }
+    ```
+  </Tab>
+  <Tab>
+   ```kotlin
+   publishMods {
+       file.set(remapJar.archiveFile)
+       modLoaders.add("fabric")
+   }
+   ```
+  </Tab>
+</Tabs>
 
 ## Adding a platform
 
 Next you need to configure each platform that you wish to publish your mod to. The following shows a simple example for publishing a mod to CurseForge.
 
-```groovy
-publishMods {
-    curseforge {
-        projectId = "123456"
-        accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
-        minecraftVersions.add("1.20.1")
+<Tabs items={['Groovy', 'Kotlin']}>
+  <Tab>
+    ```groovy
+    publishMods {
+        curseforge {
+            projectId = "123456"
+            accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
+            minecraftVersions.add("1.20.1")
+        }
     }
-}
-```
+    ```
+  </Tab>
+  <Tab>
+   ```kotlin
+   publishMods {
+       curseforge {
+           projectId.set("123456")
+           accessToken.set(providers.environmentVariable("CURSEFORGE_TOKEN"))
+           minecraftVersions.add("1.20.1")
+       }
+   }
+   ```
+  </Tab>
+</Tabs>
+
 ## Publishing
 
 Run the `publishMods` task to publish the mod to all the configured destinations.
