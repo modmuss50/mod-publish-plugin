@@ -1,34 +1,73 @@
 ## Basic example
 See the following minimal example showing how to publish the `jar` task to Gitea:
-```groovy
-publishMods {
-    file = jar.archiveFile
-    changelog = "Changelog"
-    type = STABLE
-    modLoaders.add("fabric")
+<Tabs items={['Groovy', 'Kotlin']}>
+  <Tab>
+    ```groovy
+    publishMods {
+        file = jar.archiveFile
+        changelog = "Changelog"
+        type = STABLE
+        modLoaders.add("fabric")
 
-    gitea {
-        accessToken = providers.environmentVariable("GITEA_TOKEN")
-        host(new URI("https://gitea.example.com")) // This is the link for your Gitea host.
-        repository = "Example/MyMod"
-        commitish = "main" // This is the branch the release tag will be created from
+        gitea {
+            accessToken = providers.environmentVariable("GITEA_TOKEN")
+            host(new URI("https://gitea.example.com")) // This is the link for your Gitea host.
+            repository = "Example/MyMod"
+            commitish = "main" // This is the branch the release tag will be created from
+        }
     }
-}
+    ```
+  </Tab>
+  <Tab>
+    ```kotlin
+    publishMods {
+        file.set(jar.archiveFile)
+        changelog.set("Changelog")
+        type.set(STABLE)
+        modLoaders.add("fabric")
 
-```
+        gitea {
+            accessToken.set(providers.environmentVariable("GITEA_TOKEN"))
+            host(uri("https://gitea.example.com")) // This is the link for your Gitea host.
+            repository.set("Example/MyMod")
+            commitish.set("main") // This is the branch the release tag will be created from
+        }
+    }
+    ```
+  </Tab>
+</Tabs>
+
 ## Multiple releases
 You can create multiple Gitea destinations by specifying a name like so:
-```groovy
-publishMods {
-    gitea("giteaProjectA") {
-        // Configure Gitea settings for project A here
-    }
+<Tabs items={['Groovy', 'Kotlin']}>
+  <Tab>
+    ```groovy
+    publishMods {
+        gitea("giteaProjectA") {
+            // Configure Gitea settings for project A here
+        }
 
-    gitea("giteaProjectB") {
-        // Configure Gitea settings for project B here
+        gitea("giteaProjectB") {
+            // Configure Gitea settings for project B here
+        }
     }
-}
-```
+    ```
+  </Tab>
+  <Tab>
+    ```kotlin
+    publishMods {
+        gitea("giteaProjectA") {
+            // Configure Gitea settings for project A here
+        }
+
+        gitea("giteaProjectB") {
+            // Configure Gitea settings for project B here
+        }
+    }
+    ```
+  </Tab>
+</Tabs>
+
 This will create 2 separate Gitea releases.
 
 ## Parent releases
@@ -36,58 +75,125 @@ If you wish to upload files to a Gitea release created by another task either in
 This is useful where you have multiple subprojects that you want to publish to a single release, the following example shows how a root project can create the release and subprojects can upload files to it:
 
 #### Root project
-```groovy
-publishMods {
-    gitea {
-        accessToken = providers.environmentVariable("GITEA_TOKEN")
-        repository = "Example/MyMod"
-        commitish = "main"
-        tagName = "release/1.0.0"
+<Tabs items={['Groovy', 'Kotlin']}>
+  <Tab>
+    ```groovy
+    publishMods {
+        gitea {
+            accessToken = providers.environmentVariable("GITEA_TOKEN")
+            repository = "Example/MyMod"
+            commitish = "main"
+            tagName = "release/1.0.0"
 
-        // Allow the release to be initially created without any files.
-        allowEmptyFiles = true
+            // Allow the release to be initially created without any files.
+            allowEmptyFiles = true
+        }
     }
-}
-```
+    ```
+  </Tab>
+  <Tab>
+    ```kotlin
+    publishMods {
+        gitea {
+            accessToken.set(providers.environmentVariable("GITEA_TOKEN"))
+            repository.set("Example/MyMod")
+            commitish.set("main")
+            tagName.set("release/1.0.0")
+
+            // Allow the release to be initially created without any files.
+            allowEmptyFiles.set(true)
+        }
+    }
+    ```
+  </Tab>
+</Tabs>
 
 #### Subproject
 When using the `parent` option, only the `accessToken` and files are required, the other options are forcefully inherited from the parent task.
-```groovy
-publishMods {
-    gitea {
-        accessToken = providers.environmentVariable("GITEA_TOKEN")
+<Tabs items={['Groovy', 'Kotlin']}>
+  <Tab>
+    ```groovy
+    publishMods {
+        gitea {
+            accessToken = providers.environmentVariable("GITEA_TOKEN")
 
-        // Specify the root project's gitea task to upload files to
-        parent project(":").tasks.named("gitea")
+            // Specify the root project's gitea task to upload files to
+            parent project(":").tasks.named("gitea")
+        }
     }
-}
-```
+    ```
+  </Tab>
+  <Tab>
+    ```kotlin
+    publishMods {
+        gitea {
+            accessToken.set(providers.environmentVariable("GITEA_TOKEN"))
+
+            // Specify the root project's gitea task to upload files to
+            parent project(":").tasks.named("gitea")
+        }
+    }
+    ```
+  </Tab>
+</Tabs>
 
 ## All options
 See the following example showing all the Gitea specific options:
-```groovy
-publishMods {
-    gitea {
-        accessToken = providers.environmentVariable("GITEA_TOKEN")
-        host(new URI("https://gitea.example.com"))
-        repository = "Example/MyMod"
-        commitish = "main"
-        tagName = "release/1.0.0"
+<Tabs items={['Groovy', 'Kotlin']}>
+  <Tab>
+    ```groovy
+    publishMods {
+        gitea {
+            accessToken = providers.environmentVariable("GITEA_TOKEN")
+            host(new URI("https://gitea.example.com"))
+            repository = "Example/MyMod"
+            commitish = "main"
+            tagName = "release/1.0.0"
 
-        // Optionally set the announcement title used by the Discord publisher
-        announcementTitle = "Download from Gitea"
-		// Optionally set the display name for your host, which is used by the discord publisher if no custom title is set
-		hostDisplayName = "Example"
-        // Optionally set the brand color used by your host
-        hostBrandColor = 0x1d8f4a
+            // Optionally set the announcement title used by the Discord publisher
+            announcementTitle = "Download from Gitea"
+    		// Optionally set the display name for your host, which is used by the discord publisher if no custom title is set
+    		hostDisplayName = "Example"
+            // Optionally set the brand color used by your host
+            hostBrandColor = 0x1d8f4a
 
-        // Upload the files to a previously created release, by providing another Gitea publish task
-        // This is useful in multi-project builds where you want to publish multiple subprojects to a single release
-        parent tasks.named("publishGitea")
+            // Upload the files to a previously created release, by providing another Gitea publish task
+            // This is useful in multi-project builds where you want to publish multiple subprojects to a single release
+            parent tasks.named("publishGitea")
 
-        // Optionally allow the release to be created without any attached files.
-        // This is useful when you have subprojects using the parent option that you want to publish a single release.
-        allowEmptyFiles = true
+            // Optionally allow the release to be created without any attached files.
+            // This is useful when you have subprojects using the parent option that you want to publish a single release.
+            allowEmptyFiles = true
+        }
     }
-}
-```
+    ```
+  </Tab>
+  <Tab>
+    ```kotlin
+    publishMods {
+        gitea {
+            accessToken.set(providers.environmentVariable("GITEA_TOKEN"))
+            host(uri("https://gitea.example.com"))
+            repository.set("Example/MyMod")
+            commitish.set("main")
+            tagName.set("release/1.0.0")
+
+            // Optionally set the announcement title used by the Discord publisher
+            announcementTitle.set("Download from Gitea")
+    		// Optionally set the display name for your host, which is used by the discord publisher if no custom title is set
+    		hostDisplayName.set("Example")
+            // Optionally set the brand color used by your host
+            hostBrandColor.set(0x1d8f4a)
+
+            // Upload the files to a previously created release, by providing another Gitea publish task
+            // This is useful in multi-project builds where you want to publish multiple subprojects to a single release
+            parent tasks.named("publishGitea")
+
+            // Optionally allow the release to be created without any attached files.
+            // This is useful when you have subprojects using the parent option that you want to publish a single release.
+            allowEmptyFiles.set(true)
+        }
+    }
+    ```
+  </Tab>
+</Tabs>
