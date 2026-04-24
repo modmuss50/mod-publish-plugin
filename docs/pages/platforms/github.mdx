@@ -1,33 +1,71 @@
 ## Basic example
 See the following minimal example showing how to publish the `jar` task to GitHub:
-```groovy
-publishMods {
-    file = jar.archiveFile
-    changelog = "Changelog"
-    type = STABLE
-    modLoaders.add("fabric")
+<Tabs items={['Groovy', 'Kotlin']}>
+  <Tab>
+    ```groovy
+    publishMods {
+        file = jar.archiveFile
+        changelog = "Changelog"
+        type = STABLE
+        modLoaders.add("fabric")
 
-    github {
-        accessToken = providers.environmentVariable("GITHUB_TOKEN")
-        repository = "Example/MyMod"
-        commitish = "main" // This is the branch the release tag will be created from
+        github {
+            accessToken = providers.environmentVariable("GITHUB_TOKEN")
+            repository = "Example/MyMod"
+            commitish = "main" // This is the branch the release tag will be created from
+        }
     }
-}
+    ```
+  </Tab>
+  <Tab>
+    ```kotlin
+    publishMods {
+        file.set(jar.archiveFile)
+        changelog.set("Changelog")
+        type.set(STABLE)
+        modLoaders.add("fabric")
 
-```
+        github {
+            accessToken.set(providers.environmentVariable("GITHUB_TOKEN"))
+            repository.set("Example/MyMod")
+            commitish.set("main") // This is the branch the release tag will be created from
+        }
+    }
+    ```
+  </Tab>
+</Tabs>
+
 ## Multiple releases
 You can create multiple GitHub destinations by specifying a name like so:
-```groovy
-publishMods {
-    github("githubProjectA") {
-        // Configure GitHub settings for project A here
-    }
+<Tabs items={['Groovy', 'Kotlin']}>
+  <Tab>
+   ```groovy
+   publishMods {
+       github("githubProjectA") {
+           // Configure GitHub settings for project A here
+       }
 
-    github("githubProjectB") {
-        // Configure GitHub settings for project B here
+       github("githubProjectB") {
+           // Configure GitHub settings for project B here
+       }
+   }
+   ```
+  </Tab>
+  <Tab>
+    ```kotlin
+    publishMods {
+        github("githubProjectA") {
+            // Configure GitHub settings for project A here
+        }
+
+        github("githubProjectB") {
+            // Configure GitHub settings for project B here
+        }
     }
-}
-```
+    ```
+  </Tab>
+</Tabs>
+
 This will create 2 separate GitHub releases.
 
 ## Parent releases
@@ -35,53 +73,115 @@ If you wish to upload files to a GitHub release created by another task either i
 This is useful where you have multiple subprojects that you want to publish to a single release, the following example shows how a root project can create the release and subprojects can upload files to it:
 
 #### Root project
-```groovy
-publishMods {
-    github {
-        accessToken = providers.environmentVariable("GITHUB_TOKEN")
-        repository = "Example/MyMod"
-        commitish = "main"
-        tagName = "release/1.0.0"
+<Tabs items={['Groovy', 'Kotlin']}>
+  <Tab>
+   ```groovy
+   publishMods {
+       github {
+           accessToken = providers.environmentVariable("GITHUB_TOKEN")
+           repository = "Example/MyMod"
+           commitish = "main"
+           tagName = "release/1.0.0"
 
-        // Allow the release to be initially created without any files.
-        allowEmptyFiles = true
+           // Allow the release to be initially created without any files.
+           allowEmptyFiles = true
+       }
+   }
+   ```
+  </Tab>
+  <Tab>
+    ```kotlin
+    publishMods {
+        github {
+            accessToken.set(providers.environmentVariable("GITHUB_TOKEN"))
+            repository.set("Example/MyMod")
+            commitish.set("main")
+            tagName.set("release/1.0.0")
+
+            // Allow the release to be initially created without any files.
+            allowEmptyFiles.set(true)
+        }
     }
-}
-```
+    ```
+  </Tab>
+</Tabs>
 
 #### Subproject
 When using the `parent` option, only the `accessToken` and files are required, the other options are forcefully inherited from the parent task.
-```groovy
-publishMods {
-    github {
-        accessToken = providers.environmentVariable("GITHUB_TOKEN")
+<Tabs items={['Groovy', 'Kotlin']}>
+  <Tab>
+    ```groovy
+    publishMods {
+        github {
+            accessToken = providers.environmentVariable("GITHUB_TOKEN")
 
-        // Specify the root project's GitHub task to upload files to
-        parent project(":").tasks.named("publishGithub")
+            // Specify the root project's GitHub task to upload files to
+            parent project(":").tasks.named("publishGithub")
+        }
     }
-}
-```
+    ```
+  </Tab>
+  <Tab>
+    ```kotlin
+    publishMods {
+        github {
+            accessToken.set(providers.environmentVariable("GITHUB_TOKEN"))
+
+            // Specify the root project's GitHub task to upload files to
+            parent project(":").tasks.named("publishGithub")
+        }
+    }
+    ```
+  </Tab>
+</Tabs>
 
 ## All options
 See the following example showing all the GitHub specific options:
-```groovy
-publishMods {
-    github {
-        accessToken = providers.environmentVariable("GITHUB_TOKEN")
-        repository = "Example/MyMod"
-        commitish = "main"
-        tagName = "release/1.0.0"
+<Tabs items={['Groovy', 'Kotlin']}>
+  <Tab>
+   ```groovy
+   publishMods {
+       github {
+           accessToken = providers.environmentVariable("GITHUB_TOKEN")
+           repository = "Example/MyMod"
+           commitish = "main"
+           tagName = "release/1.0.0"
 
-        // Optionally set the announcement title used by the Discord publisher
-        announcementTitle = "Download from GitHub"
+           // Optionally set the announcement title used by the Discord publisher
+           announcementTitle = "Download from GitHub"
 
-        // Upload the files to a previously created release, by providing another github publish task
-        // This is useful in multi-project builds where you want to publish multiple subprojects to a single release
-        parent tasks.named("publishGithub")
+           // Upload the files to a previously created release, by providing another github publish task
+           // This is useful in multi-project builds where you want to publish multiple subprojects to a single release
+           parent tasks.named("publishGithub")
 
-        // Optionally allow the release to be created without any attached files.
-        // This is useful when you have subprojects using the parent option that you want to publish a single release.
-        allowEmptyFiles = true
+           // Optionally allow the release to be created without any attached files.
+           // This is useful when you have subprojects using the parent option that you want to publish a single release.
+           allowEmptyFiles = true
+       }
+   }
+   ```
+  </Tab>
+  <Tab>
+    ```kotlin
+    publishMods {
+        github {
+            accessToken.set(providers.environmentVariable("GITHUB_TOKEN"))
+            repository.set("Example/MyMod")
+            commitish.set("main")
+            tagName.set("release/1.0.0")
+
+            // Optionally set the announcement title used by the Discord publisher
+            announcementTitle.set("Download from GitHub")
+
+            // Upload the files to a previously created release, by providing another github publish task
+            // This is useful in multi-project builds where you want to publish multiple subprojects to a single release
+            parent tasks.named("publishGithub")
+
+            // Optionally allow the release to be created without any attached files.
+            // This is useful when you have subprojects using the parent option that you want to publish a single release.
+            allowEmptyFiles.set(true)
+        }
     }
-}
-```
+    ```
+  </Tab>
+</Tabs>
