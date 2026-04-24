@@ -4,56 +4,116 @@
 
 See the following minimal example showing how a message can be sent to a Discord channel using a webhook.
 
-```groovy
-publishMods {
-    // ...
-    discord {
-        webhookUrl = providers.environmentVariable("DISCORD_WEBHOOK")
+<Tabs items={['Groovy', 'Kotlin']}>
+  <Tab>
+   ```groovy
+   publishMods {
+       // ...
+       discord {
+           webhookUrl = providers.environmentVariable("DISCORD_WEBHOOK")
+       }
+   }
+   ```
+  </Tab>
+  <Tab>
+    ```kotlin
+    publishMods {
+        // ...
+        discord {
+            webhookUrl.set(providers.environmentVariable("DISCORD_WEBHOOK"))
+        }
     }
-}
-```
+    ```
+  </Tab>
+</Tabs>
 
 Please note, when using the Discord webhook you must also specify the `projectSlug` in any CurseForge publications. This is due to limitations in the CurseForge API.
 
 By default Discord will publish a message with the changelog to the supplied webhook. A link to all of the platforms will also be included.
 
-```groovy
-publishMods {
-    // ...
-    discord {
-        // Pass in the secret webhook URL. Required
-        webhookUrl = providers.environmentVariable("DISCORD_WEBHOOK")
+<Tabs items={['Groovy', 'Kotlin']}>
+  <Tab>
+    ```groovy
+    publishMods {
+        // ...
+        discord {
+            // Pass in the secret webhook URL. Required
+            webhookUrl = providers.environmentVariable("DISCORD_WEBHOOK")
 
-        // Pass in the secret webhook URL to post the messages when running a dry run. Optional
-        dryRunWebhookUrl = providers.environmentVariable("DISCORD_WEBHOOK_DRY_RUN")
+            // Pass in the secret webhook URL to post the messages when running a dry run. Optional
+            dryRunWebhookUrl = providers.environmentVariable("DISCORD_WEBHOOK_DRY_RUN")
 
-        // Set the username used to send the webhook, defaults to "Mod Publish Plugin"
-        username = "My Cool Mod"
+            // Set the username used to send the webhook, defaults to "Mod Publish Plugin"
+            username = "My Cool Mod"
 
-        // Set the avatar image url for the webhook, defaults to none.
-        avatarUrl = "https://placekitten.com/500/500"
+            // Set the avatar image url for the webhook, defaults to none.
+            avatarUrl = "https://placekitten.com/500/500"
 
-        // Set the content message, in this example a header is added before the changelog. Defaults to just the changelog
-        content = changelog.map { "# A new version of my cool mod has been released! \n" + it}
+            // Set the content message, in this example a header is added before the changelog. Defaults to just the changelog
+            content = changelog.map { "# A new version of my cool mod has been released! \n" + it}
 
-        // If you wish to only link to certain platform you can do the following
-        setPlatforms(publishMods.platforms.curseforge, publishMods.platforms.github)
+            // If you wish to only link to certain platform you can do the following
+            setPlatforms(publishMods.platforms.curseforge, publishMods.platforms.github)
 
-        // Instead if you wish to link to all platform in a specific Gradle project you can do the following
-        setPlatformsAllFrom(project(":child1"), project(":child2"))
+            // Instead if you wish to link to all platform in a specific Gradle project you can do the following
+            setPlatformsAllFrom(project(":child1"), project(":child2"))
+        }
     }
-}
-```
+    ```
+  </Tab>
+  <Tab>
+   ```kotlin
+   publishMods {
+       // ...
+       discord {
+           // Pass in the secret webhook URL. Required
+           webhookUrl.set(providers.environmentVariable("DISCORD_WEBHOOK"))
+
+           // Pass in the secret webhook URL to post the messages when running a dry run. Optional
+           dryRunWebhookUrl.set(providers.environmentVariable("DISCORD_WEBHOOK_DRY_RUN"))
+
+           // Set the username used to send the webhook, defaults to "Mod Publish Plugin"
+           username.set("My Cool Mod")
+
+           // Set the avatar image url for the webhook, defaults to none.
+           avatarUrl.set("https://placekitten.com/500/500")
+
+           // Set the content message, in this example a header is added before the changelog. Defaults to just the changelog
+           content.set(changelog.map { "# A new version of my cool mod has been released! \n" + it})
+
+           // If you wish to only link to certain platform you can do the following
+           setPlatforms(publishMods.platforms.curseforge, publishMods.platforms.github)
+
+           // Instead if you wish to link to all platform in a specific Gradle project you can do the following
+           setPlatformsAllFrom(project(":child1"), project(":child2"))
+       }
+   }
+   ```
+  </Tab>
+</Tabs>
 
 You can customise the platform specific message by using the `announcementTitle` property present on all of the platforms. This will be used as the title of the embed.
 
-```groovy
-publishMods {
-    curseforge {
-        announcementTitle = "Download from CurseForge"
+<Tabs items={['Groovy', 'Kotlin']}>
+  <Tab>
+    ```groovy
+    publishMods {
+        curseforge {
+            announcementTitle = "Download from CurseForge"
+        }
     }
-}
-```
+    ```
+  </Tab>
+  <Tab>
+    ```kotlin
+    publishMods {
+        curseforge {
+            announcementTitle.set("Download from CurseForge")
+        }
+    }
+    ```
+  </Tab>
+</Tabs>
 
 The webhook message can be customized to different styles  
 The look can be set to `CLASSIC` or `MODERN`
@@ -67,18 +127,36 @@ The look can be set to `CLASSIC` or `MODERN`
   ## Modern look
   ![Modern look](/images/discord_modern.png)
 
-  ```groovy
-  publishMods {
-    // ...
-    discord {
-      // ...
-      style {
+<Tabs items={['Groovy', 'Kotlin']}>
+  <Tab>
+      ```groovy
+      publishMods {
         // ...
-        look = "MODERN"
+        discord {
+          // ...
+          style {
+            // ...
+            look = "MODERN"
+          }
+        }
       }
-    }
-  }
-  ```
+      ```
+  </Tab>
+  <Tab>
+      ```kotlin
+      publishMods {
+        // ...
+        discord {
+          // ...
+          style {
+            // ...
+            look.set("MODERN")
+          }
+        }
+      }
+      ```
+  </Tab>
+</Tabs>
 
   The style tag also has the options `thumbnailUrl` and `color`, this options allow you to customize more the look of your embeds
 
@@ -86,20 +164,40 @@ The look can be set to `CLASSIC` or `MODERN`
   The string can also be `modrinth`, `github` or `curseforge`, with those working as alias for the colors used for the embed links for those platforms
 
   ![Example with thumbnail](/images/discord_modern_button_thumbnail.png)
-  ```groovy
-  publishMods {
-    // ...
-    discord {
-      // ...
-      style {
-        // ...
-        look = "MODERN"
-        thumbnailUrl = "https://example.com"
-        color = "#f6f0fc"
-      }
-    }
-  }
-  ```
+  <Tabs items={['Groovy', 'Kotlin']}>
+    <Tab>
+      ```groovy
+        publishMods {
+          // ...
+          discord {
+            // ...
+            style {
+              // ...
+              look = "MODERN"
+              thumbnailUrl = "https://example.com"
+              color = "#f6f0fc"
+            }
+          }
+        }
+        ```
+    </Tab>
+    <Tab>
+      ```kotlin
+        publishMods {
+          // ...
+          discord {
+            // ...
+            style {
+              // ...
+              look.set("MODERN")
+              thumbnailUrl.set("https://example.com")
+              color.set("#f6f0fc")
+            }
+          }
+        }
+        ```
+    </Tab>
+  </Tabs>
 </details>
 
 You can also set your links to be posted as `EMBED` or `BUTTON`
@@ -111,16 +209,34 @@ You can also set your links to be posted as `EMBED` or `BUTTON`
   ## Button links
   ![Button links](/images/discord_button.png)
 
-  ```groovy
-  publishMods {
-    // ...
-    discord {
-      // ...
-      style {
+<Tabs items={['Groovy', 'Kotlin']}>
+  <Tab>
+    ```groovy
+      publishMods {
         // ...
-        link = "BUTTON"
+        discord {
+          // ...
+          style {
+            // ...
+            link = "BUTTON"
+          }
+        }
       }
-    }
-  }
-  ```
+      ```
+  </Tab>
+  <Tab>
+    ```kotlin
+      publishMods {
+        // ...
+        discord {
+          // ...
+          style {
+            // ...
+            link.set("BUTTON")
+          }
+        }
+      }
+      ```
+  </Tab>
+</Tabs>
 </details>
