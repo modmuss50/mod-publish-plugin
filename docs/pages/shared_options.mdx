@@ -1,46 +1,101 @@
+import { Tabs, Tab } from 'nextra/components'
+
 If you wish to create multiple releases to the same platform you can create shared options. The following example shows how to use `curseforgeOptions` for a forge and fabric release.
 
-```groovy
-publishMods {
-    changelog = file("changelog.md").text
+<Tabs items={['Groovy', 'Kotlin']}>
+  <Tab>
+    ```groovy
+    publishMods {
+        changelog = file("changelog.md").text
 
-    def options = curseforgeOptions {
-        accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
-        minecraftVersions.add("1.20.1")
-    }
+        def options = curseforgeOptions {
+            accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
+            minecraftVersions.add("1.20.1")
+        }
 
-    curseforge("curseforgeFabric") {
-        from options
-        projectId = "123456"
-        type = STABLE
-        file = fabricJar.archiveFile
-    }
+        curseforge("curseforgeFabric") {
+            from options
+            projectId = "123456"
+            type = STABLE
+            file = fabricJar.archiveFile
+        }
 
-    curseforge("curseforgeForge") {
-        from options
-        projectId = "7890123"
-        type = BETA
-        file = forgeJar.archiveFile
+        curseforge("curseforgeForge") {
+            from options
+            projectId = "7890123"
+            type = BETA
+            file = forgeJar.archiveFile
+        }
     }
-}
-```
+    ```
+  </Tab>
+  <Tab>
+   ```kotlin
+   publishMods {
+       changelog.set(file("changelog.md").text)
+
+       val options = curseforgeOptions {
+           accessToken.set(providers.environmentVariable("CURSEFORGE_TOKEN"))
+           minecraftVersions.add("1.20.1")
+       }
+
+       curseforge("curseforgeFabric") {
+           from options
+           projectId.set("123456")
+           type.set(STABLE)
+           file.set(fabricJar.archiveFile)
+       }
+
+       curseforge("curseforgeForge") {
+           from options
+           projectId.set("7890123")
+           type.set(BETA)
+           file.set(forgeJar.archiveFile)
+       }
+   }
+   ```
+  </Tab>
+</Tabs>
 
 The following example shows how the inheritance works, any option can be overridden without affecting the parent.
 
-```groovy
-publishMods {
-    changelog = "Changelog 1"
+<Tabs items={['Groovy', 'Kotlin']}>
+  <Tab>
+    ```groovy
+    publishMods {
+        changelog = "Changelog 1"
 
-    def options = curseforgeOptions {
-        // Automatically inherits properties from the parent block
+        def options = curseforgeOptions {
+            // Automatically inherits properties from the parent block
 
-        changelog = "Changelog 2" // Overrides changelog 1
+            changelog = "Changelog 2" // Overrides changelog 1
+        }
+
+        curseforge {
+            from options // Inherit properties from `options`
+
+            changelog = "Changelog 3" // Overrides changelog 2
+        }
     }
+    ```
+  </Tab>
+  <Tab>
+   ```kotlin
+   publishMods {
+       changelog.set("Changelog 1")
 
-    curseforge {
-        from options // Inherit properties from `options`
+       val options = curseforgeOptions {
+           // Automatically inherits properties from the parent block
 
-        changelog = "Changelog 3" // Overrides changelog 2
-    }
-}
-```
+           changelog.set("Changelog 2") // Overrides changelog 1
+       }
+
+       curseforge {
+           from options // Inherit properties from `options`
+
+           changelog.set("Changelog 3") // Overrides changelog 2
+       }
+   }
+   ```
+  </Tab>
+</Tabs>

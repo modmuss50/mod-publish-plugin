@@ -1,20 +1,41 @@
+import { Tabs, Tab } from 'nextra/components'
+
 ## Basic example
 See the following minimal example showing how to publish the `jar` task to Modrinth:
-```groovy
-publishMods {
-    file = jar.archiveFile
-    changelog = "Changelog"
-    type = STABLE
-    modLoaders.add("fabric")
+<Tabs items={['Groovy', 'Kotlin']}>
+  <Tab>
+    ```groovy
+    publishMods {
+        file = jar.archiveFile
+        changelog = "Changelog"
+        type = STABLE
+        modLoaders.add("fabric")
 
-    modrinth {
-        accessToken = providers.environmentVariable("MODRINTH_API_KEY")
-        projectId = "12345678"
-        minecraftVersions.add("1.20.1")
+        modrinth {
+            accessToken = providers.environmentVariable("MODRINTH_API_KEY")
+            projectId = "12345678"
+            minecraftVersions.add("1.20.1")
+        }
     }
-}
+    ```
+  </Tab>
+  <Tab>
+    ```kotlin
+    publishMods {
+        file.set(jar.archiveFile)
+        changelog.set("Changelog")
+        type.set(STABLE)
+        modLoaders.add("fabric")
 
-```
+        modrinth {
+            accessToken.set(providers.environmentVariable("MODRINTH_API_KEY"))
+            projectId.set("12345678")
+            minecraftVersions.add("1.20.1")
+        }
+    }
+    ```
+  </Tab>
+</Tabs>
 
 You will need to generate a Modrinth PAT token in your account settings [here](https://modrinth.com/settings/pats), you can set this an environment variable.
 If you plan to publish from your local machine using a Gradle user property may be more convenient:
@@ -25,17 +46,34 @@ You can use the gradle property provider like so:
 
 ## Multiple projects
 You can create multiple Modrinth destinations by providing a name like so:
-```groovy
-publishMods {
-    modrinth("modrinthProjectA") {
-        // Configure Modrinth settings for project A here
-    }
+<Tabs items={['Groovy', 'Kotlin']}>
+  <Tab>
+    ```groovy
+    publishMods {
+        modrinth("modrinthProjectA") {
+            // Configure Modrinth settings for project A here
+        }
 
-    modrinth("modrinthProjectB") {
-        // Configure Modrinth settings for project B here
+        modrinth("modrinthProjectB") {
+            // Configure Modrinth settings for project B here
+        }
     }
-}
-```
+    ```
+  </Tab>
+  <Tab>
+    ```kotlin
+    publishMods {
+        modrinth("modrinthProjectA") {
+            // Configure Modrinth settings for project A here
+        }
+
+        modrinth("modrinthProjectB") {
+            // Configure Modrinth settings for project B here
+        }
+    }
+    ```
+  </Tab>
+</Tabs>
 ## Token options
 When creating your Modrinth personal access token, you should give it the following scopes:
 - Create versions
@@ -48,58 +86,119 @@ If you are using the `projectDescription` option, you will need also need to giv
 
 ## All options
 See the following example showing all the Modrinth specific options:
-```groovy
-publishMods {
-    modrinth {
-        accessToken = providers.environmentVariable("MODRINTH_API_KEY")
-        projectId = "12345678"
-        minecraftVersions.add("1.20.1")
+<Tabs items={['Groovy', 'Kotlin']}>
+  <Tab>
+    ```groovy
+    publishMods {
+        modrinth {
+            accessToken = providers.environmentVariable("MODRINTH_API_KEY")
+            projectId = "12345678"
+            minecraftVersions.add("1.20.1")
 
-        // Optionally set the announcement title used by the Discord publisher
-        announcementTitle = "Download from Modrinth"
+            // Optionally set the announcement title used by the Discord publisher
+            announcementTitle = "Download from Modrinth"
 
-        // Optionally update the project description after publishing a file
-        // This can be useful if you want to sync your GitHub readme with the Modrinth project description
-        projectDescription = providers.fileContents(layout.projectDirectory.file("readme.md")).asText
+            // Optionally update the project description after publishing a file
+            // This can be useful if you want to sync your GitHub readme with the Modrinth project description
+            projectDescription = providers.fileContents(layout.projectDirectory.file("readme.md")).asText
 
-        // You can specify a range of Minecraft versions like so:
-        minecraftVersionRange {
-            start = "1.19.4"
-            end = "1.20.2" // Set to "latest" to use the latest Minecraft version
+            // You can specify a range of Minecraft versions like so:
+            minecraftVersionRange {
+                start = "1.19.4"
+                end = "1.20.2" // Set to "latest" to use the latest Minecraft version
 
-            // Optionally include snapshot versions, defaults to false
-            includeSnapshots = true
+                // Optionally include snapshot versions, defaults to false
+                includeSnapshots = true
+            }
+
+            // Alternatively, you can specify a range of Minecraft versions as a list:
+            minecraftVersionList("26.1, 26.1.1, 26.1.2")
+
+            // You can specify either the project id OR slug, but not both.
+            requires {
+                id = "12345678"
+                slug = "project-slug"
+
+                // You can optionally specify a version id or name for the dependency
+                version = "IIJJKKLL"
+            }
+            optional {
+                id = "12345678"
+                slug = "project-slug"
+            }
+            incompatible {
+                id = "12345678"
+                slug = "project-slug"
+            }
+            embeds {
+                id = "12345678"
+                slug = "project-slug"
+            }
+
+            // You can use the shortened method if you only need to specify the slug
+            requires("project-slug")
+            optional("project-slug")
+            incompatible("project-slug")
+            embeds("project-slug")
         }
-
-        // Alternatively, you can specify a range of Minecraft versions as a list:
-        minecraftVersionList("26.1, 26.1.1, 26.1.2")
-
-        // You can specify either the project id OR slug, but not both.
-        requires {
-            id = "12345678"
-            slug = "project-slug"
-
-            // You can optionally specify a version id or name for the dependency
-            version = "IIJJKKLL"
-        }
-        optional {
-            id = "12345678"
-            slug = "project-slug"
-        }
-        incompatible {
-            id = "12345678"
-            slug = "project-slug"
-        }
-        embeds {
-            id = "12345678"
-            slug = "project-slug"
-        }
-
-        // You can use the shortened method if you only need to specify the slug
-        requires("project-slug")
-        optional("project-slug")
-        incompatible("project-slug")
-        embeds("project-slug")
     }
-}
-```
+    ```
+  </Tab>
+  <Tab>
+    ```kotlin
+    publishMods {
+        modrinth {
+            accessToken.set(providers.environmentVariable("MODRINTH_API_KEY"))
+            projectId.set("12345678")
+            minecraftVersions.add("1.20.1")
+
+            // Optionally set the announcement title used by the Discord publisher
+            announcementTitle.set("Download from Modrinth")
+
+            // Optionally update the project description after publishing a file
+            // This can be useful if you want to sync your GitHub readme with the Modrinth project description
+            projectDescription.set(providers.fileContents(layout.projectDirectory.file("readme.md")).asText)
+
+            // You can specify a range of Minecraft versions like so:
+            minecraftVersionRange {
+                start.set("1.19.4")
+                end.set("1.20.2") // Set to "latest" to use the latest Minecraft version
+
+                // Optionally include snapshot versions, defaults to false
+                includeSnapshots.set(true)
+            }
+
+            // Alternatively, you can specify a range of Minecraft versions as a list:
+            minecraftVersionList("26.1, 26.1.1, 26.1.2")
+
+            // You can specify either the project id OR slug, but not both.
+            requires {
+                id.set("12345678")
+                slug.set( "project-slug")
+
+                // You can optionally specify a version id or name for the dependency
+                version.set("IIJJKKLL")
+            }
+            optional {
+                id.set("12345678")
+                slug.set("project-slug")
+            }
+            incompatible {
+                id.set("12345678")
+                slug.set("project-slug")
+            }
+            embeds {
+                id.set("12345678")
+                slug.set("project-slug")
+            }
+
+            // You can use the shortened method if you only need to specify the slug
+            requires("project-slug")
+            optional("project-slug")
+            incompatible("project-slug")
+            embeds("project-slug")
+        }
+    }
+    ```
+  </Tab>
+</Tabs>
