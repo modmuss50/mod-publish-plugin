@@ -1,3 +1,4 @@
+import org.gradle.plugin.compatibility.compatibility
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -6,7 +7,7 @@ plugins {
     embeddedKotlin("jvm")
     embeddedKotlin("plugin.serialization")
     id("com.diffplug.spotless") version "6.18.0"
-    id("com.gradle.plugin-publish") version "1.2.1"
+    id("com.gradle.plugin-publish") version "2.1.1"
 }
 
 group = "me.modmuss50"
@@ -19,11 +20,11 @@ repositories {
 
 dependencies {
     implementation(gradleApi())
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
 
     testImplementation(kotlin("test"))
-    testImplementation("io.javalin:javalin:6.3.0")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.11.0")
+    testImplementation("io.javalin:javalin:7.2.0")
+    testImplementation("org.junit.jupiter:junit-jupiter:6.0.3")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
@@ -81,6 +82,11 @@ gradlePlugin {
         description = project.description
         version = project.version
         tags = listOf("minecraft", )
+        compatibility {
+            features {
+                configurationCache = true
+            }
+        }
     }
 }
 
