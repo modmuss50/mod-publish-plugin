@@ -1,33 +1,73 @@
+import { Tabs, Tab } from 'nextra/components'
+
 ## Basic example
 See the following minimal example showing how to publish the `jar` task to GitLab:
-```groovy
-publishMods {
-    file = tasks.named("jar").flatMap { it.archiveFile }
-    changelog = "Changelog"
-    type = STABLE
-    modLoaders.add("fabric")
+<Tabs items={['Groovy', 'Kotlin']}>
+  <Tab>
+    ```groovy
+    publishMods {
+        file = tasks.named("jar").flatMap { it.archiveFile }
+        changelog = "Changelog"
+        type = STABLE
+        modLoaders.add("fabric")
 
-    gitlab {
-        accessToken = providers.environmentVariable("GITLAB_TOKEN")
-        projectId = 12345678 // This is how GitLab resolves the project you are publishing to
-        commitish = "main" // This is the branch the release tag will be created from
+        gitlab {
+            accessToken = providers.environmentVariable("GITLAB_TOKEN")
+            projectId = 12345678 // This is how GitLab resolves the project you are publishing to
+            commitish = "main" // This is the branch the release tag will be created from
+        }
     }
-}
-```
+    ```
+  </Tab>
+  <Tab>
+    ```kotlin
+    publishMods {
+        file.set(tasks.named("jar").flatMap { it.archiveFile })
+        changelog.set("Changelog")
+        type.set(STABLE)
+        modLoaders.add("fabric")
+
+        gitlab {
+            accessToken.set(providers.environmentVariable("GITLAB_TOKEN"))
+            projectId.set(12345678) // This is how GitLab resolves the project you are publishing to
+            commitish.set("main") // This is the branch the release tag will be created from
+        }
+    }
+    ```
+  </Tab>
+</Tabs>
 
 ## Multiple releases
 You can create multiple GitLab destinations by specifying a name like so:
-```groovy
-publishMods {
-    gitlab("A") {
-            // Configure GitLab settings for project A here
-    }
+<Tabs items={['Groovy', 'Kotlin']}>
+  <Tab>
+    ```groovy
+    publishMods {
+        gitlab("A") {
+                // Configure GitLab settings for project A here
+        }
 
-    gitlab("B") {
-           // Configure GitLab settings for project B here
+        gitlab("B") {
+               // Configure GitLab settings for project B here
+        }
     }
-}
-```
+    ```
+  </Tab>
+  <Tab>
+    ```kotlin
+    publishMods {
+        gitlab("A") {
+                // Configure GitLab settings for project A here
+        }
+
+        gitlab("B") {
+               // Configure GitLab settings for project B here
+        }
+    }
+    ```
+  </Tab>
+</Tabs>
+
 This will create 2 separate GitLab releases.
 
 ## Parent releases
@@ -35,51 +75,111 @@ If you wish to upload files to a GitLab release created by another task either i
 This is useful where you have multiple subprojects that you want to publish to a single release, the following example shows how a root project can create the release and subprojects can upload files to it:
 
 #### Root project
-```groovy
-publishMods {
-    gitlab {
-        accessToken = providers.environmentVariable("GITLAB_TOKEN")
-        commitish = "main"
-        tagName = "TEST_TAG"
+<Tabs items={['Groovy', 'Kotlin']}>
+  <Tab>
+    ```groovy
+    publishMods {
+        gitlab {
+            accessToken = providers.environmentVariable("GITLAB_TOKEN")
+            commitish = "main"
+            tagName = "TEST_TAG"
 
-        // Allow the release to be initially created without any files.
-        allowEmptyFiles = true
+            // Allow the release to be initially created without any files.
+            allowEmptyFiles = true
+        }
     }
-}
-```
+    ```
+  </Tab>
+  <Tab>
+    ```kotlin
+    publishMods {
+        gitlab {
+            accessToken.set(providers.environmentVariable("GITLAB_TOKEN"))
+            commitish.set("main")
+            tagName.set("TEST_TAG")
+
+            // Allow the release to be initially created without any files.
+            allowEmptyFiles.set(true)
+        }
+    }
+    ```
+  </Tab>
+</Tabs>
 
 #### Subproject
 When using the `parent` option, only the `accessToken` and files are required, the other options are forcefully inherited from the parent task.
-```groovy
-publishMods {
-    gitlab {
-        accessToken = providers.environmentVariable("GITLAB_TOKEN")
+<Tabs items={['Groovy', 'Kotlin']}>
+  <Tab>
+    ```groovy
+    publishMods {
+        gitlab {
+            accessToken = providers.environmentVariable("GITLAB_TOKEN")
 
-        // Specify the root project's gitlab task to upload files to
-        parent project(":").tasks.named("publishGitlab")
+            // Specify the root project's gitlab task to upload files to
+            parent project(":").tasks.named("publishGitlab")
+        }
     }
-}
-```
+    ```
+  </Tab>
+  <Tab>
+    ```kotlin
+    publishMods {
+        gitlab {
+            accessToken.set(providers.environmentVariable("GITLAB_TOKEN"))
+
+            // Specify the root project's gitlab task to upload files to
+            parent project(":").tasks.named("publishGitlab")
+        }
+    }
+    ```
+  </Tab>
+</Tabs>
 
 ## All options
 See the following example showing all the GitLab specific options:
-```groovy
-publishMods {
-    gitlab {
-        accessToken = providers.environmentVariable("GITLAB_TOKEN")
-        commitish = "main"
-        tagName = "TEST_TAG"
+<Tabs items={['Groovy', 'Kotlin']}>
+  <Tab>
+    ```groovy
+    publishMods {
+        gitlab {
+            accessToken = providers.environmentVariable("GITLAB_TOKEN")
+            commitish = "main"
+            tagName = "TEST_TAG"
 
-       // Optionally set the announcement title used by the Discord publisher
-       announcementTitle = "Download from GitLab"
+           // Optionally set the announcement title used by the Discord publisher
+           announcementTitle = "Download from GitLab"
 
-        // Upload the files to a previously created release, by providing another GitLab publish task
-        // This is useful in multi-project builds where you want to publish multiple subprojects to a single release
-        parent tasks.named("publishGitlab")
+            // Upload the files to a previously created release, by providing another GitLab publish task
+            // This is useful in multi-project builds where you want to publish multiple subprojects to a single release
+            parent tasks.named("publishGitlab")
 
-        // Optionally allow the release to be created without any attached files.
-        // This is useful when you have subprojects using the parent option that you want to publish a single release.
-        allowEmptyFiles = true
+            // Optionally allow the release to be created without any attached files.
+            // This is useful when you have subprojects using the parent option that you want to publish a single release.
+            allowEmptyFiles = true
+        }
     }
-}
-```
+    ```
+  </Tab>
+  <Tab>
+    ```kotlin
+    publishMods {
+        gitlab {
+            accessToken.set() = providers.environmentVariable("GITLAB_TOKEN")
+            commitish.set("main")
+            tagName.set("TEST_TAG")
+
+           // Optionally set the announcement title used by the Discord publisher
+           announcementTitle.set("Download from GitLab")
+
+            // Upload the files to a previously created release, by providing another GitLab publish task
+            // This is useful in multi-project builds where you want to publish multiple subprojects to a single release
+            parent tasks.named("publishGitlab")
+
+            // Optionally allow the release to be created without any attached files.
+            // This is useful when you have subprojects using the parent option that you want to publish a single release.
+            allowEmptyFiles.set(true)
+        }
+    }
+    ```
+  </Tab>
+</Tabs>

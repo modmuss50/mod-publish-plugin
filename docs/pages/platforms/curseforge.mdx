@@ -1,21 +1,42 @@
+import { Tabs, Tab } from 'nextra/components'
+
 ## Basic example
 See the following minimal example showing how to publish the `jar` task to CurseForge:
 
-```groovy
-publishMods {
-    file = jar.archiveFile
-    changelog = "Changelog"
-    type = STABLE
-    modLoaders.add("fabric")
+<Tabs items={['Groovy', 'Kotlin']}>
+  <Tab>
+   ```groovy
+   publishMods {
+       file = jar.archiveFile
+       changelog = "Changelog"
+       type = STABLE
+       modLoaders.add("fabric")
 
-    curseforge {
-        accessToken = providers.environmentVariable("CURSEFORGE_API_KEY")
-        projectId = "308769"
-        minecraftVersions.add("1.20.1")
-    }
-}
+       curseforge {
+           accessToken = providers.environmentVariable("CURSEFORGE_API_KEY")
+           projectId = "308769"
+           minecraftVersions.add("1.20.1")
+       }
+   }
+   ```
+  </Tab>
+  <Tab>
+   ```kotlin
+   publishMods {
+       file = jar.archiveFile
+       changelog = "Changelog"
+       type = STABLE
+       modLoaders.add("fabric")
 
-```
+       curseforge {
+           accessToken = providers.environmentVariable("CURSEFORGE_API_KEY")
+           projectId = "308769"
+           minecraftVersions.add("1.20.1")
+       }
+   }
+   ```
+  </Tab>
+</Tabs>
 
 You will need to generate a CurseForge API token in your account settings [here](https://legacy.curseforge.com/account/api-tokens), you can set this an environment variable.
 If you plan to publish from your local machine using a Gradle user property may be more convenient:
@@ -25,68 +46,143 @@ You can use the gradle property provider like so:
 
 ## Multiple projects
 You can create multiple CurseForge destinations by providing a name like so:
-```groovy
-publishMods {
-    curseforge("curseforgeProjectA") {
-        // Configure CurseForge settings for project A here
-    }
+<Tabs items={['Groovy', 'Kotlin']}>
+  <Tab>
+   ```groovy
+   publishMods {
+       curseforge("curseforgeProjectA") {
+           // Configure CurseForge settings for project A here
+       }
 
-    curseforge("curseforgeProjectB") {
-        // Configure CurseForge settings for project B here
+       curseforge("curseforgeProjectB") {
+           // Configure CurseForge settings for project B here
+       }
+   }
+   ```
+  </Tab>
+  <Tab>
+    ```kotlin
+    publishMods {
+        curseforge("curseforgeProjectA") {
+            // Configure CurseForge settings for project A here
+        }
+
+        curseforge("curseforgeProjectB") {
+            // Configure CurseForge settings for project B here
+        }
     }
-}
-```
+    ```
+  </Tab>
+</Tabs>
 ## All options
 See the following example showing all the CurseForge specific options:
-```groovy
-publishMods {
-    curseforge {
-        accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
-        projectId = "123456"
-        minecraftVersions.add("1.20.1")
+<Tabs items={['Groovy', 'Kotlin']}>
+  <Tab>
+    ```groovy
+    publishMods {
+        curseforge {
+            accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
+            projectId = "123456"
+            minecraftVersions.add("1.20.1")
 
-        // You can specify a range of Minecraft versions like so:
-        minecraftVersionRange {
-            start = "1.19.4"
-            end = "1.20.2" // Set to "latest" to use the latest minecraft version
-        }
+            // You can specify a range of Minecraft versions like so:
+            minecraftVersionRange {
+                start = "1.19.4"
+                end = "1.20.2" // Set to "latest" to use the latest minecraft version
+            }
 
-        // Alternatively, you can specify a range of Minecraft versions as a list:
-        minecraftVersionList("26.1, 26.1.1, 26.1.2")
+            // Alternatively, you can specify a range of Minecraft versions as a list:
+            minecraftVersionList("26.1, 26.1.1, 26.1.2")
 
-        // Optionally set the announcement title used by the discord publisher
-        announcementTitle = "Download from CurseForge"
+            // Optionally set the announcement title used by the discord publisher
+            announcementTitle = "Download from CurseForge"
 
-        // Optionally specify the java version that is required to run the mod
-        javaVersions.add(JavaVersion.VERSION_17)
+            // Optionally specify the java version that is required to run the mod
+            javaVersions.add(JavaVersion.VERSION_17)
 
-        // Optionally specify an environment that is required to run the mod
-        clientRequired = true
-        serverRequired = true
+            // Optionally specify an environment that is required to run the mod
+            clientRequired = true
+            serverRequired = true
 
-        // When using the discord webhook you must also specify the project slug
-        // This is due to limitations in the CurseForge API.
-        projectSlug = "test-mod"
+            // When using the discord webhook you must also specify the project slug
+            // This is due to limitations in the CurseForge API.
+            projectSlug = "test-mod"
 
-        // Add dependencies to your project
-        requires("project-slug-1", "another-project")
-        optional("project-slug")
-        incompatible("project-slug")
-        embeds("project-slug")
+            // Add dependencies to your project
+            requires("project-slug-1", "another-project")
+            optional("project-slug")
+            incompatible("project-slug")
+            embeds("project-slug")
 
-        // Set a changelog using text, markdown, or html (defaults to markdown)
-        changelog = "# Markdown changelog content"
-        changelogType = "markdown"
+            // Set a changelog using text, markdown, or html (defaults to markdown)
+            changelog = "# Markdown changelog content"
+            changelogType = "markdown"
 
-        // Set the display name of an additional file
-        additionalFile(jar) {
-            name = "Fabric"
-        }
+            // Set the display name of an additional file
+            additionalFile(jar) {
+                name = "Fabric"
+            }
 
-        // Set the display name of an additional file from another project
-        additionalFile(project(":child")) {
-            name = "Fabric"
+            // Set the display name of an additional file from another project
+            additionalFile(project(":child")) {
+                name = "Fabric"
+            }
         }
     }
-}
-```
+    ```
+  </Tab>
+  <Tab>
+   ```kotlin
+   publishMods {
+       curseforge {
+           accessToken.set(providers.environmentVariable("CURSEFORGE_TOKEN"))
+           projectId.set("123456")
+           minecraftVersions.add("1.20.1")
+
+           // You can specify a range of Minecraft versions like so:
+           minecraftVersionRange {
+               start.set("1.19.4")
+               end.set("1.20.2") // Set to "latest" to use the latest minecraft version
+           }
+
+           // Alternatively, you can specify a range of Minecraft versions as a list:
+           minecraftVersionList("26.1, 26.1.1, 26.1.2")
+
+           // Optionally set the announcement title used by the discord publisher
+           announcementTitle.set("Download from CurseForge")
+
+           // Optionally specify the java version that is required to run the mod
+           javaVersions.add(JavaVersion.VERSION_17)
+
+           // Optionally specify an environment that is required to run the mod
+           clientRequired.set(true)
+           serverRequired.set(true)
+
+           // When using the discord webhook you must also specify the project slug
+           // This is due to limitations in the CurseForge API.
+           projectSlug.set("test-mod")
+
+           // Add dependencies to your project
+           requires("project-slug-1", "another-project")
+           optional("project-slug")
+           incompatible("project-slug")
+           embeds("project-slug")
+
+           // Set a changelog using text, markdown, or html (defaults to markdown)
+           changelog.set("# Markdown changelog content")
+           changelogType.set("markdown")
+
+           // Set the display name of an additional file
+           additionalFile(jar) {
+               name.set("Fabric")
+           }
+
+           // Set the display name of an additional file from another project
+           additionalFile(project(":child")) {
+               name.set("Fabric")
+           }
+       }
+   }
+   ```
+  </Tab>
+</Tabs>

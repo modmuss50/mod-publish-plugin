@@ -1,64 +1,137 @@
+import { Tabs, Tab } from 'nextra/components'
+
 The mod publish plugin has a number of common options that are shared between all platforms.
 
-```groovy
-publishMods {
-    // Set the main file to be uploaded
-    file = jar.archiveFile
+<Tabs items={['Groovy', 'Kotlin']}>
+  <Tab>
+    ```groovy
+    publishMods {
+        // Set the main file to be uploaded
+        file = jar.archiveFile
 
-    // Or set the main file to be uploaded from another sub project
-    file project(":subproject")
+        // Or set the main file to be uploaded from another sub project
+        file project(":subproject")
 
-    // Markdown changelog
-    changelog = "Example changelog"
+        // Markdown changelog
+        changelog = "Example changelog"
 
-    // Defaults to the Gradle project version
-    version = "1.0.0"
+        // Defaults to the Gradle project version
+        version = "1.0.0"
 
-    // Specify the release type
-    type = STABLE
-    type = BETA
-    type = ALPHA
+        // Specify the release type
+        type = STABLE
+        type = BETA
+        type = ALPHA
 
-    // The display name/release title, this defaults to the Gradle project name + version
-    displayName = "My Mod"
+        // The display name/release title, this defaults to the Gradle project name + version
+        displayName = "My Mod"
 
-    // Set the display name to match the file name
-    displayName = file.map { it.asFile.name }
+        // Set the display name to match the file name
+        displayName = file.map { it.asFile.name }
 
-    // A list of mod loaders the release supports
-    modLoaders.add("fabric")
+        // A list of mod loaders the release supports
+        modLoaders.add("fabric")
 
-    // A ConfigurableFileCollection of addional files that are uploaded alongside the main file
-    additionalFiles.from(jar.archiveFile)
+        // A ConfigurableFileCollection of addional files that are uploaded alongside the main file
+        additionalFiles.from(jar.archiveFile)
 
-    // The max number of times to retry on server error, defaults to 3.
-    maxRetries = 5
+        // The max number of times to retry on server error, defaults to 3.
+        maxRetries = 5
 
-    // When dry run is enabled the release assets will be saved to the build directory for testing.
-    dryRun = true
-    // You can always enable it when one of your API keys is not present.
-    dryRun = providers.environmentVariable("API_KEY").getOrNull() == null
-}
-```
+        // When dry run is enabled the release assets will be saved to the build directory for testing.
+        dryRun = true
+        // You can always enable it when one of your API keys is not present.
+        dryRun = providers.environmentVariable("API_KEY").getOrNull() == null
+    }
+    ```
+  </Tab>
+  <Tab>
+   ```kotlin
+   publishMods {
+       // Set the main file to be uploaded
+       file.set(jar.archiveFile)
+
+       // Or set the main file to be uploaded from another sub project
+       file project(":subproject")
+
+       // Markdown changelog
+       changelog.set("Example changelog")
+
+       // Defaults to the Gradle project version
+       version.set("1.0.0")
+
+       // Specify the release type
+       type.set(STABLE)
+       type.set(BETA)
+       type.set(ALPHA)
+
+       // The display name/release title, this defaults to the Gradle project name + version
+       displayName.set("My Mod")
+
+       // Set the display name to match the file name
+       displayName.set(file.map { it.asFile.name })
+
+       // A list of mod loaders the release supports
+       modLoaders.add("fabric")
+
+       // A ConfigurableFileCollection of additional files that are uploaded alongside the main file
+       additionalFiles.from(jar.archiveFile)
+
+       // The max number of times to retry on server error, defaults to 3.
+       maxRetries.set(5)
+
+       // When dry run is enabled the release assets will be saved to the build directory for testing.
+       dryRun.set(true)
+       // You can always enable it when one of your API keys is not present.
+       dryRun.set(providers.environmentVariable("API_KEY").getOrNull() == null)
+   }
+   ```
+  </Tab>
+</Tabs>
 
 Each platform inherits the above common options, and can all be individually configured. For example if you want to use a different file just for GitHub you could do the following:
 
-```groovy
-publishMods {
-    // Default file
-    file = jar.archiveFile
+<Tabs items={['Groovy', 'Kotlin']}>
+  <Tab>
+    ```groovy
+    publishMods {
+        // Default file
+        file = jar.archiveFile
 
-    github {
-        // The githubJar is only used by the GitHub publish task.
-        file = githubJar.archiveFile
-    }
+        github {
+            // The githubJar is only used by the GitHub publish task.
+            file = githubJar.archiveFile
+        }
 
-    curseforge {
-        // Default file used
-    }
+        curseforge {
+            // Default file used
+        }
 
-    modrinth {
-        // Default file used
+        modrinth {
+            // Default file used
+        }
     }
-}
-```
+    ```
+  </Tab>
+  <Tab>
+   ```kotlin
+   publishMods {
+       // Default file
+       file.set(jar.archiveFile)
+
+       github {
+           // The githubJar is only used by the GitHub publish task.
+           file.set(githubJar.archiveFile)
+       }
+
+       curseforge {
+           // Default file used
+       }
+
+       modrinth {
+           // Default file used
+       }
+   }
+   ```
+  </Tab>
+</Tabs>
