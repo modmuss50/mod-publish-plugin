@@ -3,18 +3,31 @@ package me.modmuss50.mpp.test.github
 import me.modmuss50.mpp.test.IntegrationTest
 import me.modmuss50.mpp.test.MockWebServer
 import org.gradle.testkit.runner.TaskOutcome
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
 class GithubTest : IntegrationTest {
+    private lateinit var server: MockWebServer<MockGithubApi>
+
+    @BeforeTest
+    fun setup() {
+        server = MockWebServer(MockGithubApi())
+    }
+
+    @AfterTest
+    fun cleanup() {
+        server.close()
+    }
+
     @Test
     fun uploadGithub() {
-        val server = MockWebServer(MockGithubApi())
-
-        val result = gradleTest()
-            .buildScript(
-                """
+        val result =
+            gradleTest()
+                .buildScript(
+                    """
                     publishMods {
                         file = tasks.jar.flatMap { it.archiveFile }
                         changelog = "Hello!"
@@ -28,21 +41,18 @@ class GithubTest : IntegrationTest {
                             tagName = "release/1.0.0"
                         }
                     }
-                """.trimIndent(),
-            )
-            .run("publishGithub")
-        server.close()
+                    """.trimIndent(),
+                ).run("publishGithub")
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishGithub")!!.outcome)
     }
 
     @Test
     fun noMainFile() {
-        val server = MockWebServer(MockGithubApi())
-
-        val result = gradleTest()
-            .buildScript(
-                """
+        val result =
+            gradleTest()
+                .buildScript(
+                    """
                     publishMods {
                         changelog = "Hello!"
                         version = "1.0.0"
@@ -56,21 +66,18 @@ class GithubTest : IntegrationTest {
                             additionalFiles.from(tasks.jar.flatMap { it.archiveFile })
                         }
                     }
-                """.trimIndent(),
-            )
-            .run("publishGithub")
-        server.close()
+                    """.trimIndent(),
+                ).run("publishGithub")
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishGithub")!!.outcome)
     }
 
     @Test
     fun uploadGithubExistingRelease() {
-        val server = MockWebServer(MockGithubApi())
-
-        val result = gradleTest()
-            .buildScript(
-                """
+        val result =
+            gradleTest()
+                .buildScript(
+                    """
                     publishMods {
                         file = tasks.jar.flatMap { it.archiveFile }
                         changelog = "Hello!"
@@ -89,21 +96,18 @@ class GithubTest : IntegrationTest {
                             parent(tasks.named("publishGithub"))
                         }
                     }
-                """.trimIndent(),
-            )
-            .run("publishGithubOther")
-        server.close()
+                    """.trimIndent(),
+                ).run("publishGithubOther")
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishGithubOther")!!.outcome)
     }
 
     @Test
     fun allowEmptyFiles() {
-        val server = MockWebServer(MockGithubApi())
-
-        val result = gradleTest()
-            .buildScript(
-                """
+        val result =
+            gradleTest()
+                .buildScript(
+                    """
                     publishMods {
                         changelog = "Hello!"
                         version = "1.0.0"
@@ -117,11 +121,10 @@ class GithubTest : IntegrationTest {
                             allowEmptyFiles = true
                         }
                     }
-                """.trimIndent(),
-            )
-            .subProject(
-                "child",
-                """
+                    """.trimIndent(),
+                ).subProject(
+                    "child",
+                    """
                     publishMods {
                         github {
                             accessToken = "123"
@@ -130,10 +133,8 @@ class GithubTest : IntegrationTest {
                             file = tasks.jar.flatMap { it.archiveFile }
                         }
                     }
-                """.trimIndent(),
-            )
-            .run("publishMods")
-        server.close()
+                    """.trimIndent(),
+                ).run("publishMods")
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishGithub")!!.outcome)
         assertEquals(TaskOutcome.SUCCESS, result.task(":child:publishGithub")!!.outcome)
@@ -141,11 +142,10 @@ class GithubTest : IntegrationTest {
 
     @Test
     fun allowEmptyFilesDryRun() {
-        val server = MockWebServer(MockGithubApi())
-
-        val result = gradleTest()
-            .buildScript(
-                """
+        val result =
+            gradleTest()
+                .buildScript(
+                    """
                     publishMods {
                         changelog = "Hello!"
                         version = "1.0.0"
@@ -160,21 +160,18 @@ class GithubTest : IntegrationTest {
                             allowEmptyFiles = true
                         }
                     }
-                """.trimIndent(),
-            )
-            .run("publishGithub")
-        server.close()
+                    """.trimIndent(),
+                ).run("publishGithub")
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishGithub")!!.outcome)
     }
 
     @Test
     fun failOnDuplicateNames() {
-        val server = MockWebServer(MockGithubApi())
-
-        val result = gradleTest()
-            .buildScript(
-                """
+        val result =
+            gradleTest()
+                .buildScript(
+                    """
                     publishMods {
                         file = tasks.jar.flatMap { it.archiveFile }
                         changelog = "Hello!"
@@ -189,10 +186,8 @@ class GithubTest : IntegrationTest {
                             additionalFiles.from(tasks.jar.flatMap { it.archiveFile })
                         }
                     }
-                """.trimIndent(),
-            )
-            .run("publishGithub")
-        server.close()
+                    """.trimIndent(),
+                ).run("publishGithub")
 
         assertEquals(TaskOutcome.FAILED, result.task(":publishGithub")!!.outcome)
         assertContains(result.output, "Github file names must be unique within a release, found duplicates: mpp-example.jar")
