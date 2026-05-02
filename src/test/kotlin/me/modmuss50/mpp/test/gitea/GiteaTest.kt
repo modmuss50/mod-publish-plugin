@@ -3,19 +3,32 @@ package me.modmuss50.mpp.test.gitea
 import me.modmuss50.mpp.test.IntegrationTest
 import me.modmuss50.mpp.test.MockWebServer
 import org.gradle.testkit.runner.TaskOutcome
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 class GiteaTest : IntegrationTest {
+    private lateinit var server: MockWebServer<MockGiteaApi>
+
+    @BeforeTest
+    fun setup() {
+        server = MockWebServer(MockGiteaApi())
+    }
+
+    @AfterTest
+    fun cleanup() {
+        server.close()
+    }
+
     @Test
     fun uploadGitea() {
-        val server = MockWebServer(MockGiteaApi())
-
-        val result = gradleTest()
-            .buildScript(
-                """
+        val result =
+            gradleTest()
+                .buildScript(
+                    """
                     publishMods {
                         file = tasks.jar.flatMap { it.archiveFile }
                         changelog = "Hello!"
@@ -29,21 +42,18 @@ class GiteaTest : IntegrationTest {
                             tagName = "release/1.0.0"
                         }
                     }
-                """.trimIndent(),
-            )
-            .run("publishGitea")
-        server.close()
+                    """.trimIndent(),
+                ).run("publishGitea")
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishGitea")!!.outcome)
     }
 
     @Test
     fun uploadForgejo() {
-        val server = MockWebServer(MockGiteaApi())
-
-        val result = gradleTest()
-            .buildScript(
-                """
+        val result =
+            gradleTest()
+                .buildScript(
+                    """
                     publishMods {
                         file = tasks.jar.flatMap { it.archiveFile }
                         changelog = "Hello!"
@@ -57,22 +67,19 @@ class GiteaTest : IntegrationTest {
                             tagName = "release/1.0.0"
                         }
                     }
-                """.trimIndent(),
-            )
-            .run("publishForgejo")
-        server.close()
+                    """.trimIndent(),
+                ).run("publishForgejo")
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishForgejo")!!.outcome)
     }
 
     @Test
     fun uploadCodeberg() {
-        val server = MockWebServer(MockGiteaApi())
-
         // host(...) call is not needed in production repos since the apiEndpoint is static
-        val result = gradleTest()
-            .buildScript(
-                """
+        val result =
+            gradleTest()
+                .buildScript(
+                    """
                     publishMods {
                         file = tasks.jar.flatMap { it.archiveFile }
                         changelog = "Hello!"
@@ -86,21 +93,18 @@ class GiteaTest : IntegrationTest {
                             tagName = "release/1.0.0"
                         }
                     }
-                """.trimIndent(),
-            )
-            .run("publishCodeberg")
-        server.close()
+                    """.trimIndent(),
+                ).run("publishCodeberg")
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishCodeberg")!!.outcome)
     }
 
     @Test
     fun noMainFile() {
-        val server = MockWebServer(MockGiteaApi())
-
-        val result = gradleTest()
-            .buildScript(
-                """
+        val result =
+            gradleTest()
+                .buildScript(
+                    """
                     publishMods {
                         changelog = "Hello!"
                         version = "1.0.0"
@@ -114,21 +118,18 @@ class GiteaTest : IntegrationTest {
                             additionalFiles.from(tasks.jar.flatMap { it.archiveFile })
                         }
                     }
-                """.trimIndent(),
-            )
-            .run("publishGitea")
-        server.close()
+                    """.trimIndent(),
+                ).run("publishGitea")
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishGitea")!!.outcome)
     }
 
     @Test
     fun uploadGiteaExistingRelease() {
-        val server = MockWebServer(MockGiteaApi())
-
-        val result = gradleTest()
-            .buildScript(
-                """
+        val result =
+            gradleTest()
+                .buildScript(
+                    """
                     publishMods {
                         file = tasks.jar.flatMap { it.archiveFile }
                         changelog = "Hello!"
@@ -146,21 +147,18 @@ class GiteaTest : IntegrationTest {
                             parent(tasks.named("publishGitea"))
                         }
                     }
-                """.trimIndent(),
-            )
-            .run("publishGiteaOther")
-        server.close()
+                    """.trimIndent(),
+                ).run("publishGiteaOther")
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishGiteaOther")!!.outcome)
     }
 
     @Test
     fun allowEmptyFiles() {
-        val server = MockWebServer(MockGiteaApi())
-
-        val result = gradleTest()
-            .buildScript(
-                """
+        val result =
+            gradleTest()
+                .buildScript(
+                    """
                     publishMods {
                         changelog = "Hello!"
                         version = "1.0.0"
@@ -174,11 +172,10 @@ class GiteaTest : IntegrationTest {
                             allowEmptyFiles = true
                         }
                     }
-                """.trimIndent(),
-            )
-            .subProject(
-                "child",
-                """
+                    """.trimIndent(),
+                ).subProject(
+                    "child",
+                    """
                     publishMods {
                         gitea {
                             accessToken = "123"
@@ -186,10 +183,8 @@ class GiteaTest : IntegrationTest {
                             file = tasks.jar.flatMap { it.archiveFile }
                         }
                     }
-                """.trimIndent(),
-            )
-            .run("publishMods")
-        server.close()
+                    """.trimIndent(),
+                ).run("publishMods")
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishGitea")!!.outcome)
         assertEquals(TaskOutcome.SUCCESS, result.task(":child:publishGitea")!!.outcome)
@@ -197,11 +192,10 @@ class GiteaTest : IntegrationTest {
 
     @Test
     fun allowEmptyFilesDryRun() {
-        val server = MockWebServer(MockGiteaApi())
-
-        val result = gradleTest()
-            .buildScript(
-                """
+        val result =
+            gradleTest()
+                .buildScript(
+                    """
                     publishMods {
                         changelog = "Hello!"
                         version = "1.0.0"
@@ -216,21 +210,18 @@ class GiteaTest : IntegrationTest {
                             allowEmptyFiles = true
                         }
                     }
-                """.trimIndent(),
-            )
-            .run("publishGitea")
-        server.close()
+                    """.trimIndent(),
+                ).run("publishGitea")
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishGitea")!!.outcome)
     }
 
     @Test
     fun failOnDuplicateNames() {
-        val server = MockWebServer(MockGiteaApi())
-
-        val result = gradleTest()
-            .buildScript(
-                """
+        val result =
+            gradleTest()
+                .buildScript(
+                    """
                     publishMods {
                         file = tasks.jar.flatMap { it.archiveFile }
                         changelog = "Hello!"
@@ -245,10 +236,8 @@ class GiteaTest : IntegrationTest {
                             additionalFiles.from(tasks.jar.flatMap { it.archiveFile })
                         }
                     }
-                """.trimIndent(),
-            )
-            .run("publishGitea")
-        server.close()
+                    """.trimIndent(),
+                ).run("publishGitea")
 
         assertEquals(TaskOutcome.FAILED, result.task(":publishGitea")!!.outcome)
         assertContains(result.output, "Gitea file names must be unique within a release, found duplicates: mpp-example.jar")
@@ -256,11 +245,10 @@ class GiteaTest : IntegrationTest {
 
     @Test
     fun failOnParentingGiteaWithForgejo() {
-        val server = MockWebServer(MockGiteaApi())
-
-        val result = gradleTest()
-            .buildScript(
-                """
+        val result =
+            gradleTest()
+                .buildScript(
+                    """
                     publishMods {
                         file = tasks.jar.flatMap { it.archiveFile }
                         changelog = "Hello!"
@@ -279,10 +267,8 @@ class GiteaTest : IntegrationTest {
                             parent(tasks.named("publishGitea"))
                         }
                     }
-                """.trimIndent(),
-            )
-            .run("publishGitea")
-        server.close()
+                    """.trimIndent(),
+                ).run("publishGitea")
 
         assertNull(result.task(":publishGitea"))
         assertContains(result.output, "Unable to make a Gitea instance a parent of a Forgejo instance")
