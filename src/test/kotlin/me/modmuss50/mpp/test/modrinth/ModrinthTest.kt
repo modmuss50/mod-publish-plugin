@@ -3,86 +3,96 @@ package me.modmuss50.mpp.test.modrinth
 import me.modmuss50.mpp.test.IntegrationTest
 import me.modmuss50.mpp.test.MockWebServer
 import org.gradle.testkit.runner.TaskOutcome
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 
 class ModrinthTest : IntegrationTest {
+    private lateinit var modrinthApi: MockModrinthApi
+    private lateinit var server: MockWebServer<MockModrinthApi>
+
+    @BeforeTest
+    fun setup() {
+        modrinthApi = MockModrinthApi()
+        server = MockWebServer(modrinthApi)
+    }
+
+    @AfterTest
+    fun cleanup() {
+        server.close()
+    }
+
     @Test
     fun uploadModrinth() {
-        val server = MockWebServer(MockModrinthApi())
-
-        val result = gradleTest()
-            .buildScript(
-                """
-            publishMods {
-                file = tasks.jar.flatMap { it.archiveFile }
-                changelog = "Hello!"
-                version = "1.0.0"
-                type = STABLE
-                modLoaders.add("fabric")
-            
-                modrinth {
-                    accessToken = "123"
-                    projectId = "12345678"
-                    minecraftVersions.add("1.20.1")
+        val result =
+            gradleTest()
+                .buildScript(
+                    """
+                    publishMods {
+                        file = tasks.jar.flatMap { it.archiveFile }
+                        changelog = "Hello!"
+                        version = "1.0.0"
+                        type = STABLE
+                        modLoaders.add("fabric")
                     
-                    requires {
-                        id = "P7dR8mSH"
+                        modrinth {
+                            accessToken = "123"
+                            projectId = "12345678"
+                            minecraftVersions.add("1.20.1")
+                            
+                            requires {
+                                id = "P7dR8mSH"
+                            }
+                            
+                            apiEndpoint = "${server.endpoint}"
+                        }
                     }
-                    
-                    apiEndpoint = "${server.endpoint}"
-                }
-            }
-                """.trimIndent(),
-            )
-            .run("publishModrinth")
-        server.close()
+                    """.trimIndent(),
+                ).run("publishModrinth")
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinth")!!.outcome)
     }
 
     @Test
     fun uploadModrinthWithOptions() {
-        val server = MockWebServer(MockModrinthApi())
-
-        val result = gradleTest()
-            .buildScript(
-                """
-                version = "1.0.0"
-                publishMods {
-                    changelog = "Hello!"
-                    type = BETA
-                
-                    // Common options that can be re-used between diffrent modrinth tasks
-                    val modrinthOptions = modrinthOptions {
-                        accessToken = "123"
-                        minecraftVersions.add("1.20.1")
-                        apiEndpoint = "${server.endpoint}"
-                    }
-                
-                    modrinth("modrinthFabric") {
-                        from(modrinthOptions)
-                        file = tasks.jar.flatMap { it.archiveFile }
-                        projectId = "12345678"
-                        modLoaders.add("fabric")
-                        requires {
-                           id = "P7dR8mSH" // fabric-api
+        val result =
+            gradleTest()
+                .buildScript(
+                    """
+                    version = "1.0.0"
+                    publishMods {
+                        changelog = "Hello!"
+                        type = BETA
+                    
+                        // Common options that can be re-used between diffrent modrinth tasks
+                        val modrinthOptions = modrinthOptions {
+                            accessToken = "123"
+                            minecraftVersions.add("1.20.1")
+                            apiEndpoint = "${server.endpoint}"
+                        }
+                    
+                        modrinth("modrinthFabric") {
+                            from(modrinthOptions)
+                            file = tasks.jar.flatMap { it.archiveFile }
+                            projectId = "12345678"
+                            modLoaders.add("fabric")
+                            requires {
+                               id = "P7dR8mSH" // fabric-api
+                            }
+                        }
+                        
+                        modrinth("modrinthForge") {
+                            from(modrinthOptions)
+                            file = tasks.jar.flatMap { it.archiveFile }
+                            projectId = "67896545"
+                            modLoaders.add("forge")
                         }
                     }
-                    
-                    modrinth("modrinthForge") {
-                        from(modrinthOptions)
-                        file = tasks.jar.flatMap { it.archiveFile }
-                        projectId = "67896545"
-                        modLoaders.add("forge")
-                    }
-                }
-                """.trimIndent(),
-            )
-            .run("publishMods")
-        server.close()
+                    """.trimIndent(),
+                ).run("publishMods")
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinthFabric")!!.outcome)
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinthForge")!!.outcome)
@@ -90,89 +100,83 @@ class ModrinthTest : IntegrationTest {
 
     @Test
     fun dryRunModrinth() {
-        val result = gradleTest()
-            .buildScript(
-                """
-            publishMods {
-                file = tasks.jar.flatMap { it.archiveFile }
-                changelog = "Hello!"
-                version = "1.0.0"
-                type = STABLE
-                modLoaders.add("fabric")
-                dryRun = true
+        val result =
+            gradleTest()
+                .buildScript(
+                    """
+                    publishMods {
+                        file = tasks.jar.flatMap { it.archiveFile }
+                        changelog = "Hello!"
+                        version = "1.0.0"
+                        type = STABLE
+                        modLoaders.add("fabric")
+                        dryRun = true
 
-                modrinth {
-                    accessToken = providers.environmentVariable("TEST_TOKEN_THAT_DOES_NOT_EXISTS")
-                    projectId = "12345678"
-                    minecraftVersions.add("1.20.1")
-                    requires {
-                           id = "P7dR8mSH" // fabric-api
+                        modrinth {
+                            accessToken = providers.environmentVariable("TEST_TOKEN_THAT_DOES_NOT_EXISTS")
+                            projectId = "12345678"
+                            minecraftVersions.add("1.20.1")
+                            requires {
+                                   id = "P7dR8mSH" // fabric-api
+                            }
+                        }
                     }
-                }
-            }
-                """.trimIndent(),
-            )
-            .run("publishModrinth")
+                    """.trimIndent(),
+                ).run("publishModrinth")
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinth")!!.outcome)
     }
 
     @Test
     fun uploadModrinthNoDeps() {
-        val server = MockWebServer(MockModrinthApi())
+        val result =
+            gradleTest()
+                .buildScript(
+                    """
+                    publishMods {
+                        file = tasks.jar.flatMap { it.archiveFile }
+                        changelog = "Hello!"
+                        version = "1.0.0"
+                        type = STABLE
+                        modLoaders.add("fabric")
+                    
+                        modrinth {
+                            accessToken = "123"
+                            projectId = "12345678"
+                            minecraftVersions.add("1.20.1")
 
-        val result = gradleTest()
-            .buildScript(
-                """
-            publishMods {
-                file = tasks.jar.flatMap { it.archiveFile }
-                changelog = "Hello!"
-                version = "1.0.0"
-                type = STABLE
-                modLoaders.add("fabric")
-            
-                modrinth {
-                    accessToken = "123"
-                    projectId = "12345678"
-                    minecraftVersions.add("1.20.1")
-
-                    apiEndpoint = "${server.endpoint}"
-                }
-            }
-                """.trimIndent(),
-            )
-            .run("publishModrinth")
-        server.close()
+                            apiEndpoint = "${server.endpoint}"
+                        }
+                    }
+                    """.trimIndent(),
+                ).run("publishModrinth")
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinth")!!.outcome)
     }
 
     @Test
     fun invalidId() {
-        val server = MockWebServer(MockModrinthApi())
+        val result =
+            gradleTest()
+                .buildScript(
+                    """
+                    publishMods {
+                        file = tasks.jar.flatMap { it.archiveFile }
+                        changelog = "Hello!"
+                        version = "1.0.0"
+                        type = STABLE
+                        modLoaders.add("fabric")
+                    
+                        modrinth {
+                            accessToken = "123"
+                            projectId = "invalid-id"
+                            minecraftVersions.add("1.20.1")
 
-        val result = gradleTest()
-            .buildScript(
-                """
-            publishMods {
-                file = tasks.jar.flatMap { it.archiveFile }
-                changelog = "Hello!"
-                version = "1.0.0"
-                type = STABLE
-                modLoaders.add("fabric")
-            
-                modrinth {
-                    accessToken = "123"
-                    projectId = "invalid-id"
-                    minecraftVersions.add("1.20.1")
-
-                    apiEndpoint = "${server.endpoint}"
-                }
-            }
-                """.trimIndent(),
-            )
-            .run("publishModrinth")
-        server.close()
+                            apiEndpoint = "${server.endpoint}"
+                        }
+                    }
+                    """.trimIndent(),
+                ).run("publishModrinth")
 
         assertEquals(TaskOutcome.FAILED, result.task(":publishModrinth")!!.outcome)
         result.output.contains("invalid-id is not a valid Modrinth ID")
@@ -180,73 +184,66 @@ class ModrinthTest : IntegrationTest {
 
     @Test
     fun uploadModrinthSlugLookup() {
-        val server = MockWebServer(MockModrinthApi())
-
-        val result = gradleTest()
-            .buildScript(
-                """
-            publishMods {
-                file = tasks.jar.flatMap { it.archiveFile }
-                changelog = "Hello!"
-                version = "1.0.0"
-                type = STABLE
-                modLoaders.add("fabric")
-            
-                modrinth {
-                    accessToken = "123"
-                    projectId = "12345678"
-                    minecraftVersions.add("1.20.1")
+        val result =
+            gradleTest()
+                .buildScript(
+                    """
+                    publishMods {
+                        file = tasks.jar.flatMap { it.archiveFile }
+                        changelog = "Hello!"
+                        version = "1.0.0"
+                        type = STABLE
+                        modLoaders.add("fabric")
                     
-                    requires {
-                        slug = "fabric-api"
+                        modrinth {
+                            accessToken = "123"
+                            projectId = "12345678"
+                            minecraftVersions.add("1.20.1")
+                            
+                            requires {
+                                slug = "fabric-api"
+                            }
+                            
+                            apiEndpoint = "${server.endpoint}"
+                        }
                     }
-                    
-                    apiEndpoint = "${server.endpoint}"
-                }
-            }
-                """.trimIndent(),
-            )
-            .run("publishModrinth")
-        server.close()
+                    """.trimIndent(),
+                ).run("publishModrinth")
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinth")!!.outcome)
     }
 
     @Test
     fun uploadModrinthMinecraftVersionRange() {
-        val mockModrinthApi = MockModrinthApi()
-        val server = MockWebServer(mockModrinthApi)
+        val result =
+            gradleTest()
+                .buildScript(
+                    """
+                    publishMods {
+                        file = tasks.jar.flatMap { it.archiveFile }
+                        changelog = "Hello!"
+                        version = "1.0.0"
+                        type = STABLE
+                        modLoaders.add("fabric")
+                    
+                        modrinth {
+                            accessToken = "123"
+                            projectId = "12345678"
 
-        val result = gradleTest()
-            .buildScript(
-                """
-            publishMods {
-                file = tasks.jar.flatMap { it.archiveFile }
-                changelog = "Hello!"
-                version = "1.0.0"
-                type = STABLE
-                modLoaders.add("fabric")
-            
-                modrinth {
-                    accessToken = "123"
-                    projectId = "12345678"
+                            minecraftVersionRange {
+                                start = "1.13.1" // test WALL_OF_SHAME
+                                end = "1.20.2"
+                                includeSnapshots = true
+                            }
 
-                    minecraftVersionRange {
-                        start = "1.13.1" // test WALL_OF_SHAME
-                        end = "1.20.2"
-                        includeSnapshots = true
+                            apiEndpoint = "${server.endpoint}"
+                        }
                     }
-
-                    apiEndpoint = "${server.endpoint}"
-                }
-            }
-                """.trimIndent(),
-            )
-            .run("publishModrinth")
-        server.close()
+                    """.trimIndent(),
+                ).run("publishModrinth")
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinth")!!.outcome)
-        val gameVersions = mockModrinthApi.lastCreateVersion!!.gameVersions
+        val gameVersions = modrinthApi.lastCreateVersion!!.gameVersions
         assertContains(gameVersions, "1.13.1")
         assertContains(gameVersions, "1.14.2-pre4")
         assertContains(gameVersions, "1.20-pre1")
@@ -256,35 +253,31 @@ class ModrinthTest : IntegrationTest {
 
     @Test
     fun uploadModrinthMinecraftVersionList() {
-        val mockModrinthApi = MockModrinthApi()
-        val server = MockWebServer(mockModrinthApi)
+        val result =
+            gradleTest()
+                .buildScript(
+                    """
+                    publishMods {
+                        file = tasks.jar.flatMap { it.archiveFile }
+                        changelog = "Hello!"
+                        version = "1.0.0"
+                        type = STABLE
+                        modLoaders.add("fabric")
+                    
+                        modrinth {
+                            accessToken = "123"
+                            projectId = "12345678"
 
-        val result = gradleTest()
-            .buildScript(
-                """
-            publishMods {
-                file = tasks.jar.flatMap { it.archiveFile }
-                changelog = "Hello!"
-                version = "1.0.0"
-                type = STABLE
-                modLoaders.add("fabric")
-            
-                modrinth {
-                    accessToken = "123"
-                    projectId = "12345678"
+                            minecraftVersionList("26.1, 26.1.1, 26.1.2, 26.2-snapshot-1")
 
-                    minecraftVersionList("26.1, 26.1.1, 26.1.2, 26.2-snapshot-1")
-
-                    apiEndpoint = "${server.endpoint}"
-                }
-            }
-                """.trimIndent(),
-            )
-            .run("publishModrinth")
-        server.close()
+                            apiEndpoint = "${server.endpoint}"
+                        }
+                    }
+                    """.trimIndent(),
+                ).run("publishModrinth")
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinth")!!.outcome)
-        val gameVersions = mockModrinthApi.lastCreateVersion!!.gameVersions
+        val gameVersions = modrinthApi.lastCreateVersion!!.gameVersions
         assertContains(gameVersions, "26.1")
         assertContains(gameVersions, "26.1.1")
         assertContains(gameVersions, "26.1.2")
@@ -293,38 +286,34 @@ class ModrinthTest : IntegrationTest {
 
     @Test
     fun uploadModrinthMinecraftVersionRangeNoSnapshots() {
-        val mockModrinthApi = MockModrinthApi()
-        val server = MockWebServer(mockModrinthApi)
+        val result =
+            gradleTest()
+                .buildScript(
+                    """
+                    publishMods {
+                        file = tasks.jar.flatMap { it.archiveFile }
+                        changelog = "Hello!"
+                        version = "1.0.0"
+                        type = STABLE
+                        modLoaders.add("fabric")
+                    
+                        modrinth {
+                            accessToken = "123"
+                            projectId = "12345678"
 
-        val result = gradleTest()
-            .buildScript(
-                """
-            publishMods {
-                file = tasks.jar.flatMap { it.archiveFile }
-                changelog = "Hello!"
-                version = "1.0.0"
-                type = STABLE
-                modLoaders.add("fabric")
-            
-                modrinth {
-                    accessToken = "123"
-                    projectId = "12345678"
+                            minecraftVersionRange {
+                                start = "1.19.4"
+                                end = "1.20.2"
+                            }
 
-                    minecraftVersionRange {
-                        start = "1.19.4"
-                        end = "1.20.2"
+                            apiEndpoint = "${server.endpoint}"
+                        }
                     }
-
-                    apiEndpoint = "${server.endpoint}"
-                }
-            }
-                """.trimIndent(),
-            )
-            .run("publishModrinth")
-        server.close()
+                    """.trimIndent(),
+                ).run("publishModrinth")
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinth")!!.outcome)
-        val gameVersions = mockModrinthApi.lastCreateVersion!!.gameVersions
+        val gameVersions = modrinthApi.lastCreateVersion!!.gameVersions
         assertContains(gameVersions, "1.19.4")
         assertFalse(gameVersions.contains("1.20-pre1"))
         assertContains(gameVersions, "1.20.1")
@@ -333,105 +322,98 @@ class ModrinthTest : IntegrationTest {
 
     @Test
     fun updateProjectDescription() {
-        val api = MockModrinthApi()
-        val server = MockWebServer(api)
-
-        val result = gradleTest()
-            .buildScript(
-                """
-            publishMods {
-                file = tasks.jar.flatMap { it.archiveFile }
-                changelog = "Hello!"
-                version = "1.0.0"
-                type = STABLE
-                modLoaders.add("fabric")
-            
-                modrinth {
-                    accessToken = "123"
-                    projectId = "12345678"
-                    minecraftVersions.add("1.20.1")
-                    projectDescription = providers.fileContents(layout.projectDirectory.file("readme.md")).asText
+        val result =
+            gradleTest()
+                .buildScript(
+                    """
+                    publishMods {
+                        file = tasks.jar.flatMap { it.archiveFile }
+                        changelog = "Hello!"
+                        version = "1.0.0"
+                        type = STABLE
+                        modLoaders.add("fabric")
                     
-                    apiEndpoint = "${server.endpoint}"
-                }
-            }
-                """.trimIndent(),
-            )
-            .file("readme.md", "Hello World")
-            .run("publishModrinth")
-        server.close()
+                        modrinth {
+                            accessToken = "123"
+                            projectId = "12345678"
+                            minecraftVersions.add("1.20.1")
+                            projectDescription = providers.fileContents(layout.projectDirectory.file("readme.md")).asText
+                            
+                            apiEndpoint = "${server.endpoint}"
+                        }
+                    }
+                    """.trimIndent(),
+                ).file("readme.md", "Hello World")
+                .run("publishModrinth")
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinth")!!.outcome)
-        assertEquals("Hello World", api.projectBody)
+        assertEquals("Hello World", modrinthApi.projectBody)
     }
 
     @Test
     fun invalidDependency() {
-        val result = gradleTest()
-            .buildScript(
-                """
-            publishMods {
-                file = tasks.jar.flatMap { it.archiveFile }
-                changelog = "Hello!"
-                version = "1.0.0"
-                type = STABLE
-                modLoaders.add("fabric")
-                dryRun = true
+        val result =
+            gradleTest()
+                .buildScript(
+                    """
+                    publishMods {
+                        file = tasks.jar.flatMap { it.archiveFile }
+                        changelog = "Hello!"
+                        version = "1.0.0"
+                        type = STABLE
+                        modLoaders.add("fabric")
+                        dryRun = true
 
-                modrinth {
-                    accessToken = providers.environmentVariable("TEST_TOKEN_THAT_DOES_NOT_EXISTS")
-                    projectId = "12345678"
-                    minecraftVersions.add("1.20.1")
-                    requires {
-                        // neither id nor slug set
+                        modrinth {
+                            accessToken = providers.environmentVariable("TEST_TOKEN_THAT_DOES_NOT_EXISTS")
+                            projectId = "12345678"
+                            minecraftVersions.add("1.20.1")
+                            requires {
+                                // neither id nor slug set
+                            }
+                        }
                     }
-                }
-            }
-                """.trimIndent(),
-            )
-            .run("publishModrinth")
+                    """.trimIndent(),
+                ).run("publishModrinth")
 
         assertContains(result.output, "Modrinth dependency must have either an id or slug specified")
     }
 
     @Test
     fun uploadModrinthSlugDependency() {
-        val mockModrinthApi = MockModrinthApi()
-        val server = MockWebServer(mockModrinthApi)
-
-        val result = gradleTest()
-            .buildScript(
-                """
-            publishMods {
-                file = tasks.jar.flatMap { it.archiveFile }
-                changelog = "Hello!"
-                version = "1.0.0"
-                type = STABLE
-                
-                modrinth {
-                    accessToken = "123"
-                    minecraftVersions.add("1.20.1")
-                    apiEndpoint = "${server.endpoint}"
-                    projectId = "67896545"
-                    modLoaders.add("fabric")
-                    requires {
-                        id = "P7dR8mSH"
-                        version = "P7uGFii0"
+        val result =
+            gradleTest()
+                .buildScript(
+                    """
+                    publishMods {
+                        file = tasks.jar.flatMap { it.archiveFile }
+                        changelog = "Hello!"
+                        version = "1.0.0"
+                        type = STABLE
+                        
+                        modrinth {
+                            accessToken = "123"
+                            minecraftVersions.add("1.20.1")
+                            apiEndpoint = "${server.endpoint}"
+                            projectId = "67896545"
+                            modLoaders.add("fabric")
+                            requires {
+                                id = "P7dR8mSH"
+                                version = "P7uGFii0"
+                            }
+                            requires {
+                                slug = "fabric-api"
+                                version = "0.92.1+1.20.1"
+                            }
+                        }
                     }
-                    requires {
-                        slug = "fabric-api"
-                        version = "0.92.1+1.20.1"
-                    }
-                }
-            }
-                """.trimIndent(),
-            )
-            .run("publishMods")
+                    """.trimIndent(),
+                ).run("publishMods")
         server.close()
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinth")!!.outcome)
 
-        var dependencies = mockModrinthApi.lastCreateVersion!!.dependencies.map { it.versionId }
+        var dependencies = modrinthApi.lastCreateVersion!!.dependencies.map { it.versionId }
         assertEquals(2, dependencies.size)
         assertContains(dependencies, "P7uGFii0")
         assertContains(dependencies, "ba99D9Qf")
