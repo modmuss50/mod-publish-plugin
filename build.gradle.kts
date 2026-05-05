@@ -20,6 +20,9 @@ repositories {
 
 dependencies {
     implementation(gradleApi())
+    implementation("io.ktor:ktor-client-core:3.4.3")
+    implementation("io.ktor:ktor-client-cio:3.4.3")
+    implementation("io.ktor:ktor-client-content-negotiation:3.4.3")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
 
     testImplementation(kotlin("test"))
@@ -37,12 +40,13 @@ kotlin {
 
 // Workaround https://github.com/gradle/gradle/issues/25898
 tasks.withType(Test::class.java).configureEach {
-    jvmArgs = listOf(
-        "--add-opens=java.base/java.lang=ALL-UNNAMED",
-        "--add-opens=java.base/java.util=ALL-UNNAMED",
-        "--add-opens=java.base/java.lang.invoke=ALL-UNNAMED",
-        "--add-opens=java.base/java.net=ALL-UNNAMED"
-    )
+    jvmArgs =
+        listOf(
+            "--add-opens=java.base/java.lang=ALL-UNNAMED",
+            "--add-opens=java.base/java.util=ALL-UNNAMED",
+            "--add-opens=java.base/java.lang.invoke=ALL-UNNAMED",
+            "--add-opens=java.base/java.net=ALL-UNNAMED",
+        )
 }
 
 tasks.withType(JavaCompile::class.java).all {
@@ -81,7 +85,7 @@ gradlePlugin {
         displayName = "Mod Publish Plugin"
         description = project.description
         version = project.version
-        tags = listOf("minecraft", )
+        tags = listOf("minecraft")
         compatibility {
             features {
                 configurationCache = true
@@ -93,7 +97,7 @@ gradlePlugin {
 fun replaceVersion(path: String) {
     var content = project.file(path).readText()
 
-    content = content.replace("(version \").*(\")".toRegex(), "version \"${project.version}\"")// project.version.toString())
+    content = content.replace("(version \").*(\")".toRegex(), "version \"${project.version}\"") // project.version.toString())
 
     project.file(path).writeText(content)
 }
