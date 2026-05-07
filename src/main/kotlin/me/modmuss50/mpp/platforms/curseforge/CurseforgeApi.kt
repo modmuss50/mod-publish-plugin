@@ -3,7 +3,6 @@ package me.modmuss50.mpp.platforms.curseforge
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import me.modmuss50.mpp.PlatformDependency
 import me.modmuss50.mpp.networking.DefaultHttpImpl
@@ -189,20 +188,16 @@ class CurseforgeApi(
     ): UploadFileResponse {
         val metadataJson = httpUtils.json.encodeToString(uploadMetadata)
 
-        val bodyBuilder =
+        val body =
             MultipartBodyBuilder()
                 .addFormDataPart("file", path.name, path, "application/java-archive")
                 .addFormDataPart("metadata", metadataJson)
-
-        val multipartHeaders =
-            headers.toMutableMap().apply {
-                this["Content-Type"] = bodyBuilder.getContentType()
-            }
+                .build()
 
         return httpUtils.post(
             url = "$baseUrl/api/projects/$projectId/upload-file",
-            body = bodyBuilder.build(),
-            headers = multipartHeaders,
+            body = body,
+            headers = headers,
         )
     }
 }

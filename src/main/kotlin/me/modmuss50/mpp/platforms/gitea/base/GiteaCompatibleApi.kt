@@ -2,7 +2,6 @@ package me.modmuss50.mpp.platforms.gitea.base
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import me.modmuss50.mpp.networking.DefaultHttpImpl
 import me.modmuss50.mpp.networking.HttpConfig
@@ -87,14 +86,21 @@ class GiteaCompatibleApi(
         release: Release,
         file: File,
     ) {
-        val bodyBuilder =
+        val body =
             MultipartBodyBuilder()
-                .addFormDataPart("attachment", file.name, file, "application/java-archive")
+                .addFormDataPart(
+                    "attachment",
+                    file.name,
+                    file,
+                    "application/java-archive",
+                )
+                .build()
 
-        val multipartHeaders = headers.toMutableMap()
-        multipartHeaders["Content-Type"] = bodyBuilder.getContentType()
-
-        return httpUtils.post(release.uploadUrl, bodyBuilder.build(), multipartHeaders)
+        return httpUtils.post(
+            url = release.uploadUrl,
+            body = body,
+            headers = headers,
+        )
     }
 
     // https://docs.gitea.com/api/1.24/#tag/repository/operation/repoEditRelease

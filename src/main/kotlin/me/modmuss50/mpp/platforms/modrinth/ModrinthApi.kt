@@ -2,7 +2,6 @@ package me.modmuss50.mpp.platforms.modrinth
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import me.modmuss50.mpp.PlatformDependency
 import me.modmuss50.mpp.ReleaseType
@@ -13,7 +12,6 @@ import me.modmuss50.mpp.networking.MultipartBodyBuilder
 import java.net.http.HttpRequest
 import java.nio.file.Path
 import java.time.Duration
-import kotlin.io.path.name
 
 // https://docs.modrinth.com/api-spec/#tag/versions/operation/createVersion
 class ModrinthApi(
@@ -173,18 +171,26 @@ class ModrinthApi(
     ): CreateVersionResponse {
         val metadataJson = Json.encodeToString(metadata)
 
-        val bodyBuilder =
+        val body =
             MultipartBodyBuilder()
                 .addFormDataPart("data", metadataJson)
+                .apply {
+                    for ((name, path) in files) {
+                        addFormDataPart(
+                            name = name,
+                            filename = path.fileName.toString(),
+                            path = path,
+                            mediaType = "application/java-archive",
+                        )
+                    }
+                }
+                .build()
 
-        for ((name, path) in files) {
-            bodyBuilder.addFormDataPart(name, path.name, path, "application/java-archive")
-        }
-
-        val multipartHeaders = headers.toMutableMap()
-        multipartHeaders["Content-Type"] = bodyBuilder.getContentType()
-
-        return httpUtils.post("$baseUrl/version", bodyBuilder.build(), multipartHeaders)
+        return httpUtils.post(
+            url = "$baseUrl/version",
+            body = body,
+            headers = headers,
+        )
     }
 
     fun checkProject(projectSlug: String): ProjectCheckResponse = httpUtils.get("$baseUrl/project/$projectSlug/check", headers)

@@ -3,7 +3,6 @@ package me.modmuss50.mpp.platforms.gitlab
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import me.modmuss50.mpp.networking.DefaultHttpImpl
 import me.modmuss50.mpp.networking.HttpConfig
@@ -120,10 +119,14 @@ class GitlabApi(
         file: File,
     ): AssetLink {
         val url = "$apiEndpoint/projects/$projectId/uploads"
-        val builder = MultipartBodyBuilder().addFormDataPart("file", file.name, file)
-        val bodyPublisher = builder.build()
-        val headersWithContentType = headers + ("Content-Type" to builder.getContentType())
-        val response: UploadResponse = httpUtils.post(url, bodyPublisher, headersWithContentType)
+        val body = MultipartBodyBuilder().addFormDataPart("file", file.name, file).build()
+
+        val response: UploadResponse =
+            httpUtils.post(
+                url = url,
+                body = body,
+                headers = headers,
+            )
 
         return AssetLink(
             name = file.name,

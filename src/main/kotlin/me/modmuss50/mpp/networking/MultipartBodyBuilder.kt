@@ -1,10 +1,10 @@
 package me.modmuss50.mpp.networking
 
+import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
 import io.ktor.http.ContentType
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
-import io.ktor.http.content.PartData
 import java.io.File
 import java.nio.file.Path
 
@@ -15,7 +15,7 @@ class MultipartBodyBuilder {
         name: String,
         value: String,
     ): MultipartBodyBuilder {
-        parts.add(Part.Text(name, value))
+        parts += Part.Text(name, value)
         return this
     }
 
@@ -25,7 +25,7 @@ class MultipartBodyBuilder {
         file: File,
         mediaType: String? = null,
     ): MultipartBodyBuilder {
-        parts.add(Part.File(name, filename, file.toPath(), mediaType))
+        parts += Part.File(name, filename, file.toPath(), mediaType)
         return this
     }
 
@@ -35,39 +35,43 @@ class MultipartBodyBuilder {
         path: Path,
         mediaType: String? = null,
     ): MultipartBodyBuilder {
-        parts.add(Part.File(name, filename, path, mediaType))
+        parts += Part.File(name, filename, path, mediaType)
         return this
     }
 
-    fun build(): List<PartData> =
-        parts.map { part ->
-            when (part) {
-                is Part.Text -> {
-                    formData {
-                        append(part.name, part.value)
-                    }.first()
-                }
+    fun build(): MultiPartFormDataContent =
+        MultiPartFormDataContent(
+            formData {
+                for (part in parts) {
+                    when (part) {
+                        is Part.Text -> {
+                            append(part.name, part.value)
+                        }
 
-                is Part.File -> {
-                    formData {
-                        append(
-                            key = part.name,
-                            value = part.path.toFile().readBytes(),
-                            headers =
-                                Headers.build {
-                                    append(HttpHeaders.ContentDisposition, "filename=\"${part.filename}\"")
-                                    append(
-                                        HttpHeaders.ContentType,
-                                        part.mediaType ?: ContentType.Application.OctetStream.toString(),
-                                    )
-                                },
-                        )
-                    }.first()
+                        is Part.File -> {
+                            append(
+                                key = part.name,
+                                value = part.path.toFile().readBytes(),
+                                headers =
+                                    Headers.build {
+                                        append(
+                                            HttpHeaders.ContentDisposition,
+                                            "filename=\"${part.filename}\"",
+                                        )
+                                        append(
+                                            HttpHeaders.ContentType,
+                                            part.mediaType
+                                                ?: ContentType.Application.OctetStream.toString(),
+                                        )
+                                    },
+                            )
+                        }
+                    }
                 }
-            }
-        }
+            },
+        )
 
-    sealed class Part {
+    private sealed class Part {
         data class Text(
             val name: String,
             val value: String,
