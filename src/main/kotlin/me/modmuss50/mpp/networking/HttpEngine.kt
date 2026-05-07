@@ -6,11 +6,21 @@ import io.ktor.client.request.request
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
+import kotlinx.coroutines.runBlocking
 
 class HttpEngine(
-    private val ctx: HttpContext,
+    val ctx: HttpContext,
 ) {
-    internal suspend inline fun <reified T> request(
+    inline fun <reified T> request(
+        url: String,
+        headers: Map<String, String> = emptyMap(),
+        noinline block: HttpRequestBuilder.() -> Unit = {},
+    ): T =
+        runBlocking {
+            asyncRequest<T>(url, headers, block)
+        }
+
+    suspend inline fun <reified T> asyncRequest(
         url: String,
         headers: Map<String, String> = emptyMap(),
         block: HttpRequestBuilder.() -> Unit = {},

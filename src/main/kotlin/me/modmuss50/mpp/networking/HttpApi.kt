@@ -10,7 +10,7 @@ class HttpApi(
 
     val json get() = ctx.json
 
-    internal suspend inline fun <reified T> get(
+    internal inline fun <reified T> get(
         url: String,
         headers: Map<String, String> = emptyMap(),
     ): T =
@@ -21,7 +21,7 @@ class HttpApi(
             method = HttpMethod.Get
         }
 
-    internal suspend inline fun <reified T> post(
+    internal inline fun <reified T> post(
         url: String,
         body: Any? = null,
         headers: Map<String, String> = emptyMap(),
@@ -37,7 +37,7 @@ class HttpApi(
             }
         }
 
-    internal suspend inline fun <reified T> put(
+    internal inline fun <reified T> put(
         url: String,
         body: Any? = null,
         headers: Map<String, String> = emptyMap(),
@@ -53,7 +53,7 @@ class HttpApi(
             }
         }
 
-    internal suspend inline fun <reified T> patch(
+    internal inline fun <reified T> patch(
         url: String,
         body: Any? = null,
         headers: Map<String, String> = emptyMap(),

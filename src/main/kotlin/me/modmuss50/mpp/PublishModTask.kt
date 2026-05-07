@@ -1,6 +1,5 @@
 package me.modmuss50.mpp
 
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import me.modmuss50.mpp.platforms.gitea.base.GiteaCompatibleOptions
 import me.modmuss50.mpp.platforms.github.GithubOptions
