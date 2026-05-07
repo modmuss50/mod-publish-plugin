@@ -1,6 +1,8 @@
 package me.modmuss50.mpp.networking
 
+import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.engine.cio.CIO
 import io.ktor.client.engine.cio.endpoint
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
@@ -47,7 +49,7 @@ object DefaultHttpImpl {
     val defaultConfig = HttpConfig(defaultProfile)
 
     fun client(timeout: java.time.Duration) =
-        io.ktor.client.HttpClient(io.ktor.client.engine.cio.CIO) {
+        HttpClient(CIO) {
             engine {
                 requestTimeout = timeout.toMillis()
                 endpoint {
