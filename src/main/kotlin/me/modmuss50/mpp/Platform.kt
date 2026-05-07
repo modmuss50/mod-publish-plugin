@@ -11,7 +11,7 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.jetbrains.annotations.ApiStatus
-import java.util.*
+import java.util.Locale
 import javax.inject.Inject
 import kotlin.reflect.KClass
 

@@ -2,7 +2,6 @@ package me.modmuss50.mpp
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.gradle.api.Action
 import org.gradle.api.file.RegularFile
