@@ -110,6 +110,8 @@ Next you need to configure each platform that you wish to publish your mod to. T
             projectId = "123456"
             accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
             minecraftVersions.add("1.20.1")
+            client = true
+            server = true
         }
     }
     ```
@@ -121,6 +123,8 @@ Next you need to configure each platform that you wish to publish your mod to. T
            projectId.set("123456")
            accessToken.set(providers.environmentVariable("CURSEFORGE_TOKEN"))
            minecraftVersions.add("1.20.1")
+           client.set(true)
+           server.set(true)
        }
    }
    ```
