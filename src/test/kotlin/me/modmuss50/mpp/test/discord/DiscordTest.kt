@@ -33,6 +33,7 @@ class DiscordTest : IntegrationTest {
                         accessToken = "123"
                         projectId = "123456"
                         projectSlug = "test-mod"
+                        client = true
                         apiEndpoint = "${server.endpoint}"
                     }
                     
@@ -86,6 +87,7 @@ class DiscordTest : IntegrationTest {
                         accessToken = "123"
                         projectId = "123456"
                         projectSlug = "test-mod"
+                        client = true
                         apiEndpoint = "${server.endpoint}"
                     }
                     
@@ -178,6 +180,7 @@ class DiscordTest : IntegrationTest {
                     val options = curseforgeOptions {
                         accessToken = "123"
                         minecraftVersions.add("1.20.1")
+                        client = true
                         apiEndpoint = "${server.endpoint}"
                     }
                 
@@ -240,6 +243,7 @@ class DiscordTest : IntegrationTest {
                             accessToken = "123"
                             projectId = "123456"
                             projectSlug = "test-mod-" + i
+                            client = true
                             apiEndpoint = "${server.endpoint}"
                         }
                     }
@@ -288,6 +292,7 @@ class DiscordTest : IntegrationTest {
                             accessToken = "123"
                             projectId = "123456"
                             projectSlug = "test-mod-" + i
+                            client = true
                             apiEndpoint = "${server.endpoint}"
                         }
                     }
@@ -344,6 +349,7 @@ class DiscordTest : IntegrationTest {
                         accessToken = "123"
                         projectId = "123456"
                         projectSlug = "test-mod"
+                        client = true
                         apiEndpoint = "${server.endpoint}"
                     }
                     
@@ -410,6 +416,7 @@ class DiscordTest : IntegrationTest {
                         accessToken = "123"
                         projectId = "123456"
                         projectSlug = "test-mod"
+                        client = true
                         apiEndpoint = "${server.endpoint}"
                     }
                 }
@@ -462,6 +469,7 @@ class DiscordTest : IntegrationTest {
                         accessToken = "123"
                         projectId = "123456"
                         projectSlug = "test-mod"
+                        client = true
                         apiEndpoint = "${server.endpoint}"
                     }
                     
@@ -520,6 +528,7 @@ class DiscordTest : IntegrationTest {
                         accessToken = "123"
                         projectId = "123456"
                         projectSlug = "test-mod"
+                        client = true
                         apiEndpoint = "${server.endpoint}"
                     }
                     
@@ -579,6 +588,7 @@ class DiscordTest : IntegrationTest {
                         accessToken = "123"
                         projectId = "123456"
                         projectSlug = "test-mod"
+                        client = true
                         apiEndpoint = "${server.endpoint}"
                     }
                     

@@ -26,6 +26,7 @@ class MultiPlatformTest : IntegrationTest {
                         accessToken = "123"
                         projectId = "123456"
                         minecraftVersions.add("1.20.1")
+                        client = true
                         apiEndpoint = "${server.endpoint}"
                     }
                 

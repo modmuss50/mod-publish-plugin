@@ -16,6 +16,7 @@ See the following minimal example showing how to publish the `jar` task to Curse
            accessToken = providers.environmentVariable("CURSEFORGE_API_KEY")
            projectId = "308769"
            minecraftVersions.add("1.20.1")
+           client = true
        }
    }
    ```
@@ -32,11 +33,14 @@ See the following minimal example showing how to publish the `jar` task to Curse
            accessToken = providers.environmentVariable("CURSEFORGE_API_KEY")
            projectId = "308769"
            minecraftVersions.add("1.20.1")
+           client.set(true)
        }
    }
    ```
   </Tab>
 </Tabs>
+
+CurseForge requires you to declare at least one supported environment. Set `client`, `server`, or both.
 
 You will need to generate a CurseForge API token in your account settings [here](https://legacy.curseforge.com/account/api-tokens), you can set this an environment variable.
 If you plan to publish from your local machine using a Gradle user property may be more convenient:
@@ -100,9 +104,9 @@ See the following example showing all the CurseForge specific options:
             // Optionally specify the java version that is required to run the mod
             javaVersions.add(JavaVersion.VERSION_17)
 
-            // Optionally specify an environment that is required to run the mod
-            clientRequired = true
-            serverRequired = true
+            // CurseForge requires at least one supported environment
+            client = true
+            server = true
 
             // When using the discord webhook you must also specify the project slug
             // This is due to limitations in the CurseForge API.
@@ -154,9 +158,9 @@ See the following example showing all the CurseForge specific options:
            // Optionally specify the java version that is required to run the mod
            javaVersions.add(JavaVersion.VERSION_17)
 
-           // Optionally specify an environment that is required to run the mod
-           clientRequired.set(true)
-           serverRequired.set(true)
+           // CurseForge requires at least one supported environment
+           client.set(true)
+           server.set(true)
 
            // When using the discord webhook you must also specify the project slug
            // This is due to limitations in the CurseForge API.

@@ -50,11 +50,23 @@ interface CurseforgeOptions :
 
     @get:Input
     @get:Optional
-    val clientRequired: Property<Boolean>
+    val client: Property<Boolean>
 
     @get:Input
     @get:Optional
+    val server: Property<Boolean>
+
+    @Deprecated("Renamed to client", ReplaceWith("client"))
+    @get:Input
+    @get:Optional
+    val clientRequired: Property<Boolean>
+        get() = client
+
+    @Deprecated("Renamed to server", ReplaceWith("server"))
+    @get:Input
+    @get:Optional
     val serverRequired: Property<Boolean>
+        get() = server
 
     @get:Input
     val javaVersions: ListProperty<JavaVersion>
@@ -75,8 +87,8 @@ interface CurseforgeOptions :
         projectId.convention(other.projectId)
         projectSlug.convention(other.projectSlug)
         minecraftVersions.convention(other.minecraftVersions)
-        clientRequired.convention(other.clientRequired)
-        serverRequired.convention(other.serverRequired)
+        client.convention(other.client)
+        server.convention(other.server)
         javaVersions.convention(other.javaVersions)
         apiEndpoint.convention(other.apiEndpoint)
         changelogType.convention(other.changelogType)
@@ -239,6 +251,10 @@ constructor(
         super.validateInputs()
         Validators.validateUnique("minecraftVersions", minecraftVersions)
         Validators.validateUnique("javaVersions", javaVersions)
+
+        if (client.orNull != true && server.orNull != true) {
+            throw IllegalArgumentException("At least one of client or server must be set to true")
+        }
     }
 
     override fun publish(context: PublishContext) {
@@ -289,11 +305,11 @@ constructor(
                     gameVersions.add(versions.getModLoaderVersion(modLoader))
                 }
 
-                if (clientRequired.isPresent && clientRequired.get()) {
+                if (client.isPresent && client.get()) {
                     gameVersions.add(versions.getClientVersion())
                 }
 
-                if (serverRequired.isPresent && serverRequired.get()) {
+                if (server.isPresent && server.get()) {
                     gameVersions.add(versions.getServerVersion())
                 }
 

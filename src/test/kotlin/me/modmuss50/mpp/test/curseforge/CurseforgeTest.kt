@@ -30,8 +30,8 @@ class CurseforgeTest : IntegrationTest {
                         projectId = "123456"
                         minecraftVersions.add("1.20.1")
                         javaVersions.add(JavaVersion.VERSION_17)
-                        clientRequired = true
-                        serverRequired = true
+                        client = true
+                        server = true
                         changelogType = "html"
                         
                         requires {
@@ -91,6 +91,7 @@ class CurseforgeTest : IntegrationTest {
                             start = "1.19.4"
                             end = "1.20.1"
                         }
+                        client = true
                         changelogType = "text"
                     }
                 
@@ -149,6 +150,7 @@ class CurseforgeTest : IntegrationTest {
                         accessToken = "123"
                         projectId = "123456"
                         minecraftVersionList("1.19.4, 1.20, 1.20.1")
+                        client = true
                         
                         apiEndpoint = "${server.endpoint}"
                     }
@@ -190,6 +192,7 @@ class CurseforgeTest : IntegrationTest {
                     def curseforgeOptions = curseforgeOptions {
                         accessToken = "123"
                         minecraftVersions.add("1.20.1")
+                        client = true
                         apiEndpoint = "${server.endpoint}"
                         changelogType = "markdown"
                     }
@@ -243,6 +246,7 @@ class CurseforgeTest : IntegrationTest {
                         accessToken = providers.environmentVariable("TEST_TOKEN_THAT_DOES_NOT_EXISTS")
                         projectId = "123456"
                         minecraftVersions.add("1.20.1")
+                        client = true
                         requires {
                             slug = "fabric-api"
                         }
@@ -273,6 +277,7 @@ class CurseforgeTest : IntegrationTest {
                         accessToken = "abc"
                         projectId = "123456"
                         minecraftVersions.add("1.20.1")
+                        client = true
                         
                         requires {
                             slug = "fabric-api"
@@ -308,6 +313,7 @@ class CurseforgeTest : IntegrationTest {
                         accessToken = "123"
                         projectId = "123456"
                         minecraftVersions.add("1.20.1")
+                        client = true
                         
                         apiEndpoint = "${server.endpoint}"
                     }
@@ -342,6 +348,7 @@ class CurseforgeTest : IntegrationTest {
                         accessToken = "abc"
                         projectId = "123456"
                         minecraftVersions.add("1.20.1")
+                        client = true
                         
                         requires {
                             slug = "fabric-api"
@@ -378,6 +385,7 @@ class CurseforgeTest : IntegrationTest {
                         projectId = "123456"
                         minecraftVersions.add("1.20.1")
                         minecraftVersions.add("1.20.1")
+                        client = true
                     }
                 }
                 """.trimIndent(),
@@ -386,6 +394,63 @@ class CurseforgeTest : IntegrationTest {
 
         assertEquals(TaskOutcome.FAILED, result.task(":publishCurseforge")!!.outcome)
         assertContains(result.output, "minecraftVersions contains duplicate values: [1.20.1]")
+    }
+
+    @Test
+    fun missingClientAndServerFails() {
+        val result = gradleTest()
+            .buildScript(
+                """
+                publishMods {
+                    file = tasks.jar.flatMap { it.archiveFile }
+                    changelog = "Hello!"
+                    version = "1.0.0"
+                    type = BETA
+                    modLoaders.add("fabric")
+                    dryRun = true
+
+                    curseforge {
+                        projectId = "123456"
+                        minecraftVersions.add("1.20.1")
+                    }
+                }
+                """.trimIndent(),
+            )
+            .run("publishCurseforge")
+
+        assertEquals(TaskOutcome.FAILED, result.task(":publishCurseforge")!!.outcome)
+        assertContains(result.output, "At least one of client or server must be set to true")
+    }
+
+    @Suppress("DEPRECATION")
+    @Test
+    fun deprecatedClientRequiredStillWorks() {
+        val server = MockWebServer(MockCurseforgeApi())
+
+        val result = gradleTest()
+            .buildScript(
+                """
+                publishMods {
+                    file = tasks.jar.flatMap { it.archiveFile }
+                    changelog = "Hello!"
+                    version = "1.0.0"
+                    type = BETA
+                    modLoaders.add("fabric")
+
+                    curseforge {
+                        accessToken = "123"
+                        projectId = "123456"
+                        minecraftVersions.add("1.20.1")
+                        clientRequired = true
+                        apiEndpoint = "${server.endpoint}"
+                    }
+                }
+                """.trimIndent(),
+            )
+            .run("publishCurseforge")
+        server.close()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishCurseforge")!!.outcome)
     }
 
     @Test
@@ -412,6 +477,7 @@ class CurseforgeTest : IntegrationTest {
                         accessToken = "123"
                         projectId = "123456"
                         minecraftVersions.add("1.20.1")
+                        client = true
                         
                         additionalFile(fabricJar.flatMap { it.archiveFile }) {
                             name = "Fabric"
@@ -455,6 +521,7 @@ class CurseforgeTest : IntegrationTest {
                         accessToken = "123"
                         projectId = "123456"
                         minecraftVersions.add("1.20.1")
+                        client = true
                         apiEndpoint = "${server.endpoint}"
                     }
                 }
@@ -485,6 +552,7 @@ class CurseforgeTest : IntegrationTest {
                         accessToken = providers.environmentVariable("TEST_TOKEN_THAT_DOES_NOT_EXISTS")
                         projectId = "123456"
                         minecraftVersions.add("1.20.1")
+                        client = true
                         requires {
                             // slug not set
                         }
@@ -515,6 +583,7 @@ class CurseforgeTest : IntegrationTest {
                         accessToken = "123"
                         projectId = "123456"
                         minecraftVersions.add("1.20.1")
+                        client = true
                         
                         additionalFile(project(":fabric")) {
                             name = "Fabric"

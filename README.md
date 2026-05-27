@@ -37,6 +37,8 @@ publishMods {
         projectSlug = "example-project" // Required for discord webhook
         accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
         minecraftVersions.add("1.20.1")
+        client = true
+        server = true
         requires("fabric-api")
     }
     modrinth {
@@ -67,6 +69,8 @@ publishMods {
         projectSlug.set("example-project") // Required for discord webhook
         accessToken.set(providers.environmentVariable("CURSEFORGE_TOKEN"))
         minecraftVersions.add("1.20.1")
+        client.set(true)
+        server.set(true)
         requires("fabric-api")
     }
     modrinth {
@@ -86,5 +90,7 @@ publishMods {
 ```
 
 Run the `publishMods` task to publish to all configured destinations.
+
+When publishing to CurseForge, set at least one of `client` or `server` to `true`.
 
 Visit the [docs site](https://modmuss50.github.io/mod-publish-plugin/) for more detailed instructions.

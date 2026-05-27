@@ -123,8 +123,8 @@ class DiscordIntegrationTest : IntegrationTest {
                         projectSlug = "${options.curseforgeProjectSlug}"
                         minecraftVersions.add("1.20.1")
                         javaVersions.add(JavaVersion.VERSION_17)
-                        clientRequired = true
-                        serverRequired = true
+                        client = true
+                        server = true
                         
                         requires {
                             slug = "fabric-api"
