@@ -61,6 +61,20 @@ class MinecraftApiTest {
     }
 
     @Test
+    fun getVersionsLatestReleaseSnapshot() {
+        val server = MockWebServer(MockMinecraftApi())
+        val api = MinecraftApi(server.endpoint)
+
+        val versions = api.getVersionsInRange("1.19.4", "latestRelease", true)
+        assertContains(versions, "1.19.4")
+        assertContains(versions, "1.20.2-rc2")
+        assertContains(versions, "1.20.2")
+        assertFalse(versions.contains("23w44a"))
+
+        server.close()
+    }
+
+    @Test
     fun getSingleVersionFromRange() {
         val server = MockWebServer(MockMinecraftApi())
         val api = MinecraftApi(server.endpoint)

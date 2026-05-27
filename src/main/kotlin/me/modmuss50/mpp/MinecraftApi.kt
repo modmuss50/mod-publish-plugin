@@ -18,28 +18,44 @@ class MinecraftApi(
     )
 
     @Serializable
+    data class Latest(
+        val release: String,
+        val snapshot: String,
+    )
+
+    @Serializable
     data class LauncherMeta(
+        val latest: Latest,
         val versions: List<Version>,
     )
 
     private val headers: Map<String, String>
         get() = mapOf()
 
-    fun getVersions(): List<Version> = httpUtils.get<LauncherMeta>("$baseUrl/mc/game/version_manifest_v2.json", headers).versions
+    fun getLauncherMeta(): LauncherMeta = httpUtils.get("$baseUrl/mc/game/version_manifest_v2.json", headers)
+
+    fun getVersions(): List<Version> = getLauncherMeta().versions
 
     fun getVersionsInRange(
         startId: String,
         endId: String,
         includeSnapshots: Boolean = false,
     ): List<String> {
+        val launcherMeta = getLauncherMeta()
         val versions =
-            getVersions()
+            launcherMeta.versions
                 .filter { it.type == "release" || includeSnapshots }
                 .map { it.id }
                 .reversed()
 
         val startIndex = versions.indexOf(startId)
-        val endIndex = if (endId == "latest") versions.size - 1 else versions.indexOf(endId)
+        val resolvedEndId =
+            when (endId) {
+                "latest" -> versions.last()
+                "latestRelease" -> launcherMeta.latest.release
+                else -> endId
+            }
+        val endIndex = versions.indexOf(resolvedEndId)
 
         if (startIndex == -1) throw IllegalArgumentException("Invalid start version $startId")
         if (endIndex == -1) throw IllegalArgumentException("Invalid end version $endId")
