@@ -19,10 +19,12 @@ import org.gradle.api.ExtensiblePolymorphicDomainObjectContainer
 import org.gradle.api.NamedDomainObjectProvider
 import org.gradle.api.PolymorphicDomainObjectContainer
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.api.tasks.TaskContainer
 import java.nio.file.Path
 import kotlin.reflect.KClass
 
@@ -317,9 +319,7 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
     }
 
     fun discord(name: String, action: Action<DiscordWebhookTask>): TaskProvider<DiscordWebhookTask> {
-        val task = project.tasks.register(name, DiscordWebhookTask::class.java) {
-            action.execute(it)
-        }
+        val task = project.tasks.maybeRegister(name, DiscordWebhookTask::class.java, action)
 
         project.tasks.named("publishMods").configure {
             it.dependsOn(task.get())
@@ -335,6 +335,14 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
             named(name, T::class.java, action)
         } else {
             register(name, T::class.java, action)
+        }
+    }
+
+    private fun <T : Task> TaskContainer.maybeRegister(name: String, type: Class<T>, action: Action<T>): TaskProvider<T> {
+        return if (name in names) {
+            named(name, type, action)
+        } else {
+            register(name, type, action)
         }
     }
 

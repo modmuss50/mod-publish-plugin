@@ -122,6 +122,39 @@ class DiscordTest : IntegrationTest {
     }
 
     @Test
+    fun announceWebhookCanBeConfiguredMultipleTimes() {
+        val discordApi = MockDiscordApi()
+        val server = MockWebServer(discordApi)
+
+        gradleTest()
+            .buildScript(
+                """
+                publishMods {
+                    changelog = "Hello!"
+
+                    discord {
+                        webhookUrl = "${server.endpoint}/api/webhooks/213/abc"
+                        style {
+                            link = "INLINE"
+                        }
+                    }
+                }
+
+                publishMods {
+                    discord {
+                        username = "My Cool Mod"
+                    }
+                }
+                """.trimIndent(),
+            )
+            .run("announceDiscord")
+        server.close()
+
+        assertEquals(1, discordApi.requests.size)
+        assertEquals("My Cool Mod", discordApi.requests.single().username)
+    }
+
+    @Test
     fun announceWebhookTitle() {
         val discordApi = MockDiscordApi()
         val server = MockWebServer(MockWebServer.CombinedApi(listOf(discordApi, MockCurseforgeApi(), MockModrinthApi(), MockGithubApi())))
