@@ -4,6 +4,7 @@ import me.modmuss50.mpp.MinecraftApi
 import me.modmuss50.mpp.test.MockWebServer
 import kotlin.test.Test
 import kotlin.test.assertContains
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 
 class MinecraftApiTest {
@@ -13,10 +14,9 @@ class MinecraftApiTest {
         val api = MinecraftApi(server.endpoint)
 
         val versions = api.getVersionsInRange("1.19.4", "1.20.1")
-        assertContains(versions, "1.19.4")
-        assertContains(versions, "1.20")
-        assertContains(versions, "1.20.1")
+        assertEquals(listOf("1.19.4", "1.20", "1.20.1"), versions)
         assertFalse(versions.contains("1.20-rc1"))
+        assertFalse(versions.contains("1.20.2"))
 
         server.close()
     }
@@ -27,10 +27,7 @@ class MinecraftApiTest {
         val api = MinecraftApi(server.endpoint)
 
         val versions = api.getVersionsInRange("1.19.4", "1.20.1", true)
-        assertContains(versions, "1.19.4")
-        assertContains(versions, "1.20")
-        assertContains(versions, "1.20.1")
-        assertContains(versions, "1.20-rc1")
+        assertEquals(listOf("1.19.4", "1.20-rc1", "1.20", "1.20.1"), versions)
 
         server.close()
     }

@@ -7,6 +7,7 @@ import org.gradle.testkit.runner.TaskOutcome
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 
 class CurseforgeTest : IntegrationTest {
     @Test
@@ -124,6 +125,8 @@ class CurseforgeTest : IntegrationTest {
         assertContains(metadata.gameVersions!!, 9776) // 1.19.4
         assertContains(metadata.gameVersions!!, 9971) // 1.20
         assertContains(metadata.gameVersions!!, 9990) // 1.20.1
+        assertFalse(metadata.gameVersions!!.contains(9550)) // 1.19.3-Snapshot
+        assertFalse(metadata.gameVersions!!.contains(10864)) // 1.20.2
         assertEquals(CurseforgeApi.ChangelogType.TEXT, metadata.changelogType)
     }
 

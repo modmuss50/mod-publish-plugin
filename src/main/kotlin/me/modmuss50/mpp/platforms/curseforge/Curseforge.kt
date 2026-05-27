@@ -177,7 +177,7 @@ interface CurseforgeVersionRangeOptions {
     val start: Property<String>
 
     /**
-     * The end version of the range (exclusive)
+     * The end version of the range (inclusive)
      */
     val end: Property<String>
 }

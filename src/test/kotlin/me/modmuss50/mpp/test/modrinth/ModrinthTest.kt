@@ -329,6 +329,7 @@ class ModrinthTest : IntegrationTest {
         assertFalse(gameVersions.contains("1.20-pre1"))
         assertContains(gameVersions, "1.20.1")
         assertContains(gameVersions, "1.20.2")
+        assertFalse(gameVersions.contains("23w44a"))
     }
 
     @Test
