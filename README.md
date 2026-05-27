@@ -11,13 +11,13 @@ Add to your Gradle plugins block:
 #### Groovy
 ```groovy
 plugins {
-  id "me.modmuss50.mod-publish-plugin" version "2.0.0-beta.1"
+  id "me.modmuss50.mod-publish-plugin" version "2.0.0-beta.2"
 }
 ```
 #### Kotlin
 ```kotlin
 plugins {
-  id("me.modmuss50.mod-publish-plugin") version "2.0.0-beta.1"
+  id("me.modmuss50.mod-publish-plugin") version "2.0.0-beta.2"
 }
 ```
 

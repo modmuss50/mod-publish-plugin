@@ -27,9 +27,12 @@ A modern Gradle plugin to publish Minecraft mods to a range of destinations. Sta
 ### Changelog
 #### 2.0.0 (beta)
 - Update minimum supported Gradle version to 9.0.0
+- CurseForge `client` and/or `server` properties are now required, matching new API changes.
 - Add GitLab & Codeberg support
 - Remove all 3rd party dependencies, reduces download size
 - Add `minecraftVersionList` to take a csv of Minecraft versions
+- Add `latestRelease` as a valid `end` version when using `minecraftVersionRange`
+- Fix issue preventing configuring discord multiple times.
 - General internal code cleanup and refactors.
 #### 1.1.0
 - Gitea/Forgejo support
