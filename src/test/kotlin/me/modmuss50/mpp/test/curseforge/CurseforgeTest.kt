@@ -239,6 +239,34 @@ class CurseforgeTest : IntegrationTest {
                     version = "1.0.0"
                     type = BETA
                     modLoaders.add("fabric")
+
+                    dryRun = true
+
+                    curseforge {
+                        accessToken = providers.environmentVariable("TEST_TOKEN_THAT_DOES_NOT_EXISTS")
+                        projectId = "123456"
+                        minecraftVersions.add("1.20.1")
+                        client = true
+                    }
+                }
+                """.trimIndent(),
+            )
+            .run("publishCurseforge")
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishCurseforge")!!.outcome)
+    }
+
+    @Test
+    fun dryRunCurseforgeFailsWithoutClientOrServer() {
+        val result = gradleTest()
+            .buildScript(
+                """
+                publishMods {
+                    file = tasks.jar.flatMap { it.archiveFile }
+                    changelog = "Hello!"
+                    version = "1.0.0"
+                    type = BETA
+                    modLoaders.add("fabric")
                     
                     dryRun = true
                 
@@ -246,7 +274,6 @@ class CurseforgeTest : IntegrationTest {
                         accessToken = providers.environmentVariable("TEST_TOKEN_THAT_DOES_NOT_EXISTS")
                         projectId = "123456"
                         minecraftVersions.add("1.20.1")
-                        client = true
                         requires {
                             slug = "fabric-api"
                         }
@@ -256,7 +283,8 @@ class CurseforgeTest : IntegrationTest {
             )
             .run("publishCurseforge")
 
-        assertEquals(TaskOutcome.SUCCESS, result.task(":publishCurseforge")!!.outcome)
+        assertEquals(TaskOutcome.FAILED, result.task(":publishCurseforge")!!.outcome)
+        assertContains(result.output, "At least one of client or server must be set to true")
     }
 
     @Test
@@ -394,32 +422,6 @@ class CurseforgeTest : IntegrationTest {
 
         assertEquals(TaskOutcome.FAILED, result.task(":publishCurseforge")!!.outcome)
         assertContains(result.output, "minecraftVersions contains duplicate values: [1.20.1]")
-    }
-
-    @Test
-    fun missingClientAndServerFails() {
-        val result = gradleTest()
-            .buildScript(
-                """
-                publishMods {
-                    file = tasks.jar.flatMap { it.archiveFile }
-                    changelog = "Hello!"
-                    version = "1.0.0"
-                    type = BETA
-                    modLoaders.add("fabric")
-                    dryRun = true
-
-                    curseforge {
-                        projectId = "123456"
-                        minecraftVersions.add("1.20.1")
-                    }
-                }
-                """.trimIndent(),
-            )
-            .run("publishCurseforge")
-
-        assertEquals(TaskOutcome.FAILED, result.task(":publishCurseforge")!!.outcome)
-        assertContains(result.output, "At least one of client or server must be set to true")
     }
 
     @Suppress("DEPRECATION")
