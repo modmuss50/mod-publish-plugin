@@ -1,33 +1,25 @@
 package me.modmuss50.mpp.platforms.discord
 
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import me.modmuss50.mpp.networking.DefaultHttpImpl
-import me.modmuss50.mpp.networking.HttpConfig
-import me.modmuss50.mpp.networking.HttpContext
+import me.modmuss50.mpp.networking.HttpApi.get
+import me.modmuss50.mpp.networking.HttpApi.post
+import me.modmuss50.mpp.networking.RequestContext
 import java.net.http.HttpRequest
 
 object DiscordAPI {
-    @OptIn(ExperimentalSerializationApi::class)
-    val httpConfig =
-        HttpConfig(
-            HttpContext(
-                client = DefaultHttpImpl.defaultClient,
-                json =
-                Json {
-                    explicitNulls = false
-                    classDiscriminator = "class"
-                    encodeDefaults = true
-                },
-                userAgent = DefaultHttpImpl.defaultAgent,
-                exceptionFactory = DefaultHttpImpl.defaultExceptionFactory,
-            ),
-        )
+    val httpContext = RequestContext(
+        json = Json {
+            explicitNulls = false
+            classDiscriminator = "class"
+            encodeDefaults = true
+        },
+        userAgent = RequestContext.Default.userAgent,
+        client = RequestContext.Default.client,
+        exceptionFactory = RequestContext.Default.exceptionFactory,
+    )
 
-    private val httpUtils = httpConfig.httpApi
     private val headers: Map<String, String> = mapOf("Content-Type" to "application/json")
 
     // https://discord.com/developers/docs/resources/webhook#execute-webhook
@@ -35,8 +27,8 @@ object DiscordAPI {
         url: String,
         webhook: Webhook,
     ) {
-        val body = HttpRequest.BodyPublishers.ofString(httpUtils.json.encodeToString(webhook))
-        httpUtils.post<String>(url, body, headers)
+        val body = HttpRequest.BodyPublishers.ofString(httpContext.json.encodeToString(webhook))
+        httpContext.post<String>(url, body, headers)
     }
 
     // https://discord.com/developers/docs/resources/webhook#execute-webhook-jsonform-params
@@ -170,7 +162,7 @@ object DiscordAPI {
 
     // https://discord.com/developers/docs/resources/webhook#get-webhook
     fun getWebhook(url: String): WebhookData {
-        val response = httpUtils.get<WebhookData>(url, headers)
+        val response = httpContext.get<WebhookData>(url, headers)
         return response
     }
 

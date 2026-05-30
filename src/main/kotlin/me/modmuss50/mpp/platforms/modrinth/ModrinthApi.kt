@@ -2,14 +2,16 @@ package me.modmuss50.mpp.platforms.modrinth
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import me.modmuss50.mpp.PlatformDependency
 import me.modmuss50.mpp.ReleaseType
-import me.modmuss50.mpp.networking.DefaultHttpImpl
-import me.modmuss50.mpp.networking.HttpConfig
-import me.modmuss50.mpp.networking.HttpContext
+import me.modmuss50.mpp.networking.HttpApi.get
+import me.modmuss50.mpp.networking.HttpApi.patch
+import me.modmuss50.mpp.networking.HttpApi.post
+import me.modmuss50.mpp.networking.HttpException
+import me.modmuss50.mpp.networking.RequestContext
 import me.modmuss50.mpp.networking.MultipartBodyBuilder
+import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.nio.file.Path
 import java.time.Duration
@@ -21,23 +23,19 @@ class ModrinthApi(
     private val baseUrl: String,
 ) {
     companion object {
-        val exceptionFactory =
-            DefaultHttpImpl.jsonErrorFactory<ErrorResponse> {
-                it.description
-            }
-
-        val httpConfig =
-            HttpConfig(
-                HttpContext(
-                    client = DefaultHttpImpl.client(Duration.ofSeconds(60)),
-                    json = DefaultHttpImpl.defaultJson,
-                    userAgent = DefaultHttpImpl.defaultAgent,
-                    exceptionFactory = exceptionFactory,
-                ),
-            )
+        val httpContext = RequestContext(
+            json = RequestContext.Default.json,
+            userAgent = RequestContext.Default.userAgent,
+            client = HttpClient
+                .newBuilder()
+                .connectTimeout(Duration.ofSeconds(60))
+                .build(),
+            exceptionFactory = HttpException.jsonErrorFactory<ErrorResponse>(
+                json = RequestContext.Default.json,
+                messageExtractor = { it.description },
+            ),
+        )
     }
-
-    private val httpUtils = httpConfig.httpApi
 
     @Serializable
     enum class VersionType {
@@ -165,7 +163,7 @@ class ModrinthApi(
                 "Content-Type" to "application/json",
             )
 
-    fun listVersions(projectSlug: String): Array<ListVersionsResponse> = httpUtils.get("$baseUrl/project/$projectSlug/version", headers)
+    fun listVersions(projectSlug: String): Array<ListVersionsResponse> = httpContext.get("$baseUrl/project/$projectSlug/version", headers)
 
     fun createVersion(
         metadata: CreateVersion,
@@ -184,16 +182,16 @@ class ModrinthApi(
         val multipartHeaders = headers.toMutableMap()
         multipartHeaders["Content-Type"] = bodyBuilder.getContentType()
 
-        return httpUtils.post("$baseUrl/version", bodyBuilder.build(), multipartHeaders)
+        return httpContext.post("$baseUrl/version", bodyBuilder.build(), multipartHeaders)
     }
 
-    fun checkProject(projectSlug: String): ProjectCheckResponse = httpUtils.get("$baseUrl/project/$projectSlug/check", headers)
+    fun checkProject(projectSlug: String): ProjectCheckResponse = httpContext.get("$baseUrl/project/$projectSlug/check", headers)
 
     fun modifyProject(
         projectSlug: String,
         modifyProject: ModifyProject,
     ) {
         val body = HttpRequest.BodyPublishers.ofString(Json.encodeToString(modifyProject))
-        httpUtils.patch<String>("$baseUrl/project/$projectSlug", body, headers)
+        httpContext.patch<String>("$baseUrl/project/$projectSlug", body, headers)
     }
 }

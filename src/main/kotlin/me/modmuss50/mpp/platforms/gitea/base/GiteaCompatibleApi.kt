@@ -2,11 +2,12 @@ package me.modmuss50.mpp.platforms.gitea.base
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import me.modmuss50.mpp.networking.DefaultHttpImpl
-import me.modmuss50.mpp.networking.HttpConfig
-import me.modmuss50.mpp.networking.HttpContext
+import me.modmuss50.mpp.networking.HttpApi.get
+import me.modmuss50.mpp.networking.HttpApi.patch
+import me.modmuss50.mpp.networking.HttpApi.post
+import me.modmuss50.mpp.networking.HttpException
+import me.modmuss50.mpp.networking.RequestContext
 import me.modmuss50.mpp.networking.MultipartBodyBuilder
 import java.io.File
 import java.net.http.HttpRequest
@@ -17,23 +18,16 @@ class GiteaCompatibleApi(
     private val repository: String,
 ) {
     companion object {
-        val giteaExceptionFactory =
-            DefaultHttpImpl.jsonErrorFactory<ErrorResponse> {
-                it.message
-            }
-
-        val httpConfig =
-            HttpConfig(
-                HttpContext(
-                    client = DefaultHttpImpl.defaultClient,
-                    json = DefaultHttpImpl.defaultJson,
-                    userAgent = DefaultHttpImpl.defaultAgent,
-                    exceptionFactory = giteaExceptionFactory,
-                ),
-            )
+        val httpContext = RequestContext(
+            json = RequestContext.Default.json,
+            userAgent = RequestContext.Default.userAgent,
+            client = RequestContext.Default.client,
+            exceptionFactory = HttpException.jsonErrorFactory<ErrorResponse>(
+                json = RequestContext.Default.json,
+                messageExtractor = { it.message },
+            ),
+        )
     }
-
-    private val httpUtils = httpConfig.httpApi
 
     @Serializable
     // https://docs.gitea.com/api/1.24/#tag/repository/operation/repoGetRelease
@@ -76,11 +70,11 @@ class GiteaCompatibleApi(
     // https://docs.gitea.com/api/1.24/#tag/repository/operation/repoCreateRelease
     fun createRelease(metadata: CreateRelease): Release {
         val body = HttpRequest.BodyPublishers.ofString(Json.encodeToString(metadata))
-        return httpUtils.post("$baseUrl/repos/$repository/releases", body, headers)
+        return httpContext.post("$baseUrl/repos/$repository/releases", body, headers)
     }
 
     // https://docs.gitea.com/api/1.24/#tag/repository/operation/repoGetRelease
-    fun getRelease(id: Long): Release = httpUtils.get("$baseUrl/repos/$repository/releases/$id", headers)
+    fun getRelease(id: Long): Release = httpContext.get("$baseUrl/repos/$repository/releases/$id", headers)
 
     // https://docs.gitea.com/api/1.24/#tag/repository/operation/repoCreateReleaseAttachment
     fun uploadAsset(
@@ -94,7 +88,7 @@ class GiteaCompatibleApi(
         val multipartHeaders = headers.toMutableMap()
         multipartHeaders["Content-Type"] = bodyBuilder.getContentType()
 
-        return httpUtils.post(release.uploadUrl, bodyBuilder.build(), multipartHeaders)
+        return httpContext.post(release.uploadUrl, bodyBuilder.build(), multipartHeaders)
     }
 
     // https://docs.gitea.com/api/1.24/#tag/repository/operation/repoEditRelease
@@ -107,6 +101,6 @@ class GiteaCompatibleApi(
                 }
                 """.trimIndent(),
             )
-        return httpUtils.patch("$baseUrl/repos/$repository/releases/${release.id}", body, headers)
+        return httpContext.patch("$baseUrl/repos/$repository/releases/${release.id}", body, headers)
     }
 }

@@ -1,13 +1,18 @@
 package me.modmuss50.mpp.test.discord
 
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
-import me.modmuss50.mpp.networking.DefaultHttpImpl
+import me.modmuss50.mpp.networking.HttpApi.post
+import me.modmuss50.mpp.networking.RequestContext
 import java.io.File
 import java.net.http.HttpRequest
 
-val json = DefaultHttpImpl.defaultJson
-val httpUtils = DefaultHttpImpl.defaultConfig.httpApi
+
+val httpContext = RequestContext(
+    json = RequestContext.Default.json,
+    userAgent = RequestContext.Default.userAgent,
+    client = RequestContext.Default.client,
+    exceptionFactory = RequestContext.Default.exceptionFactory,
+)
 
 /*
 Use this to generate a bot created webhook URL for testing the discord support
@@ -20,7 +25,7 @@ fun main(args: Array<String>) {
         return
     }
 
-    val options = json.decodeFromString<Options>(File("options.json").readText())
+    val options = httpContext.json.decodeFromString<Options>(File("options.json").readText())
 
     val channelId = args[0]
     val headers: Map<String, String> =
@@ -30,8 +35,8 @@ fun main(args: Array<String>) {
         )
 
     val request = CreateWebhookRequest("test")
-    val body = HttpRequest.BodyPublishers.ofString(json.encodeToString(request))
-    val response = httpUtils.post<CreateWebhookResponse>("https://discord.com/api/v9/channels/$channelId/webhooks", body, headers)
+    val body = HttpRequest.BodyPublishers.ofString(httpContext.json.encodeToString(request))
+    val response = httpContext.post<CreateWebhookResponse>("https://discord.com/api/v9/channels/$channelId/webhooks", body, headers)
 
     println(response)
 }

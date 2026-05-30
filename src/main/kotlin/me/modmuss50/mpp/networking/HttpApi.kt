@@ -6,22 +6,11 @@ import java.net.http.HttpRequest
 /**
  * HTTP API wrapper providing convenient request methods.
  *
- * This class builds on top of [HttpEngine] to expose common HTTP operations
+ * This object builds on top of [HttpEngine] to expose common HTTP operations
  * such as GET, POST, PUT, and PATCH with minimal boilerplate.
  *
- * @property ctx The HTTP context containing the client, JSON, user agent, and exception factory.
  */
-class HttpApi(
-    private val ctx: HttpContext,
-) {
-    // For now the engine will be owned at the API level...
-    private val engine = HttpEngine(ctx)
-
-    /**
-     * The JSON instance used for encoding and decoding request/response bodies.
-     */
-    val json get() = ctx.json
-
+object HttpApi {
     /**
      * Executes an HTTP GET request and deserializes the response body into type [T].
      *
@@ -31,11 +20,12 @@ class HttpApi(
      *
      * @return The deserialized response body as type [T].
      */
-    internal inline fun <reified T> get(
+    internal inline fun <reified T> RequestContext.get(
         url: String,
         headers: Map<String, String> = emptyMap(),
     ): T =
-        engine.request(
+        HttpEngine.request(
+            this,
             HttpRequest.newBuilder().uri(URI.create(url)).GET(),
             headers,
         )
@@ -50,12 +40,13 @@ class HttpApi(
      *
      * @return The deserialized response body as type [T].
      */
-    internal inline fun <reified T> post(
+    internal inline fun <reified T> RequestContext.post(
         url: String,
         body: HttpRequest.BodyPublisher,
         headers: Map<String, String> = emptyMap(),
     ): T =
-        engine.request(
+        HttpEngine.request(
+            this,
             HttpRequest.newBuilder().uri(URI.create(url)).POST(body),
             headers,
         )
@@ -70,12 +61,13 @@ class HttpApi(
      *
      * @return The deserialized response body as type [T].
      */
-    internal inline fun <reified T> put(
+    internal inline fun <reified T> RequestContext.put(
         url: String,
         body: HttpRequest.BodyPublisher,
         headers: Map<String, String> = emptyMap(),
     ): T =
-        engine.request(
+        HttpEngine.request(
+            this,
             HttpRequest.newBuilder().uri(URI.create(url)).PUT(body),
             headers,
         )
@@ -93,12 +85,13 @@ class HttpApi(
      *
      * @return The deserialized response body as type [T].
      */
-    internal inline fun <reified T> patch(
+    internal inline fun <reified T> RequestContext.patch(
         url: String,
         body: HttpRequest.BodyPublisher,
         headers: Map<String, String> = emptyMap(),
     ): T =
-        engine.request(
+        HttpEngine.request(
+            this,
             HttpRequest.newBuilder().uri(URI.create(url)).method("PATCH", body),
             headers,
         )
