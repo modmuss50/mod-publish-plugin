@@ -6,7 +6,6 @@ import me.modmuss50.mpp.networking.RequestContext
 import java.io.File
 import java.net.http.HttpRequest
 
-
 val httpContext = RequestContext(
     json = RequestContext.Default.json,
     userAgent = RequestContext.Default.userAgent,
