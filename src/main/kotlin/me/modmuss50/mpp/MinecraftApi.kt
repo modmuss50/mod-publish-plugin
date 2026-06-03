@@ -1,12 +1,20 @@
 package me.modmuss50.mpp
 
 import kotlinx.serialization.Serializable
-import me.modmuss50.mpp.networking.DefaultHttpImpl
+import me.modmuss50.mpp.networking.HttpApi.get
+import me.modmuss50.mpp.networking.RequestContext
 
 class MinecraftApi(
     private val baseUrl: String = "https://piston-meta.mojang.com/",
 ) {
-    private val httpUtils = DefaultHttpImpl.defaultConfig.httpApi
+    companion object {
+        val httpContext = RequestContext(
+            json = RequestContext.Default.json,
+            userAgent = RequestContext.Default.userAgent,
+            client = RequestContext.Default.client,
+            exceptionFactory = RequestContext.Default.exceptionFactory,
+        )
+    }
 
     @Serializable
     data class Version(
@@ -32,7 +40,7 @@ class MinecraftApi(
     private val headers: Map<String, String>
         get() = mapOf()
 
-    fun getLauncherMeta(): LauncherMeta = httpUtils.get("$baseUrl/mc/game/version_manifest_v2.json", headers)
+    fun getLauncherMeta(): LauncherMeta = httpContext.get("$baseUrl/mc/game/version_manifest_v2.json", headers)
 
     fun getVersions(): List<Version> = getLauncherMeta().versions
 

@@ -1,15 +1,14 @@
 package me.modmuss50.mpp.platforms.curseforge
 
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import me.modmuss50.mpp.PlatformDependency
-import me.modmuss50.mpp.networking.DefaultHttpImpl
-import me.modmuss50.mpp.networking.HttpConfig
-import me.modmuss50.mpp.networking.HttpContext
+import me.modmuss50.mpp.networking.HttpApi.get
+import me.modmuss50.mpp.networking.HttpApi.post
+import me.modmuss50.mpp.networking.HttpException
 import me.modmuss50.mpp.networking.MultipartBodyBuilder
+import me.modmuss50.mpp.networking.RequestContext
 import java.nio.file.Path
 import kotlin.io.path.name
 
@@ -19,30 +18,19 @@ class CurseforgeApi(
     private val baseUrl: String,
 ) {
     companion object {
-        val exceptionFactory =
-            DefaultHttpImpl.jsonErrorFactory<ErrorResponse> {
-                it.errorMessage
-            }
-
-        @OptIn(ExperimentalSerializationApi::class)
-        val httpConfig =
-            HttpConfig(
-                HttpContext(
-                    client = DefaultHttpImpl.defaultClient,
-                    json =
-                    Json {
-                        ignoreUnknownKeys = true // Added on 4.16.26, may be re-evaluated later
-                        explicitNulls = false
-                    },
-                    userAgent = DefaultHttpImpl.defaultAgent,
-                    exceptionFactory = exceptionFactory,
-                ),
-            )
-
-        val httpClient = httpConfig.httpApi
+        val httpContext = RequestContext(
+            json = Json {
+                ignoreUnknownKeys = true // Added on 4.16.26, may be re-evaluated later
+                explicitNulls = false
+            },
+            userAgent = RequestContext.Default.userAgent,
+            client = RequestContext.Default.client,
+            exceptionFactory = HttpException.jsonErrorFactory<ErrorResponse>(
+                json = RequestContext.Default.json,
+                messageExtractor = { it.errorMessage },
+            ),
+        )
     }
-
-    private val httpUtils = httpClient
 
     @Serializable
     data class GameVersionType(
@@ -171,13 +159,13 @@ class CurseforgeApi(
         get() = mapOf("X-Api-Token" to accessToken)
 
     fun getVersionTypes(): List<GameVersionType> =
-        httpUtils.get(
+        httpContext.get(
             url = "$baseUrl/api/game/version-types",
             headers = headers,
         )
 
     fun getGameVersions(): List<GameVersion> =
-        httpUtils.get(
+        httpContext.get(
             url = "$baseUrl/api/game/versions",
             headers = headers,
         )
@@ -187,7 +175,7 @@ class CurseforgeApi(
         path: Path,
         uploadMetadata: UploadFileMetadata,
     ): UploadFileResponse {
-        val metadataJson = httpUtils.json.encodeToString(uploadMetadata)
+        val metadataJson = httpContext.json.encodeToString(uploadMetadata)
 
         val bodyBuilder =
             MultipartBodyBuilder()
@@ -199,7 +187,7 @@ class CurseforgeApi(
                 this["Content-Type"] = bodyBuilder.getContentType()
             }
 
-        return httpUtils.post(
+        return httpContext.post(
             url = "$baseUrl/api/projects/$projectId/upload-file",
             body = bodyBuilder.build(),
             headers = multipartHeaders,

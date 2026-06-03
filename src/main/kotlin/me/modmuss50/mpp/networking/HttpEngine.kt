@@ -6,23 +6,21 @@ import java.net.http.HttpResponse
 /**
  * A small HTTP execution layer responsible for sending requests and decoding responses.
  *
- * This class wraps a configured [HttpContext] and provides a generic HTTP request method
- *
- * @property ctx The HTTP context containing the client, JSON, user agent, and exception factory.
+ * This object provides a generic HTTP request method
  */
-class HttpEngine(
-    private val ctx: HttpContext,
-) {
+object HttpEngine {
     /**
      * Executes an HTTP request and deserializes the response body into type [T].
      *
      * @param T The expected response type.
+     * @param ctx The HTTP context containing the client, JSON, user agent, and exception factory.
      * @param builder The [HttpRequest.Builder] used to construct the request.
      * @param headers Headers to include in the request.
      *
      * @return The deserialized response body as type [T].
      */
     internal inline fun <reified T> request(
+        ctx: RequestContext,
         builder: HttpRequest.Builder,
         headers: Map<String, String> = emptyMap(),
     ): T {

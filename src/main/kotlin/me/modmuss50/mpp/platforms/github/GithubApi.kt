@@ -2,8 +2,10 @@ package me.modmuss50.mpp.platforms.github
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
-import me.modmuss50.mpp.networking.DefaultHttpImpl
+import me.modmuss50.mpp.networking.HttpApi.get
+import me.modmuss50.mpp.networking.HttpApi.patch
+import me.modmuss50.mpp.networking.HttpApi.post
+import me.modmuss50.mpp.networking.RequestContext
 import java.io.File
 import java.net.http.HttpRequest
 
@@ -11,7 +13,14 @@ class GithubApi(
     private val accessToken: String,
     private val apiEndpoint: String = "https://api.github.com",
 ) {
-    private val httpUtils = DefaultHttpImpl.defaultConfig.httpApi
+    companion object {
+        val httpContext = RequestContext(
+            json = RequestContext.Default.json,
+            userAgent = RequestContext.Default.userAgent,
+            client = RequestContext.Default.client,
+            exceptionFactory = RequestContext.Default.exceptionFactory,
+        )
+    }
 
     @Serializable
     data class Repository(
@@ -59,7 +68,7 @@ class GithubApi(
     // https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#get-a-repository
     fun getRepository(repository: String): Repository {
         val url = "$apiEndpoint/repos/$repository"
-        return httpUtils.get(url, headers)
+        return httpContext.get(url, headers)
     }
 
     // https://docs.github.com/en/rest/releases/releases?apiVersion=2022-11-28#create-a-release
@@ -68,9 +77,9 @@ class GithubApi(
         request: CreateReleaseRequest,
     ): Release {
         val url = "$apiEndpoint/repos/$repository/releases"
-        val body = HttpRequest.BodyPublishers.ofString(httpUtils.json.encodeToString(request))
+        val body = HttpRequest.BodyPublishers.ofString(httpContext.json.encodeToString(request))
         val headersWithContentType = headers + ("Content-Type" to "application/json")
-        return httpUtils.post(url, body, headersWithContentType)
+        return httpContext.post(url, body, headersWithContentType)
     }
 
     // https://docs.github.com/en/rest/releases/releases?apiVersion=2022-11-28#get-a-release
@@ -79,7 +88,7 @@ class GithubApi(
         releaseId: Long,
     ): Release {
         val url = "$apiEndpoint/repos/$repository/releases/$releaseId"
-        return httpUtils.get(url, headers)
+        return httpContext.get(url, headers)
     }
 
     // https://docs.github.com/en/rest/releases/releases?apiVersion=2022-11-28#update-a-release
@@ -89,9 +98,9 @@ class GithubApi(
         request: UpdateReleaseRequest,
     ): Release {
         val url = "$apiEndpoint/repos/$repository/releases/$releaseId"
-        val body = HttpRequest.BodyPublishers.ofString(httpUtils.json.encodeToString(request))
+        val body = HttpRequest.BodyPublishers.ofString(httpContext.json.encodeToString(request))
         val headersWithContentType = headers + ("Content-Type" to "application/json")
-        return httpUtils.patch(url, body, headersWithContentType)
+        return httpContext.patch(url, body, headersWithContentType)
     }
 
     // https://docs.github.com/en/rest/releases/assets?apiVersion=2022-11-28#upload-a-release-asset
@@ -104,6 +113,6 @@ class GithubApi(
         val url = "$uploadUrl?name=${file.name}"
         val body = HttpRequest.BodyPublishers.ofFile(file.toPath())
         val headersWithContentType = headers + ("Content-Type" to "application/java-archive")
-        httpUtils.post<Asset>(url, body, headersWithContentType)
+        httpContext.post<Asset>(url, body, headersWithContentType)
     }
 }
