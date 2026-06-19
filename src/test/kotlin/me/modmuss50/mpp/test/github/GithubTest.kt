@@ -37,6 +37,37 @@ class GithubTest : IntegrationTest {
     }
 
     @Test
+    fun uploadGithubFileWithPlus() {
+        val api = MockGithubApi()
+        val server = MockWebServer(api)
+
+        val result = gradleTest()
+            .file("mpp-example+mc.1.21.6.jar", "fake jar")
+            .buildScript(
+                """
+                    publishMods {
+                        file = layout.projectDirectory.file("mpp-example+mc.1.21.6.jar")
+                        changelog = "Hello!"
+                        version = "1.0.0"
+                        type = STABLE
+                        github {
+                            accessToken = "123"
+                            repository = "test/example"
+                            commitish = "main"
+                            apiEndpoint = "${server.endpoint}"
+                            tagName = "release/1.0.0"
+                        }
+                    }
+                """.trimIndent(),
+            )
+            .run("publishGithub")
+        server.close()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishGithub")!!.outcome)
+        assertEquals(listOf("mpp-example+mc.1.21.6.jar"), api.uploadedAssetNames)
+    }
+
+    @Test
     fun noMainFile() {
         val server = MockWebServer(MockGithubApi())
 

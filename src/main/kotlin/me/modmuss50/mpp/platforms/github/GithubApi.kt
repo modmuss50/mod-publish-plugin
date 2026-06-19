@@ -7,6 +7,7 @@ import me.modmuss50.mpp.networking.HttpApi.patch
 import me.modmuss50.mpp.networking.HttpApi.post
 import me.modmuss50.mpp.networking.RequestContext
 import java.io.File
+import java.net.URLEncoder
 import java.net.http.HttpRequest
 
 class GithubApi(
@@ -110,7 +111,7 @@ class GithubApi(
     ) {
         // Parse the upload URL template and replace {?name,label} with the actual query params
         val uploadUrl = release.uploadUrl.substringBefore("{")
-        val url = "$uploadUrl?name=${file.name}"
+        val url = "$uploadUrl?name=${URLEncoder.encode(file.name, Charsets.UTF_8)}"
         val body = HttpRequest.BodyPublishers.ofFile(file.toPath())
         val headersWithContentType = headers + ("Content-Type" to "application/java-archive")
         httpContext.post<Asset>(url, body, headersWithContentType)

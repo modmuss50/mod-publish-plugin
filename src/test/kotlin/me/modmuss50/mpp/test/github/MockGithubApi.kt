@@ -10,6 +10,8 @@ import me.modmuss50.mpp.test.MockWebServer
 
 // The very bare minimum to mock out the GitHub API.
 class MockGithubApi : MockWebServer.MockApi {
+    val uploadedAssetNames = mutableListOf<String>()
+
     override fun routes(): EndpointGroup {
         return EndpointGroup {
             path("repos") {
@@ -54,6 +56,7 @@ class MockGithubApi : MockWebServer.MockApi {
 
     // https://docs.github.com/en/rest/releases/assets?apiVersion=2022-11-28#upload-a-release-asset
     private fun uploadAsset(context: Context) {
+        uploadedAssetNames.add(context.queryParam("name")!!)
         context.result(
             """
             {
