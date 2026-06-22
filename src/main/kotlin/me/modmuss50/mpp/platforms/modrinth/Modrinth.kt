@@ -62,6 +62,10 @@ interface ModrinthOptions :
     @get:Input
     val featured: Property<Boolean>
 
+    @get:Input
+    @get:Optional
+    val environment: Property<ModrinthEnvironment>
+
     /**
      * When set, this will update the project description to the provided value.
      */
@@ -113,6 +117,7 @@ interface ModrinthOptions :
         projectId.convention(other.projectId)
         minecraftVersions.convention(other.minecraftVersions)
         featured.convention(other.featured)
+        environment.convention(other.environment)
         projectDescription.convention(other.projectDescription)
         apiEndpoint.convention(other.apiEndpoint)
     }
@@ -265,6 +270,7 @@ constructor(
                         dependencies = dependencies,
                         gameVersions = minecraftVersions.get(),
                         versionType = ModrinthApi.VersionType.valueOf(type.get()),
+                        environment = environment.orNull?.let { ModrinthApi.VersionEnvironment.valueOf(it) },
                         loaders = modLoaders.get().map { it.lowercase() },
                         featured = featured.get(),
                         projectId = projectId.get().modrinthId,

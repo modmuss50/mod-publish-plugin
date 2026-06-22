@@ -60,6 +60,52 @@ class ModrinthApi(
     }
 
     @Serializable
+    enum class VersionEnvironment {
+        @SerialName("client_only")
+        CLIENT_ONLY,
+
+        @SerialName("server_only")
+        SERVER_ONLY,
+
+        @SerialName("dedicated_server_only")
+        DEDICATED_SERVER_ONLY,
+
+        @SerialName("client_and_server")
+        CLIENT_AND_SERVER,
+
+        @SerialName("server_only_client_optional")
+        SERVER_ONLY_CLIENT_OPTIONAL,
+
+        @SerialName("client_only_server_optional")
+        CLIENT_ONLY_SERVER_OPTIONAL,
+
+        @SerialName("client_or_server_prefers_both")
+        CLIENT_OR_SERVER_PREFERS_BOTH,
+
+        @SerialName("client_or_server")
+        CLIENT_OR_SERVER,
+
+        @SerialName("singleplayer_only")
+        SINGLEPLAYER_ONLY,
+        ;
+
+        companion object {
+            fun valueOf(type: ModrinthEnvironment): VersionEnvironment =
+                when (type) {
+                    ModrinthEnvironment.CLIENT_ONLY -> CLIENT_ONLY
+                    ModrinthEnvironment.SERVER_ONLY -> SERVER_ONLY
+                    ModrinthEnvironment.DEDICATED_SERVER_ONLY -> DEDICATED_SERVER_ONLY
+                    ModrinthEnvironment.CLIENT_AND_SERVER -> CLIENT_AND_SERVER
+                    ModrinthEnvironment.SERVER_ONLY_CLIENT_OPTIONAL -> SERVER_ONLY_CLIENT_OPTIONAL
+                    ModrinthEnvironment.CLIENT_ONLY_SERVER_OPTIONAL -> CLIENT_ONLY_SERVER_OPTIONAL
+                    ModrinthEnvironment.CLIENT_OR_SERVER_PREFERS_BOTH -> CLIENT_OR_SERVER_PREFERS_BOTH
+                    ModrinthEnvironment.CLIENT_OR_SERVER -> CLIENT_OR_SERVER
+                    ModrinthEnvironment.SINGLEPLAYER_ONLY -> SINGLEPLAYER_ONLY
+                }
+        }
+    }
+
+    @Serializable
     data class CreateVersion(
         val name: String,
         @SerialName("version_number")
@@ -70,6 +116,7 @@ class ModrinthApi(
         val gameVersions: List<String>,
         @SerialName("version_type")
         val versionType: VersionType,
+        val environment: VersionEnvironment? = null,
         val loaders: List<String>,
         val featured: Boolean,
         val status: String? = null,
