@@ -270,7 +270,7 @@ constructor(
                         dependencies = dependencies,
                         gameVersions = minecraftVersions.get(),
                         versionType = ModrinthApi.VersionType.valueOf(type.get()),
-                        environment = environment.orNull?.let { ModrinthApi.VersionEnvironment.valueOf(it) },
+                        environment = environment.orNull,
                         loaders = modLoaders.get().map { it.lowercase() },
                         featured = featured.get(),
                         projectId = projectId.get().modrinthId,

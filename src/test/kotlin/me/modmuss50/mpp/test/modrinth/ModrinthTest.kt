@@ -1,5 +1,6 @@
 package me.modmuss50.mpp.test.modrinth
 
+import me.modmuss50.mpp.platforms.modrinth.ModrinthEnvironment
 import me.modmuss50.mpp.test.IntegrationTest
 import me.modmuss50.mpp.test.MockWebServer
 import org.gradle.testkit.runner.TaskOutcome
@@ -7,6 +8,7 @@ import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 
 class ModrinthTest : IntegrationTest {
     @Test
@@ -476,5 +478,78 @@ class ModrinthTest : IntegrationTest {
         assertEquals(2, dependencies.size)
         assertContains(dependencies, "P7uGFii0")
         assertContains(dependencies, "ba99D9Qf")
+    }
+
+    @Test
+    fun uploadModrinthNoEnvironment() {
+        val mockModrinthApi = MockModrinthApi()
+        val server = MockWebServer(mockModrinthApi)
+
+        val result = gradleTest()
+            .buildScript(
+                """
+            publishMods {
+                file = tasks.jar.flatMap { it.archiveFile }
+                changelog = "Hello!"
+                version = "1.0.0"
+                type = STABLE
+                modLoaders.add("fabric")
+            
+                modrinth {
+                    accessToken = "123"
+                    projectId = "12345678"
+                    minecraftVersions.add("1.20.1")
+                    
+                    apiEndpoint = "${server.endpoint}"
+                }
+            }
+                """.trimIndent(),
+            )
+            .run("publishMods")
+        server.close()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinth")!!.outcome)
+
+        val environment = mockModrinthApi.lastCreateVersion!!.environment
+
+        assertNull(environment)
+    }
+
+    @Test
+    fun uploadModrinthEnvironment() {
+        val mockModrinthApi = MockModrinthApi()
+        val server = MockWebServer(mockModrinthApi)
+
+        val result = gradleTest()
+            .buildScript(
+                """
+            import me.modmuss50.mpp.platforms.modrinth.ModrinthEnvironment
+            
+            publishMods {
+                file = tasks.jar.flatMap { it.archiveFile }
+                changelog = "Hello!"
+                version = "1.0.0"
+                type = STABLE
+                modLoaders.add("fabric")
+            
+                modrinth {
+                    accessToken = "123"
+                    projectId = "12345678"
+                    minecraftVersions.add("1.20.1")
+                    environment = ModrinthEnvironment.CLIENT_ONLY
+                    
+                    apiEndpoint = "${server.endpoint}"
+                }
+            }
+                """.trimIndent(),
+            )
+            .run("publishMods")
+        server.close()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinth")!!.outcome)
+
+        val environment = mockModrinthApi.lastCreateVersion!!.environment
+
+        assertEquals(ModrinthEnvironment.CLIENT_ONLY, environment)
     }
 }
