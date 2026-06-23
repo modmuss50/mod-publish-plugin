@@ -62,6 +62,11 @@ interface ModrinthOptions :
     @get:Input
     val featured: Property<Boolean>
 
+    /**
+     * The environment to upload the version with. ie. client-only, server-only, etc.
+     *
+     * See [ModrinthEnvironment] for the list of available environments and their use cases.
+     */
     @get:Input
     @get:Optional
     val environment: Property<ModrinthEnvironment>

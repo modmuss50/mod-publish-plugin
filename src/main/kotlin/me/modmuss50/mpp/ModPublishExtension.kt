@@ -13,6 +13,7 @@ import me.modmuss50.mpp.platforms.github.Github
 import me.modmuss50.mpp.platforms.github.GithubOptions
 import me.modmuss50.mpp.platforms.gitlab.Gitlab
 import me.modmuss50.mpp.platforms.modrinth.Modrinth
+import me.modmuss50.mpp.platforms.modrinth.ModrinthEnvironment
 import me.modmuss50.mpp.platforms.modrinth.ModrinthOptions
 import org.gradle.api.Action
 import org.gradle.api.ExtensiblePolymorphicDomainObjectContainer
@@ -33,6 +34,16 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
     val BETA = ReleaseType.BETA
     val ALPHA = ReleaseType.ALPHA
     val STABLE = ReleaseType.STABLE
+
+    val CLIENT_ONLY = ModrinthEnvironment.CLIENT_ONLY
+    val SERVER_ONLY = ModrinthEnvironment.SERVER_ONLY
+    val DEDICATED_SERVER_ONLY = ModrinthEnvironment.DEDICATED_SERVER_ONLY
+    val CLIENT_AND_SERVER = ModrinthEnvironment.CLIENT_AND_SERVER
+    val SERVER_ONLY_CLIENT_OPTIONAL = ModrinthEnvironment.SERVER_ONLY_CLIENT_OPTIONAL
+    val CLIENT_ONLY_SERVER_OPTIONAL = ModrinthEnvironment.CLIENT_ONLY_SERVER_OPTIONAL
+    val CLIENT_OR_SERVER_PREFERS_BOTH = ModrinthEnvironment.CLIENT_OR_SERVER_PREFERS_BOTH
+    val CLIENT_OR_SERVER = ModrinthEnvironment.CLIENT_OR_SERVER
+    val SINGLEPLAYER_ONLY = ModrinthEnvironment.SINGLEPLAYER_ONLY
 
     abstract val dryRun: Property<Boolean>
     val platforms: ExtensiblePolymorphicDomainObjectContainer<Platform> = project.objects.polymorphicDomainObjectContainer(Platform::class.java)

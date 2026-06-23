@@ -47,7 +47,8 @@ class ModrinthTest : IntegrationTest {
 
     @Test
     fun uploadModrinthWithOptions() {
-        val server = MockWebServer(MockModrinthApi())
+        val api = MockModrinthApi()
+        val server = MockWebServer(api)
 
         val result = gradleTest()
             .buildScript(
@@ -88,6 +89,8 @@ class ModrinthTest : IntegrationTest {
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinthFabric")!!.outcome)
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinthForge")!!.outcome)
+
+        assertNull(api.lastCreateVersion!!.environment, "Environment should be null when not specified")
     }
 
     @Test
@@ -481,50 +484,13 @@ class ModrinthTest : IntegrationTest {
     }
 
     @Test
-    fun uploadModrinthNoEnvironment() {
-        val mockModrinthApi = MockModrinthApi()
-        val server = MockWebServer(mockModrinthApi)
-
-        val result = gradleTest()
-            .buildScript(
-                """
-            publishMods {
-                file = tasks.jar.flatMap { it.archiveFile }
-                changelog = "Hello!"
-                version = "1.0.0"
-                type = STABLE
-                modLoaders.add("fabric")
-            
-                modrinth {
-                    accessToken = "123"
-                    projectId = "12345678"
-                    minecraftVersions.add("1.20.1")
-                    
-                    apiEndpoint = "${server.endpoint}"
-                }
-            }
-                """.trimIndent(),
-            )
-            .run("publishMods")
-        server.close()
-
-        assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinth")!!.outcome)
-
-        val environment = mockModrinthApi.lastCreateVersion!!.environment
-
-        assertNull(environment)
-    }
-
-    @Test
     fun uploadModrinthEnvironment() {
-        val mockModrinthApi = MockModrinthApi()
-        val server = MockWebServer(mockModrinthApi)
+        val api = MockModrinthApi()
+        val server = MockWebServer(api)
 
         val result = gradleTest()
             .buildScript(
                 """
-            import me.modmuss50.mpp.platforms.modrinth.ModrinthEnvironment
-            
             publishMods {
                 file = tasks.jar.flatMap { it.archiveFile }
                 changelog = "Hello!"
@@ -536,7 +502,7 @@ class ModrinthTest : IntegrationTest {
                     accessToken = "123"
                     projectId = "12345678"
                     minecraftVersions.add("1.20.1")
-                    environment = ModrinthEnvironment.CLIENT_ONLY
+                    environment = CLIENT_ONLY
                     
                     apiEndpoint = "${server.endpoint}"
                 }
@@ -547,9 +513,6 @@ class ModrinthTest : IntegrationTest {
         server.close()
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinth")!!.outcome)
-
-        val environment = mockModrinthApi.lastCreateVersion!!.environment
-
-        assertEquals(ModrinthEnvironment.CLIENT_ONLY, environment)
+        assertEquals(ModrinthEnvironment.CLIENT_ONLY, api.lastCreateVersion!!.environment)
     }
 }
