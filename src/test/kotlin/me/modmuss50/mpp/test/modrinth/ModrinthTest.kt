@@ -1,5 +1,6 @@
 package me.modmuss50.mpp.test.modrinth
 
+import me.modmuss50.mpp.platforms.modrinth.ModrinthEnvironment
 import me.modmuss50.mpp.test.IntegrationTest
 import me.modmuss50.mpp.test.MockWebServer
 import org.gradle.testkit.runner.TaskOutcome
@@ -7,6 +8,7 @@ import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 
 class ModrinthTest : IntegrationTest {
     @Test
@@ -45,7 +47,8 @@ class ModrinthTest : IntegrationTest {
 
     @Test
     fun uploadModrinthWithOptions() {
-        val server = MockWebServer(MockModrinthApi())
+        val api = MockModrinthApi()
+        val server = MockWebServer(api)
 
         val result = gradleTest()
             .buildScript(
@@ -86,6 +89,8 @@ class ModrinthTest : IntegrationTest {
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinthFabric")!!.outcome)
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinthForge")!!.outcome)
+
+        assertNull(api.lastCreateVersion!!.environment, "Environment should be null when not specified")
     }
 
     @Test
@@ -476,5 +481,38 @@ class ModrinthTest : IntegrationTest {
         assertEquals(2, dependencies.size)
         assertContains(dependencies, "P7uGFii0")
         assertContains(dependencies, "ba99D9Qf")
+    }
+
+    @Test
+    fun uploadModrinthEnvironment() {
+        val api = MockModrinthApi()
+        val server = MockWebServer(api)
+
+        val result = gradleTest()
+            .buildScript(
+                """
+            publishMods {
+                file = tasks.jar.flatMap { it.archiveFile }
+                changelog = "Hello!"
+                version = "1.0.0"
+                type = STABLE
+                modLoaders.add("fabric")
+            
+                modrinth {
+                    accessToken = "123"
+                    projectId = "12345678"
+                    minecraftVersions.add("1.20.1")
+                    environment = CLIENT_ONLY
+                    
+                    apiEndpoint = "${server.endpoint}"
+                }
+            }
+                """.trimIndent(),
+            )
+            .run("publishMods")
+        server.close()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinth")!!.outcome)
+        assertEquals(ModrinthEnvironment.CLIENT_ONLY, api.lastCreateVersion!!.environment)
     }
 }

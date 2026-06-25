@@ -70,6 +70,7 @@ class ModrinthApi(
         val gameVersions: List<String>,
         @SerialName("version_type")
         val versionType: VersionType,
+        val environment: ModrinthEnvironment? = null,
         val loaders: List<String>,
         val featured: Boolean,
         val status: String? = null,

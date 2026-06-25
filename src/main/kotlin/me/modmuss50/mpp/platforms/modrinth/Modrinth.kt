@@ -63,6 +63,15 @@ interface ModrinthOptions :
     val featured: Property<Boolean>
 
     /**
+     * The environment to upload the version with. ie. client-only, server-only, etc.
+     *
+     * See [ModrinthEnvironment] for the list of available environments and their use cases.
+     */
+    @get:Input
+    @get:Optional
+    val environment: Property<ModrinthEnvironment>
+
+    /**
      * When set, this will update the project description to the provided value.
      */
     @get:Input
@@ -113,6 +122,7 @@ interface ModrinthOptions :
         projectId.convention(other.projectId)
         minecraftVersions.convention(other.minecraftVersions)
         featured.convention(other.featured)
+        environment.convention(other.environment)
         projectDescription.convention(other.projectDescription)
         apiEndpoint.convention(other.apiEndpoint)
     }
@@ -265,6 +275,7 @@ constructor(
                         dependencies = dependencies,
                         gameVersions = minecraftVersions.get(),
                         versionType = ModrinthApi.VersionType.valueOf(type.get()),
+                        environment = environment.orNull,
                         loaders = modLoaders.get().map { it.lowercase() },
                         featured = featured.get(),
                         projectId = projectId.get().modrinthId,
