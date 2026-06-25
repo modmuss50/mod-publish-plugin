@@ -31,6 +31,6 @@ class MockDiscordApi : MockWebServer.MockApi {
 
     private fun getWebhook(context: Context) {
         // Just returns a simple response so the component check passes
-        context.result("{\"application_id\": \"0\"}")
+        context.result("{\"application_id\": \"0\", \"avatar\": \"testing\"}")
     }
 }

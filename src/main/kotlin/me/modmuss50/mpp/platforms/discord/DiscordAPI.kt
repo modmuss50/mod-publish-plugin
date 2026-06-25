@@ -12,6 +12,7 @@ object DiscordAPI {
     val httpContext = RequestContext(
         json = Json {
             explicitNulls = false
+            ignoreUnknownKeys = true
             classDiscriminator = "class"
             encodeDefaults = true
         },
