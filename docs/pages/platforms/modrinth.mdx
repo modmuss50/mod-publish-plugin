@@ -95,6 +95,9 @@ See the following example showing all the Modrinth specific options:
             projectId = "12345678"
             minecraftVersions.add("1.20.1")
 
+            // Optionally set the Modrinth environment for the uploaded version
+            environment = CLIENT_ONLY
+
             // Optionally set the announcement title used by the Discord publisher
             announcementTitle = "Download from Modrinth"
 
@@ -152,6 +155,9 @@ See the following example showing all the Modrinth specific options:
             projectId.set("12345678")
             minecraftVersions.add("1.20.1")
 
+            // Optionally set the Modrinth environment for the uploaded version
+            environment.set(CLIENT_ONLY)
+
             // Optionally set the announcement title used by the Discord publisher
             announcementTitle.set("Download from Modrinth")
 
@@ -202,3 +208,15 @@ See the following example showing all the Modrinth specific options:
     ```
   </Tab>
 </Tabs>
+
+The `environment` option can be left unset. When set, it accepts one of the following values:
+
+- `CLIENT_ONLY`
+- `SERVER_ONLY`
+- `DEDICATED_SERVER_ONLY`
+- `CLIENT_AND_SERVER`
+- `SERVER_ONLY_CLIENT_OPTIONAL`
+- `CLIENT_ONLY_SERVER_OPTIONAL`
+- `CLIENT_OR_SERVER_PREFERS_BOTH`
+- `CLIENT_OR_SERVER`
+- `SINGLEPLAYER_ONLY`
