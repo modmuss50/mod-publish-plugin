@@ -37,6 +37,21 @@ interface CurseforgeOptions :
     PlatformOptions,
     PlatformOptionsInternal<CurseforgeOptions>,
     CurseforgeDependencyContainer {
+    companion object {
+        @JvmStatic
+        val PLUGIN_LOADERS =
+            setOf(
+                "paper",
+                "spigot",
+                "bukkit",
+                "folia",
+                "purpur",
+                "bungeecord",
+                "velocity",
+                "waterfall",
+            )
+    }
+
     @get:Input
     val projectId: Property<String>
 
@@ -44,6 +59,9 @@ interface CurseforgeOptions :
     @get:Input
     @get:Optional
     val projectSlug: Property<String>
+
+    @get:Input
+    val plugin: Property<Boolean>
 
     @get:Input
     val minecraftVersions: ListProperty<String>
@@ -86,6 +104,7 @@ interface CurseforgeOptions :
         fromDependencies(other)
         projectId.convention(other.projectId)
         projectSlug.convention(other.projectSlug)
+        plugin.convention(other.plugin)
         minecraftVersions.convention(other.minecraftVersions)
         client.convention(other.client)
         server.convention(other.server)
@@ -165,6 +184,8 @@ interface CurseforgeOptions :
     override fun setInternalDefaults() {
         apiEndpoint.convention("https://minecraft.curseforge.com")
         changelogType.convention("markdown")
+        // Default plugin to true if loaders are ONLY plugin loaders
+        plugin.convention(modLoaders.map { loaders -> loaders.isNotEmpty() && loaders.all { it in PLUGIN_LOADERS } })
     }
 
     override val platformDependencyKClass: KClass<CurseforgeDependency>
@@ -252,8 +273,9 @@ constructor(
         Validators.validateUnique("minecraftVersions", minecraftVersions)
         Validators.validateUnique("javaVersions", javaVersions)
 
-        if (client.orNull != true && server.orNull != true) {
-            throw IllegalArgumentException("At least one of client or server must be set to true")
+        // Plugins don't have environments
+        if (!plugin.get() && client.orNull != true && server.orNull != true) {
+            throw IllegalArgumentException("At least one of client or server must be set to true when plugin is false")
         }
     }
 
@@ -298,23 +320,27 @@ constructor(
 
                 val gameVersions = ArrayList<Int>()
                 for (version in minecraftVersions.get()) {
-                    gameVersions.add(versions.getMinecraftVersion(version))
+                    gameVersions.add(versions.getMinecraftVersion(version, plugin.get()))
                 }
 
                 for (modLoader in modLoaders.get()) {
-                    gameVersions.add(versions.getModLoaderVersion(modLoader))
+                    // Failed mod-loaders are likely plugin-based ones (ex: "spigot")
+                    runCatching { versions.getModLoaderVersion(modLoader) }.onSuccess { gameVersions.add(it) }
                 }
 
-                if (client.isPresent && client.get()) {
-                    gameVersions.add(versions.getClientVersion())
-                }
+                // Mod-specific stuff (non-plugin)
+                if (!plugin.get()) {
+                    if (client.isPresent && client.get()) {
+                        gameVersions.add(versions.getClientVersion())
+                    }
 
-                if (server.isPresent && server.get()) {
-                    gameVersions.add(versions.getServerVersion())
-                }
+                    if (server.isPresent && server.get()) {
+                        gameVersions.add(versions.getServerVersion())
+                    }
 
-                for (javaVersion in javaVersions.get()) {
-                    gameVersions.add(versions.getJavaVersion(javaVersion))
+                    for (javaVersion in javaVersions.get()) {
+                        gameVersions.add(versions.getJavaVersion(javaVersion))
+                    }
                 }
 
                 val projectRelations =

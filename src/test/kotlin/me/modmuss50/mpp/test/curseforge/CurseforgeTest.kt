@@ -612,4 +612,104 @@ class CurseforgeTest : IntegrationTest {
         assertEquals("Fabric", metadata[1].displayName)
         assertEquals("Forge", metadata[2].displayName)
     }
+
+    @Test
+    fun uploadCurseforgePlugin() {
+        val server = MockWebServer(MockCurseforgeApi())
+
+        val result = gradleTest()
+            .buildScript(
+                """
+                publishMods {
+                    file = tasks.jar.flatMap { it.archiveFile }
+                    changelog = "Hello!"
+                    version = "1.0.0"
+                    type = BETA
+                    modLoaders.add("paper")
+
+                    curseforge {
+                        accessToken = "123"
+                        projectId = "123456"
+                        minecraftVersions.add("1.20.1")
+                        apiEndpoint = "${server.endpoint}"
+                    }
+                }
+                """.trimIndent(),
+            )
+            .run("publishCurseforge")
+        server.close()
+
+        val metadata = server.api.lastMetadata!!
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishCurseforge")!!.outcome)
+        assertContains(metadata.gameVersions!!, 9994) // 1.20.1 (plugin version type)
+        assertFalse(metadata.gameVersions!!.contains(9990)) // 1.20.1 (standard version type)
+        assertFalse(metadata.gameVersions!!.contains(9638)) // Client (skipped for plugins)
+        assertFalse(metadata.gameVersions!!.contains(9639)) // Server (skipped for plugins)
+    }
+
+    @Test
+    fun uploadCurseforgePluginWithVersionRange() {
+        val server = MockWebServer(MockCurseforgeApi())
+
+        val result = gradleTest()
+            .buildScript(
+                """
+                publishMods {
+                    file = tasks.jar.flatMap { it.archiveFile }
+                    changelog = "Hello!"
+                    version = "1.0.0"
+                    type = BETA
+                    modLoaders.add("spigot")
+
+                    curseforge {
+                        accessToken = "123"
+                        projectId = "123456"
+                        minecraftVersionRange {
+                            start = "1.19.4"
+                            end = "1.20.1"
+                        }
+                        apiEndpoint = "${server.endpoint}"
+                    }
+                }
+                """.trimIndent(),
+            )
+            .run("publishCurseforge")
+        server.close()
+
+        val metadata = server.api.lastMetadata!!
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishCurseforge")!!.outcome)
+        assertContains(metadata.gameVersions!!, 9973) // 1.19.4 (plugin version type)
+        assertContains(metadata.gameVersions!!, 9994) // 1.20.1 (plugin version type)
+        assertFalse(metadata.gameVersions!!.contains(9776)) // 1.19.4 (standard version type, should not be present)
+        assertFalse(metadata.gameVersions!!.contains(9990)) // 1.20.1 (standard version type, should not be present)
+    }
+
+    @Test
+    fun dryRunCurseforgePluginDoesNotRequireClientOrServer() {
+        val result = gradleTest()
+            .buildScript(
+                """
+                publishMods {
+                    file = tasks.jar.flatMap { it.archiveFile }
+                    changelog = "Hello!"
+                    version = "1.0.0"
+                    type = BETA
+                    modLoaders.add("spigot")
+
+                    dryRun = true
+
+                    curseforge {
+                        accessToken = providers.environmentVariable("TEST_TOKEN_THAT_DOES_NOT_EXISTS")
+                        projectId = "123456"
+                        minecraftVersions.add("1.20.1")
+                    }
+                }
+                """.trimIndent(),
+            )
+            .run("publishCurseforge")
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishCurseforge")!!.outcome)
+    }
 }
