@@ -13,7 +13,13 @@ class CurseforgeVersionsTest {
     @Test
     fun minecraftVersions() {
         val versions = createVersions()
-        assertEquals(9990, versions.getMinecraftVersion("1.20.1"))
+        assertEquals(9990, versions.getMinecraftVersion("1.20.1", false))
+    }
+
+    @Test
+    fun minecraftVersionsPlugin() {
+        val versions = createVersions()
+        assertEquals(9994, versions.getMinecraftVersion("1.20.1", true))
     }
 
     @Test

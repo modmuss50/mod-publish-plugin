@@ -6,12 +6,24 @@ class CurseforgeVersions(
     private val versionTypes: List<CurseforgeApi.GameVersionType>,
     private val versions: List<CurseforgeApi.GameVersion>,
 ) {
+    companion object {
+        // Not documented anywhere, but Minecraft versions for plugins use game version type ID = 1.
+        // It's not even returned in CurseForge's version-types API...
+        @JvmStatic
+        val PLUGIN_MINECRAFT_VERSION_TYPE_ID = 1
+    }
 
     private fun getGameVersionTypes(name: String): List<Int> {
-        val versions = if (name == "minecraft") {
-            versionTypes.filter { it.slug.startsWith("minecraft") }
-        } else {
-            versionTypes.filter { it.slug == name }
+        val versions = when (name) {
+            "minecraft" -> {
+                versionTypes.filter { it.slug.startsWith("minecraft") }
+            }
+            "minecraftPlugin" -> {
+                return listOf(PLUGIN_MINECRAFT_VERSION_TYPE_ID)
+            }
+            else -> {
+                versionTypes.filter { it.slug == name }
+            }
         }.map { it.id }
 
         if (versions.isEmpty()) {
@@ -27,8 +39,8 @@ class CurseforgeVersions(
         return version.id
     }
 
-    fun getMinecraftVersion(name: String): Int {
-        return getVersion(name, "minecraft")
+    fun getMinecraftVersion(name: String, plugin: Boolean): Int {
+        return getVersion(name, if (plugin) "minecraftPlugin" else "minecraft")
     }
 
     fun getModLoaderVersion(name: String): Int {
