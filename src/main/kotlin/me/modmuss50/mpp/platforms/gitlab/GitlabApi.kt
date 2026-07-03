@@ -9,6 +9,7 @@ import me.modmuss50.mpp.networking.HttpApi.put
 import me.modmuss50.mpp.networking.MultipartBodyBuilder
 import me.modmuss50.mpp.networking.RequestContext
 import java.io.File
+import java.net.URLEncoder
 import java.net.http.HttpRequest
 
 class GitlabApi(
@@ -88,7 +89,7 @@ class GitlabApi(
         projectId: Long,
         tagName: String,
     ): Release {
-        val encodedTag = java.net.URLEncoder.encode(tagName, Charsets.UTF_8)
+        val encodedTag = URLEncoder.encode(tagName, Charsets.UTF_8)
         val url = "$apiEndpoint/projects/$projectId/releases/$encodedTag"
         return httpContext.get(url, headers)
     }
@@ -98,7 +99,7 @@ class GitlabApi(
         tagName: String,
         request: UpdateReleaseRequest,
     ): Release {
-        val encodedTag = java.net.URLEncoder.encode(tagName, Charsets.UTF_8)
+        val encodedTag = URLEncoder.encode(tagName, Charsets.UTF_8)
         val url = "$apiEndpoint/projects/$projectId/releases/$encodedTag"
         val body = HttpRequest.BodyPublishers.ofString(httpContext.json.encodeToString(request))
         val headersWithContentType = headers + ("Content-Type" to "application/json")
