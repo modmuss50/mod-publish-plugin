@@ -12,6 +12,9 @@ import me.modmuss50.mpp.platforms.gitea.base.GiteaCompatiblePlatform
 import me.modmuss50.mpp.platforms.github.Github
 import me.modmuss50.mpp.platforms.github.GithubOptions
 import me.modmuss50.mpp.platforms.gitlab.Gitlab
+import me.modmuss50.mpp.platforms.hangar.Hangar
+import me.modmuss50.mpp.platforms.hangar.HangarOptions
+import me.modmuss50.mpp.platforms.hangar.HangarPlatformType
 import me.modmuss50.mpp.platforms.modrinth.Modrinth
 import me.modmuss50.mpp.platforms.modrinth.ModrinthEnvironment
 import me.modmuss50.mpp.platforms.modrinth.ModrinthOptions
@@ -34,6 +37,10 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
     val BETA = ReleaseType.BETA
     val ALPHA = ReleaseType.ALPHA
     val STABLE = ReleaseType.STABLE
+
+    val PAPER = HangarPlatformType.PAPER
+    val VELOCITY = HangarPlatformType.VELOCITY
+    val WATERFALL = HangarPlatformType.WATERFALL
 
     val CLIENT_ONLY = ModrinthEnvironment.CLIENT_ONLY
     val SERVER_ONLY = ModrinthEnvironment.SERVER_ONLY
@@ -140,6 +147,41 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
 
     fun modrinthOptions(action: Action<ModrinthOptions>): Provider<ModrinthOptions> {
         return configureOptions(ModrinthOptions::class) {
+            it.from(this)
+            action.execute(it)
+        }
+    }
+
+    // Hangar
+
+    fun hangar(@DelegatesTo(value = Hangar::class) closure: Closure<*>): NamedDomainObjectProvider<Hangar> {
+        return hangar {
+            project.configure(it, closure)
+        }
+    }
+
+    fun hangar(action: Action<Hangar>): NamedDomainObjectProvider<Hangar> {
+        return hangar("hangar", action)
+    }
+
+    fun hangar(name: String, @DelegatesTo(value = Hangar::class) closure: Closure<*>): NamedDomainObjectProvider<Hangar> {
+        return hangar(name) {
+            project.configure(it, closure)
+        }
+    }
+
+    fun hangar(name: String, action: Action<Hangar>): NamedDomainObjectProvider<Hangar> {
+        return platforms.maybeRegister(name, action)
+    }
+
+    fun hangarOptions(@DelegatesTo(value = HangarOptions::class) closure: Closure<*>): Provider<HangarOptions> {
+        return hangarOptions {
+            project.configure(it, closure)
+        }
+    }
+
+    fun hangarOptions(action: Action<HangarOptions>): Provider<HangarOptions> {
+        return configureOptions(HangarOptions::class) {
             it.from(this)
             action.execute(it)
         }

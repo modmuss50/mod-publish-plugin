@@ -2,7 +2,6 @@ package me.modmuss50.mpp
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.gradle.api.Action
 import org.gradle.api.file.RegularFile
@@ -12,7 +11,6 @@ import org.gradle.workers.WorkParameters
 import org.gradle.workers.WorkQueue
 import org.intellij.lang.annotations.Language
 import org.jetbrains.annotations.ApiStatus
-import java.lang.IllegalStateException
 import kotlin.reflect.KClass
 
 @ApiStatus.Internal
@@ -134,6 +132,25 @@ data class GitlabPublishResult(
 
     override val brandColor: Int
         get() = 0xFC6D26
+}
+
+@Serializable
+@SerialName("hangar")
+data class HangarPublishResult(
+    val projectSlug: String,
+    val version: String,
+    val channel: String,
+    val url: String,
+    override val title: String,
+) : PublishResult() {
+    override val type: String
+        get() = "hangar"
+
+    override val link: String
+        get() = url
+
+    override val brandColor: Int
+        get() = 0xFFFFFF
 }
 
 @ApiStatus.Internal

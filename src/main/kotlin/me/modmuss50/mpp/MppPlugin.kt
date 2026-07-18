@@ -5,6 +5,7 @@ import me.modmuss50.mpp.platforms.gitea.Codeberg
 import me.modmuss50.mpp.platforms.gitea.SelfHostedGitea
 import me.modmuss50.mpp.platforms.github.Github
 import me.modmuss50.mpp.platforms.gitlab.Gitlab
+import me.modmuss50.mpp.platforms.hangar.Hangar
 import me.modmuss50.mpp.platforms.modrinth.Modrinth
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -27,6 +28,9 @@ class MppPlugin : Plugin<Project> {
         }
         extension.platforms.registerFactory(Modrinth::class.java) {
             project.objects.newInstance(Modrinth::class.java, it)
+        }
+        extension.platforms.registerFactory(Hangar::class.java) {
+            project.objects.newInstance(Hangar::class.java, it)
         }
         extension.platforms.registerFactory(Github::class.java) {
             project.objects.newInstance(Github::class.java, it)
