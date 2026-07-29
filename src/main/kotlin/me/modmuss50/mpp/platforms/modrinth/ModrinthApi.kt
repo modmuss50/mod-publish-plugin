@@ -60,6 +60,24 @@ class ModrinthApi(
     }
 
     @Serializable
+    enum class AdditionalFileType {
+        @SerialName("required-resource-pack")
+        REQUIRED_RESOURCE_PACK,
+
+        @SerialName("optional-resource-pack")
+        OPTIONAL_RESOURCE_PACK,
+
+        @SerialName("javadoc-jar")
+        JAVADOC_JAR,
+
+        @SerialName("sources-jar")
+        SOURCES_JAR,
+
+        @SerialName("signature")
+        SIGNATURE,
+    }
+
+    @Serializable
     data class CreateVersion(
         val name: String,
         @SerialName("version_number")
@@ -82,6 +100,8 @@ class ModrinthApi(
         val fileParts: List<String>,
         @SerialName("primary_file")
         val primaryFile: String? = null,
+        @SerialName("file_types")
+        val fileTypes: Map<String, AdditionalFileType>? = null,
     )
 
     @Serializable

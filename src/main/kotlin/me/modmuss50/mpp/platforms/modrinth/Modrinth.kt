@@ -1,5 +1,6 @@
 package me.modmuss50.mpp.platforms.modrinth
 
+import me.modmuss50.mpp.GradleUtils
 import me.modmuss50.mpp.MinecraftApi
 import me.modmuss50.mpp.ModrinthPublishResult
 import me.modmuss50.mpp.Platform
@@ -15,13 +16,17 @@ import me.modmuss50.mpp.PublishWorkParameters
 import me.modmuss50.mpp.Retry
 import me.modmuss50.mpp.Validators
 import me.modmuss50.mpp.path
+import me.modmuss50.mpp.platforms.modrinth.ModrinthApi.VersionType
 import org.gradle.api.Action
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.logging.Logger
 import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
 import org.jetbrains.annotations.ApiStatus
 import java.nio.file.Path
@@ -33,6 +38,62 @@ interface ModrinthOptions :
     PlatformOptions,
     PlatformOptionsInternal<ModrinthOptions>,
     ModrinthDependencyContainer {
+    @get:Internal
+    val CLIENT_ONLY: ModrinthEnvironment
+        get() = ModrinthEnvironment.CLIENT_ONLY
+
+    @get:Internal
+    val SERVER_ONLY: ModrinthEnvironment
+        get() = ModrinthEnvironment.SERVER_ONLY
+
+    @get:Internal
+    val DEDICATED_SERVER_ONLY: ModrinthEnvironment
+        get() = ModrinthEnvironment.DEDICATED_SERVER_ONLY
+
+    @get:Internal
+    val CLIENT_AND_SERVER: ModrinthEnvironment
+        get() = ModrinthEnvironment.CLIENT_AND_SERVER
+
+    @get:Internal
+    val SERVER_ONLY_CLIENT_OPTIONAL: ModrinthEnvironment
+        get() = ModrinthEnvironment.SERVER_ONLY_CLIENT_OPTIONAL
+
+    @get:Internal
+    val CLIENT_ONLY_SERVER_OPTIONAL: ModrinthEnvironment
+        get() = ModrinthEnvironment.CLIENT_ONLY_SERVER_OPTIONAL
+
+    @get:Internal
+    val CLIENT_OR_SERVER_PREFERS_BOTH: ModrinthEnvironment
+        get() = ModrinthEnvironment.CLIENT_OR_SERVER_PREFERS_BOTH
+
+    @get:Internal
+    val CLIENT_OR_SERVER: ModrinthEnvironment
+        get() = ModrinthEnvironment.CLIENT_OR_SERVER
+
+    @get:Internal
+    val SINGLEPLAYER_ONLY: ModrinthEnvironment
+        get() = ModrinthEnvironment.SINGLEPLAYER_ONLY
+
+    @get:Internal
+    val REQUIRED_RESOURCE_PACK: ModrinthApi.AdditionalFileType
+        get() = ModrinthApi.AdditionalFileType.REQUIRED_RESOURCE_PACK
+
+    @get:Internal
+    val OPTIONAL_RESOURCE_PACK: ModrinthApi.AdditionalFileType
+        get() = ModrinthApi.AdditionalFileType.OPTIONAL_RESOURCE_PACK
+
+    @get:Internal
+    val JAVADOC_JAR: ModrinthApi.AdditionalFileType
+        get() = ModrinthApi.AdditionalFileType.JAVADOC_JAR
+
+    @get:Internal
+    val SOURCES_JAR: ModrinthApi.AdditionalFileType
+        get() = ModrinthApi.AdditionalFileType.SOURCES_JAR
+
+    @get:Internal
+    val SIGNATURE: ModrinthApi.AdditionalFileType
+        get() = ModrinthApi.AdditionalFileType.SIGNATURE
+
     companion object {
         // https://github.com/modrinth/labrinth/blob/ae1c5342f2017c1c93008d1e87f1a29549dca92f/src/scheduler.rs#L112
         @JvmStatic
@@ -81,6 +142,10 @@ interface ModrinthOptions :
     @get:Input
     val apiEndpoint: Property<String>
 
+    @get:Nested
+    @get:ApiStatus.Internal
+    val additionalFilesExt: MapProperty<ConfigurableFileCollection, AdditionalFileOptions>
+
     @ApiStatus.Internal
     override fun setInternalDefaults() {
         featured.convention(false)
@@ -116,6 +181,18 @@ interface ModrinthOptions :
         minecraftVersions.addAll(provider)
     }
 
+    fun additionalFile(
+        file: Any,
+        action: Action<AdditionalFileOptions>,
+    ) {
+        val options = objectFactory.newInstance(AdditionalFileOptions::class.java)
+        action.execute(options)
+
+        val fileCollection = GradleUtils.fileCollection(_thisProject, file)
+        additionalFiles.from(fileCollection)
+        additionalFilesExt.put(fileCollection, options)
+    }
+
     fun from(other: ModrinthOptions) {
         super.from(other)
         fromDependencies(other)
@@ -125,6 +202,7 @@ interface ModrinthOptions :
         environment.convention(other.environment)
         projectDescription.convention(other.projectDescription)
         apiEndpoint.convention(other.apiEndpoint)
+        additionalFilesExt.convention(other.additionalFilesExt)
     }
 
     fun from(other: Provider<ModrinthOptions>) {
@@ -216,6 +294,17 @@ interface ModrinthVersionRangeOptions {
     val includeSnapshots: Property<Boolean>
 }
 
+/**
+ * Options for additional files to upload alongside the main file
+ */
+interface AdditionalFileOptions {
+    /**
+     * The type of the additional file
+     */
+    @get:Input
+    val type: Property<ModrinthApi.AdditionalFileType>
+}
+
 abstract class Modrinth
 @Inject
 constructor(
@@ -261,8 +350,26 @@ constructor(
                 val files = HashMap<String, Path>()
                 files[primaryFileKey] = file.path
 
+                val additionalFileOptions =
+                    additionalFilesExt
+                        .get()
+                        .map { (key, value) ->
+                            key.singleFile.toPath() to value
+                        }.toMap()
+
+                val fileTypes = HashMap<String, ModrinthApi.AdditionalFileType>()
                 additionalFiles.files.forEachIndexed { index, additionalFile ->
-                    files["file_$index"] = additionalFile.toPath()
+                    val key = "file_$index"
+                    val path = additionalFile.toPath()
+
+                    // files
+                    files[key] = path
+
+                    // fileTypes
+                    val fileOptions = additionalFileOptions[path]
+                    if (fileOptions != null) {
+                        fileTypes[key] = fileOptions.type.get()
+                    }
                 }
 
                 val dependencies = dependencies.get().map { toApiDependency(it, api) }
@@ -281,6 +388,7 @@ constructor(
                         projectId = projectId.get().modrinthId,
                         fileParts = files.keys.toList(),
                         primaryFile = primaryFileKey,
+                        fileTypes = fileTypes,
                     )
 
                 val response =

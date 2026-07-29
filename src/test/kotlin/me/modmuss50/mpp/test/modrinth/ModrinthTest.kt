@@ -1,5 +1,6 @@
 package me.modmuss50.mpp.test.modrinth
 
+import me.modmuss50.mpp.platforms.modrinth.ModrinthApi
 import me.modmuss50.mpp.platforms.modrinth.ModrinthEnvironment
 import me.modmuss50.mpp.test.IntegrationTest
 import me.modmuss50.mpp.test.MockWebServer
@@ -514,5 +515,356 @@ class ModrinthTest : IntegrationTest {
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinth")!!.outcome)
         assertEquals(ModrinthEnvironment.CLIENT_ONLY, api.lastCreateVersion!!.environment)
+    }
+
+    @Test
+    fun uploadModrinthEnumsGroovy() {
+        val api = MockModrinthApi()
+        val server = MockWebServer(api)
+
+        val result = gradleTest(groovy = true)
+            .buildScript(
+                """
+                tasks.register("sourcesJar", Jar) {
+                    archiveClassifier = "sources"
+                }
+
+                publishMods {
+                    file = tasks.jar.archiveFile
+                    changelog = "Hello!"
+                    version = "1.0.0"
+                    type = STABLE
+                    modLoaders.add("fabric")
+
+                    modrinth {
+                        accessToken = "123"
+                        projectId = "12345678"
+                        minecraftVersions.add("1.20.1")
+                        environment = CLIENT_ONLY
+                        additionalFile(sourcesJar.archiveFile) {
+                            type = SOURCES_JAR
+                        }
+                        apiEndpoint = "${server.endpoint}"
+                    }
+                }
+                """.trimIndent(),
+            )
+            .run("publishModrinth")
+        server.close()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinth")!!.outcome)
+        assertEquals(ModrinthEnvironment.CLIENT_ONLY, api.lastCreateVersion!!.environment)
+        assertEquals(ModrinthApi.AdditionalFileType.SOURCES_JAR, api.lastCreateVersion!!.fileTypes!!["file_0"])
+    }
+
+    @Test
+    fun uploadModrinthSourcesJarType() {
+        val api = MockModrinthApi()
+        val server = MockWebServer(api)
+
+        val result = gradleTest()
+            .buildScript(
+                """
+            val sourcesJar = tasks.register("sourcesJar", Jar::class.java) {
+                archiveClassifier.set("sources")
+            }
+            
+            publishMods {
+                file = tasks.jar.flatMap { it.archiveFile }
+                changelog = "Hello!"
+                version = "1.0.0"
+                type = STABLE
+                modLoaders.add("fabric")
+                
+                modrinth {
+                    accessToken = "123"
+                    projectId = "12345678"
+                    minecraftVersions.add("1.20.1")
+                    
+                    additionalFile(sourcesJar) {
+                        type = SOURCES_JAR
+                    }
+                    
+                    apiEndpoint = "${server.endpoint}"
+                }
+            }
+                """.trimIndent(),
+            )
+            .run("publishModrinth")
+        server.close()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinth")!!.outcome)
+        assertEquals(ModrinthApi.AdditionalFileType.SOURCES_JAR, api.lastCreateVersion!!.fileTypes!!["file_0"])
+    }
+
+    @Test
+    fun uploadModrinthJavadocJarType() {
+        val api = MockModrinthApi()
+        val server = MockWebServer(api)
+
+        val result = gradleTest()
+            .file("mod-1.0.0-javadoc.jar", "dummy")
+            .buildScript(
+                """
+            val javadocJar = tasks.register("javadocJar", Jar::class.java) {
+                archiveClassifier.set("javadoc")
+            }
+            
+            publishMods {
+                file = tasks.jar.flatMap { it.archiveFile }
+                changelog = "Hello!"
+                version = "1.0.0"
+                type = STABLE
+                modLoaders.add("fabric")
+                
+                modrinth {
+                    accessToken = "123"
+                    projectId = "12345678"
+                    minecraftVersions.add("1.20.1")
+                    
+                    additionalFile(javadocJar.flatMap { it.archiveFile }) {
+                        type = JAVADOC_JAR
+                    }
+                    
+                    apiEndpoint = "${server.endpoint}"
+                }
+            }
+                """.trimIndent(),
+            )
+            .run("publishModrinth")
+        server.close()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinth")!!.outcome)
+        assertEquals(ModrinthApi.AdditionalFileType.JAVADOC_JAR, api.lastCreateVersion!!.fileTypes!!["file_0"])
+    }
+
+    @Test
+    fun uploadModrinthSignatureType() {
+        val api = MockModrinthApi()
+        val server = MockWebServer(api)
+
+        val result = gradleTest()
+            .buildScript(
+                """
+            val signature = tasks.register("signature", Jar::class.java) {
+                archiveClassifier.set("sig")
+            }
+            
+            publishMods {
+                file = tasks.jar.flatMap { it.archiveFile }
+                changelog = "Hello!"
+                version = "1.0.0"
+                type = STABLE
+                modLoaders.add("fabric")
+                
+                modrinth {
+                    accessToken = "123"
+                    projectId = "12345678"
+                    minecraftVersions.add("1.20.1")
+                    
+                    additionalFile(signature.flatMap { it.archiveFile }) {
+                        type = SIGNATURE
+                    }
+                    
+                    apiEndpoint = "${server.endpoint}"
+                }
+            }
+                """.trimIndent(),
+            )
+            .run("publishModrinth")
+        server.close()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinth")!!.outcome)
+        assertEquals(ModrinthApi.AdditionalFileType.SIGNATURE, api.lastCreateVersion!!.fileTypes!!["file_0"])
+    }
+
+    @Test
+    fun uploadModrinthAdditionalFileWithoutType() {
+        val api = MockModrinthApi()
+        val server = MockWebServer(api)
+
+        val result = gradleTest()
+            .buildScript(
+                """
+            val unknownFile = tasks.register("unknownFile", Jar::class.java) {
+                archiveClassifier.set("unknown")
+            }
+            
+            publishMods {
+                file = tasks.jar.flatMap { it.archiveFile }
+                changelog = "Hello!"
+                version = "1.0.0"
+                type = STABLE
+                modLoaders.add("fabric")
+                
+                modrinth {
+                    accessToken = "123"
+                    projectId = "12345678"
+                    minecraftVersions.add("1.20.1")
+                    
+                    additionalFiles.from(unknownFile)
+                    
+                    apiEndpoint = "${server.endpoint}"
+                }
+            }
+                """.trimIndent(),
+            )
+            .run("publishModrinth")
+        server.close()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinth")!!.outcome)
+        assert(api.lastCreateVersion!!.fileTypes.isNullOrEmpty())
+    }
+
+    @Test
+    fun uploadModrinthMultipleAdditionalFileTypes() {
+        val api = MockModrinthApi()
+        val server = MockWebServer(api)
+
+        val result = gradleTest()
+            .buildScript(
+                """
+            val sourcesJar = tasks.register("sourcesJar", Jar::class.java) {
+                archiveClassifier.set("sources")
+            }
+            val javadocJar = tasks.register("javadocJar", Jar::class.java) {
+                archiveClassifier.set("javadoc")
+            }
+            val signature = tasks.register("signature", Jar::class.java) {
+                archiveClassifier.set("sig")
+            }
+            
+            publishMods {
+                file = tasks.jar.flatMap { it.archiveFile }
+                changelog = "Hello!"
+                version = "1.0.0"
+                type = STABLE
+                modLoaders.add("fabric")
+                
+                modrinth {
+                    accessToken = "123"
+                    projectId = "12345678"
+                    minecraftVersions.add("1.20.1")
+                    
+                    additionalFile(sourcesJar.flatMap { it.archiveFile }) {
+                        type = SOURCES_JAR
+                    }
+                    additionalFile(javadocJar.flatMap { it.archiveFile }) {
+                        type = JAVADOC_JAR
+                    }
+                    additionalFile(signature.flatMap { it.archiveFile }) {
+                        type = SIGNATURE
+                    }
+                    
+                    apiEndpoint = "${server.endpoint}"
+                }
+            }
+                """.trimIndent(),
+            )
+            .notConfigCacheCompatible()
+            .run("publishModrinth")
+        server.close()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinth")!!.outcome)
+        val fileTypes = api.lastCreateVersion!!.fileTypes!!
+        assertEquals(
+            setOf(
+                ModrinthApi.AdditionalFileType.SOURCES_JAR,
+                ModrinthApi.AdditionalFileType.JAVADOC_JAR,
+                ModrinthApi.AdditionalFileType.SIGNATURE,
+            ),
+            fileTypes.values.toSet(),
+        )
+        assertFalse(fileTypes.containsKey("primaryFile"))
+    }
+
+    @Test
+    fun uploadModrinthAdditionalFilesDeduplication() {
+        val api = MockModrinthApi()
+        val server = MockWebServer(api)
+
+        val result = gradleTest()
+            .buildScript(
+                """
+            val sourcesJar = tasks.register("sourcesJar", Jar::class.java) {
+                archiveClassifier.set("sources")
+            }
+            val javadocJar = tasks.register("javadocJar", Jar::class.java) {
+                archiveClassifier.set("javadoc")
+            }
+            
+            publishMods {
+                file = tasks.jar.flatMap { it.archiveFile }
+                changelog = "Hello!"
+                version = "1.0.0"
+                type = STABLE
+                modLoaders.add("fabric")
+                
+                additionalFiles.from(sourcesJar, javadocJar)
+                
+                modrinth {
+                    accessToken = "123"
+                    projectId = "12345678"
+                    minecraftVersions.add("1.20.1")
+                    
+                    additionalFile(sourcesJar.flatMap { it.archiveFile }) {
+                        type = SOURCES_JAR
+                    }
+                    additionalFile(javadocJar.flatMap { it.archiveFile }) {
+                        type = JAVADOC_JAR
+                    }
+                    
+                    apiEndpoint = "${server.endpoint}"
+                }
+            }
+                """.trimIndent(),
+            )
+            .notConfigCacheCompatible()
+            .run("publishModrinth")
+        server.close()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinth")!!.outcome)
+        assertEquals(3, api.lastCreateVersion!!.fileParts.size)
+        val fileTypes = api.lastCreateVersion!!.fileTypes!!
+        assertEquals(2, fileTypes.size)
+        assertEquals(
+            setOf(
+                ModrinthApi.AdditionalFileType.SOURCES_JAR,
+                ModrinthApi.AdditionalFileType.JAVADOC_JAR,
+            ),
+            fileTypes.values.toSet(),
+        )
+        assertFalse(fileTypes.containsKey("primaryFile"))
+    }
+
+    @Test
+    fun uploadModrinthNoAdditionalFilesEmptyFileTypes() {
+        val api = MockModrinthApi()
+        val server = MockWebServer(api)
+
+        val result = gradleTest()
+            .buildScript(
+                """
+            publishMods {
+                file = tasks.jar.flatMap { it.archiveFile }
+                changelog = "Hello!"
+                version = "1.0.0"
+                type = STABLE
+                modLoaders.add("fabric")
+
+                modrinth {
+                    accessToken = "123"
+                    projectId = "12345678"
+                    minecraftVersions.add("1.20.1")
+                    apiEndpoint = "${server.endpoint}"
+                }
+            }
+                """.trimIndent(),
+            )
+            .run("publishModrinth")
+        server.close()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinth")!!.outcome)
+        assert(api.lastCreateVersion!!.fileTypes.isNullOrEmpty())
     }
 }
