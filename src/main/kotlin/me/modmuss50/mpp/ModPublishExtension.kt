@@ -50,7 +50,6 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
     val OPTIONAL_RESOURCE_PACK = ModrinthApi.AdditionalFileType.OPTIONAL_RESOURCE_PACK
     val JAVADOC_JAR = ModrinthApi.AdditionalFileType.JAVADOC_JAR
     val SOURCES_JAR = ModrinthApi.AdditionalFileType.SOURCES_JAR
-    val DEV_JAR = ModrinthApi.AdditionalFileType.DEV_JAR
     val SIGNATURE = ModrinthApi.AdditionalFileType.SIGNATURE
 
     abstract val dryRun: Property<Boolean>

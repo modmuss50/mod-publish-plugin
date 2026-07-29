@@ -599,47 +599,6 @@ class ModrinthTest : IntegrationTest {
     }
 
     @Test
-    fun uploadModrinthDevJarType() {
-        val api = MockModrinthApi()
-        val server = MockWebServer(api)
-
-        val result = gradleTest()
-            .file("mod-1.0.0-dev.jar", "dummy")
-            .buildScript(
-                """
-            val devJar = tasks.register("devJar", Jar::class.java) {
-                archiveClassifier.set("dev")
-            }
-            
-            publishMods {
-                file = tasks.jar.flatMap { it.archiveFile }
-                changelog = "Hello!"
-                version = "1.0.0"
-                type = STABLE
-                modLoaders.add("fabric")
-                
-                modrinth {
-                    accessToken = "123"
-                    projectId = "12345678"
-                    minecraftVersions.add("1.20.1")
-                    
-                    additionalFile(devJar.flatMap { it.archiveFile }) {
-                        type = DEV_JAR
-                    }
-                    
-                    apiEndpoint = "${server.endpoint}"
-                }
-            }
-                """.trimIndent(),
-            )
-            .run("publishModrinth")
-        server.close()
-
-        assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinth")!!.outcome)
-        assertEquals(ModrinthApi.AdditionalFileType.DEV_JAR, api.lastCreateVersion!!.fileTypes!!["file_0"])
-    }
-
-    @Test
     fun uploadModrinthSignatureType() {
         val api = MockModrinthApi()
         val server = MockWebServer(api)
