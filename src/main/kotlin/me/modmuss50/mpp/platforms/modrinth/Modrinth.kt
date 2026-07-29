@@ -1,5 +1,6 @@
 package me.modmuss50.mpp.platforms.modrinth
 
+import me.modmuss50.mpp.GradleUtils
 import me.modmuss50.mpp.MinecraftApi
 import me.modmuss50.mpp.ModrinthPublishResult
 import me.modmuss50.mpp.Platform
@@ -17,7 +18,6 @@ import me.modmuss50.mpp.Validators
 import me.modmuss50.mpp.path
 import me.modmuss50.mpp.platforms.modrinth.ModrinthApi.VersionType
 import org.gradle.api.Action
-import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.logging.Logger
 import org.gradle.api.provider.ListProperty
@@ -132,23 +132,7 @@ interface ModrinthOptions :
         val options = objectFactory.newInstance(AdditionalFileOptions::class.java)
         action.execute(options)
 
-        val fileCollection = objectFactory.fileCollection()
-        fileCollection.from(
-            when (file) {
-                is Project -> {
-                    val configuration =
-                        _thisProject.configurations.detachedConfiguration(
-                            _thisProject.dependencyFactory.create(file).setTransitive(false),
-                        )
-                    configuration.elements.map { it.single().asFile }
-                }
-
-                else -> {
-                    file
-                }
-            },
-        )
-
+        val fileCollection = GradleUtils.fileCollection(_thisProject, file)
         additionalFiles.from(fileCollection)
         additionalFilesExt.put(fileCollection, options)
     }
@@ -327,7 +311,9 @@ constructor(
 
                     // fileTypes
                     val fileOptions = additionalFileOptions[path]
-                    fileTypes[key] = fileOptions?.type?.get() ?: ModrinthApi.AdditionalFileType.UNKNOWN
+                    if (fileOptions != null) {
+                        fileTypes[key] = fileOptions.type.get()
+                    }
                 }
 
                 val dependencies = dependencies.get().map { toApiDependency(it, api) }

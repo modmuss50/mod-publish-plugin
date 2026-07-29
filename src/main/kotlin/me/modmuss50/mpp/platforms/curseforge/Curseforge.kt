@@ -1,6 +1,7 @@
 package me.modmuss50.mpp.platforms.curseforge
 
 import me.modmuss50.mpp.CurseForgePublishResult
+import me.modmuss50.mpp.GradleUtils
 import me.modmuss50.mpp.MinecraftApi
 import me.modmuss50.mpp.Platform
 import me.modmuss50.mpp.PlatformDependency
@@ -17,7 +18,6 @@ import me.modmuss50.mpp.Validators
 import me.modmuss50.mpp.path
 import org.gradle.api.Action
 import org.gradle.api.JavaVersion
-import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.logging.Logger
 import org.gradle.api.provider.ListProperty
@@ -141,23 +141,7 @@ interface CurseforgeOptions :
         val options = objectFactory.newInstance(AdditionalFileOptions::class.java)
         action.execute(options)
 
-        val fileCollection = objectFactory.fileCollection()
-        fileCollection.from(
-            when (file) {
-                is Project -> {
-                    val configuration =
-                        _thisProject.configurations.detachedConfiguration(
-                            _thisProject.dependencyFactory.create(file).setTransitive(false),
-                        )
-                    configuration.elements.map { it.single().asFile }
-                }
-
-                else -> {
-                    file
-                }
-            },
-        )
-
+        val fileCollection = GradleUtils.fileCollection(_thisProject, file)
         additionalFiles.from(fileCollection)
         additionalFilesExt.put(fileCollection, options)
     }

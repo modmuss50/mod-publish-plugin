@@ -541,7 +541,7 @@ class ModrinthTest : IntegrationTest {
                     projectId = "12345678"
                     minecraftVersions.add("1.20.1")
                     
-                    additionalFile(sourcesJar.flatMap { it.archiveFile }) {
+                    additionalFile(sourcesJar) {
                         type = SOURCES_JAR
                     }
                     
@@ -680,7 +680,7 @@ class ModrinthTest : IntegrationTest {
     }
 
     @Test
-    fun uploadModrinthUnknownFileType() {
+    fun uploadModrinthAdditionalFileWithoutType() {
         val api = MockModrinthApi()
         val server = MockWebServer(api)
 
@@ -714,7 +714,7 @@ class ModrinthTest : IntegrationTest {
         server.close()
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishModrinth")!!.outcome)
-        assertEquals(ModrinthApi.AdditionalFileType.UNKNOWN, api.lastCreateVersion!!.fileTypes!!["file_0"])
+        assert(api.lastCreateVersion!!.fileTypes.isNullOrEmpty())
     }
 
     @Test

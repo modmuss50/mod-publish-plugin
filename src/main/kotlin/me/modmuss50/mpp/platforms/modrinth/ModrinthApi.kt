@@ -78,9 +78,6 @@ class ModrinthApi(
 
         @SerialName("signature")
         SIGNATURE,
-
-        @SerialName("unknown")
-        UNKNOWN,
     }
 
     @Serializable

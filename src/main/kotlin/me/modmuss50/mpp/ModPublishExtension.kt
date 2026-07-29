@@ -52,7 +52,6 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
     val SOURCES_JAR = ModrinthApi.AdditionalFileType.SOURCES_JAR
     val DEV_JAR = ModrinthApi.AdditionalFileType.DEV_JAR
     val SIGNATURE = ModrinthApi.AdditionalFileType.SIGNATURE
-    val UNKNOWN = ModrinthApi.AdditionalFileType.UNKNOWN
 
     abstract val dryRun: Property<Boolean>
     val platforms: ExtensiblePolymorphicDomainObjectContainer<Platform> = project.objects.polymorphicDomainObjectContainer(Platform::class.java)

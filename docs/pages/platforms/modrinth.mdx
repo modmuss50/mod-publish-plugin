@@ -117,6 +117,11 @@ See the following example showing all the Modrinth specific options:
             // Alternatively, you can specify a range of Minecraft versions as a list:
             minecraftVersionList("26.1, 26.1.1, 26.1.2")
 
+            // Upload an additional file and tell Modrinth what type it is
+            additionalFile(sourcesJar) {
+                type = SOURCES_JAR
+            }
+
             // You can specify either the project id OR slug, but not both.
             requires {
                 id = "12345678"
@@ -177,6 +182,11 @@ See the following example showing all the Modrinth specific options:
             // Alternatively, you can specify a range of Minecraft versions as a list:
             minecraftVersionList("26.1, 26.1.1, 26.1.2")
 
+            // Upload an additional file and tell Modrinth what type it is
+            additionalFile(sourcesJar.flatMap { it.archiveFile }) {
+                type.set(SOURCES_JAR)
+            }
+
             // You can specify either the project id OR slug, but not both.
             requires {
                 id.set("12345678")
@@ -220,3 +230,12 @@ The `environment` option can be left unset. When set, it accepts one of the foll
 - `CLIENT_OR_SERVER_PREFERS_BOTH`
 - `CLIENT_OR_SERVER`
 - `SINGLEPLAYER_ONLY`
+
+The `type` of an `additionalFile` can be one of the following values:
+
+- `REQUIRED_RESOURCE_PACK`
+- `OPTIONAL_RESOURCE_PACK`
+- `JAVADOC_JAR`
+- `SOURCES_JAR`
+- `DEV_JAR`
+- `SIGNATURE`
