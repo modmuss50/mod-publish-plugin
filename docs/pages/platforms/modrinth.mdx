@@ -183,7 +183,7 @@ See the following example showing all the Modrinth specific options:
             minecraftVersionList("26.1, 26.1.1, 26.1.2")
 
             // Upload an additional file and tell Modrinth what type it is
-            additionalFile(sourcesJar.flatMap { it.archiveFile }) {
+            additionalFile(sourcesJar) {
                 type.set(SOURCES_JAR)
             }
 
