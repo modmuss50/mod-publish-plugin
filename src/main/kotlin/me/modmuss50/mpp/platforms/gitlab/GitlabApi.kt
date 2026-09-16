@@ -38,6 +38,12 @@ class GitlabApi(
     )
 
     @Serializable
+    data class ReleaseLinks(
+        @SerialName("_links")
+        val links: Map<String, String>
+    )
+
+    @Serializable
     data class Assets(
         val links: List<AssetLink> = emptyList(),
     )
@@ -89,6 +95,15 @@ class GitlabApi(
         projectId: Long,
         tagName: String,
     ): Release {
+        val encodedTag = URLEncoder.encode(tagName, Charsets.UTF_8)
+        val url = "$apiEndpoint/projects/$projectId/releases/$encodedTag"
+        return httpContext.get(url, headers)
+    }
+
+    fun getReleaseLinks(
+        projectId: Long,
+        tagName: String,
+    ): ReleaseLinks {
         val encodedTag = URLEncoder.encode(tagName, Charsets.UTF_8)
         val url = "$apiEndpoint/projects/$projectId/releases/$encodedTag"
         return httpContext.get(url, headers)

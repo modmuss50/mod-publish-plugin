@@ -87,6 +87,7 @@ class MockGitlabApi : MockWebServer.MockApi {
               "name": "Release $tagName",
               "description": "Mock release for project $projectId",
               "assets": { "links": [] }
+              "_links": { "self": "https://gitlab.example.com/example-mod/-/releases/$tagName" }
             }
             """.trimIndent(),
         )
