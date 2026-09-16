@@ -40,7 +40,7 @@ class GitlabApi(
     @Serializable
     data class ReleaseLinks(
         @SerialName("_links")
-        val links: Map<String, String>
+        val links: Map<String, String>,
     )
 
     @Serializable
