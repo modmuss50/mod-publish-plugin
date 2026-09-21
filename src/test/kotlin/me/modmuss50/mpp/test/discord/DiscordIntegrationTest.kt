@@ -17,7 +17,6 @@ import kotlin.test.assertEquals
 class DiscordIntegrationTest : IntegrationTest {
     @Test
     fun run() {
-        //region Classic message body
         var result = gradleTest()
             .buildScript(
                 createScript(""),
@@ -53,53 +52,6 @@ class DiscordIntegrationTest : IntegrationTest {
             .run("publishMods")
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishMods")!!.outcome)
-        //endregion
-
-        //region Modern message body
-        result = gradleTest()
-            .buildScript(
-                createScript(
-                    """
-                    style {
-                        look = "MODERN"
-                    }
-                    """.trimIndent(),
-                ),
-            )
-            .run("publishMods")
-
-        assertEquals(TaskOutcome.SUCCESS, result.task(":publishMods")!!.outcome)
-
-        result = gradleTest()
-            .buildScript(
-                createScript(
-                    """
-                    style {
-                        look = "MODERN"
-                        link = "BUTTON"
-                    }
-                    """.trimIndent(),
-                ),
-            )
-            .run("publishMods")
-
-        assertEquals(TaskOutcome.SUCCESS, result.task(":publishMods")!!.outcome)
-
-        result = gradleTest()
-            .buildScript(
-                createScript(
-                    """
-                    style {
-                        look = "MODERN"
-                        link = "INLINE"
-                    }
-                    """.trimIndent(),
-                ),
-            )
-            .run("publishMods")
-
-        assertEquals(TaskOutcome.SUCCESS, result.task(":publishMods")!!.outcome)
-        //endregion
     }
 
     private fun createScript(@Language("gradle") style: String): String {

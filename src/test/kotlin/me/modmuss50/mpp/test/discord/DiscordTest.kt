@@ -583,7 +583,7 @@ class DiscordTest : IntegrationTest {
                     changelog = "# Changelog\n-123\n-epic feature"
                     version = "1.0.0"
                     type = BETA
-                    
+
                     curseforge {
                         accessToken = "123"
                         projectId = "123456"
@@ -591,25 +591,23 @@ class DiscordTest : IntegrationTest {
                         client = true
                         apiEndpoint = "${server.endpoint}"
                     }
-                    
+
                     modrinth {
                         accessToken = "123"
-                        projectId = "12345678"                        
+                        projectId = "12345678"
                         apiEndpoint = "${server.endpoint}"
                     }
-                    
+
                     github {
                         accessToken = "123"
                         repository = "test/example"
                         commitish = "main"
                         apiEndpoint = "${server.endpoint}"
                     }
-                
+
                     discord {
                         webhookUrl = "${server.endpoint}/api/webhooks/213/abc"
-                        style {
-                            look = "MODERN"
-                        }
+                        embedContent = "Embed description"
                     }
                 }
                 """.trimIndent(),
@@ -621,10 +619,69 @@ class DiscordTest : IntegrationTest {
         embeds = embeds.sortedBy { it.url }
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":announceDiscord")!!.outcome)
+        // 1 modern embed (no URL, has description) + 3 link embeds
         assertEquals(4, embeds.size)
         assertNull(embeds[0].url)
+        assertEquals("Embed description", embeds[0].description)
         assertEquals("https://curseforge.com/minecraft/mc-mods/test-mod/files/20402", embeds[1].url)
         assertEquals("https://github.com", embeds[2].url)
         assertEquals("https://modrinth.com/mod/12345678/version/hFdJG9fY", embeds[3].url)
+    }
+
+    @Test
+    fun announceBothContentAndEmbed() {
+        val discordApi = MockDiscordApi()
+        val server = MockWebServer(MockWebServer.CombinedApi(listOf(discordApi, MockCurseforgeApi(), MockModrinthApi(), MockGithubApi())))
+
+        gradleTest()
+            .buildScript(
+                """
+                publishMods {
+                    file = tasks.jar.flatMap { it.archiveFile }
+                    changelog = "# Changelog\n-123\n-epic feature"
+                    version = "1.0.0"
+                    type = BETA
+
+                    curseforge {
+                        accessToken = "123"
+                        projectId = "123456"
+                        projectSlug = "test-mod"
+                        client = true
+                        apiEndpoint = "${server.endpoint}"
+                    }
+
+                    modrinth {
+                        accessToken = "123"
+                        projectId = "12345678"
+                        apiEndpoint = "${server.endpoint}"
+                    }
+
+                    github {
+                        accessToken = "123"
+                        repository = "test/example"
+                        commitish = "main"
+                        apiEndpoint = "${server.endpoint}"
+                    }
+
+                    discord {
+                        webhookUrl = "${server.endpoint}/api/webhooks/213/abc"
+                        content = "Plain text content"
+                        embedContent = "Embed description"
+                    }
+                }
+                """.trimIndent(),
+            )
+            .run("publishMods")
+        server.close()
+
+        val first = discordApi.requests.first()
+
+        // Both plain text content and the embed should appear in the same message
+        assertEquals("Plain text content", first.content)
+        assertNotNull(first.embeds)
+
+        // The modern embed is the one with no URL — its description comes from embedContent
+        val modernEmbed = first.embeds!!.first { it.url == null }
+        assertEquals("Embed description", modernEmbed.description)
     }
 }

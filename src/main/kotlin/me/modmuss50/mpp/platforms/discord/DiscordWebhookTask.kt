@@ -44,6 +44,9 @@ interface DiscordWebhookOptions {
     @get:Input
     val content: Property<String>
 
+    @get:Input
+    val embedContent: Property<String>
+
     @get:Nested
     val style: Property<MessageStyle>
 
@@ -53,6 +56,7 @@ interface DiscordWebhookOptions {
         username.convention(other.username)
         avatarUrl.convention(other.avatarUrl)
         content.convention(other.content)
+        embedContent.convention(other.embedContent)
         style.convention(other.style)
     }
 
@@ -63,9 +67,6 @@ interface DiscordWebhookOptions {
 
 @Suppress("MemberVisibilityCanBePrivate")
 interface MessageStyle {
-    @get:Input
-    val look: Property<String>
-
     @get:Input
     @get:Optional
     val thumbnailUrl: Property<String>
@@ -79,16 +80,10 @@ interface MessageStyle {
     val link: Property<String>
 
     fun from(other: MessageStyle) {
-        look.convention(other.look)
         thumbnailUrl.convention(other.thumbnailUrl)
         color.convention(other.color)
         link.convention(other.link)
     }
-}
-
-enum class MessageLook {
-    MODERN,
-    CLASSIC,
 }
 
 enum class LinkType {
@@ -114,12 +109,12 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
         group = "publishing"
         username.convention("Mod Publish Plugin")
         content.convention(project.modPublishExtension.changelog)
+        embedContent.convention("")
 
         dryRun.set(project.modPublishExtension.dryRun)
         dryRun.finalizeValue()
 
         with(project.objects.newInstance(MessageStyle::class.java)) {
-            look.convention("CLASSIC")
             link.convention("EMBED")
 
             style.convention(this)
@@ -226,6 +221,9 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
 
                 var firstRequest = true
 
+                // Only include plain text content if it is non-blank
+                val messageContent = createMessageBody().takeIf { it.isNotBlank() }
+
                 // Split the embeds across multiple messages if needed
                 val embedChunks = embeds.chunked(10)
                 embedChunks.forEachIndexed { index, chunk ->
@@ -233,7 +231,8 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
                         url.get(),
                         DiscordAPI.Webhook(
                             username = username.get(),
-                            content = if (index == 0) createClassicMessage() else null,
+                            // Include plain text content alongside the embed only on the first message, and only if non-blank
+                            content = if (index == 0) messageContent else null,
                             avatarUrl = avatarUrl.orNull,
                             embeds = chunk,
                             // Only the last embed should have buttons
@@ -253,7 +252,8 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
                     DiscordAPI.executeWebhook(
                         url.get(),
                         DiscordAPI.Webhook(
-                            content = if (firstRequest) createClassicMessage() else null,
+                            // Include plain text content on the first message if it wasn't already sent, and only if non-blank
+                            content = if (firstRequest) messageContent else null,
                             username = username.get(),
                             avatarUrl = avatarUrl.orNull,
                             components = components.next(),
@@ -263,12 +263,12 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
                     firstRequest = false
                 }
 
-                // Message has no embeds nor buttons, and was not sent yet
-                if (firstRequest) {
+                // Message has no embeds nor buttons, and was not sent yet — send plain text content if non-blank
+                if (firstRequest && messageContent != null) {
                     DiscordAPI.executeWebhook(
                         url.get(),
                         DiscordAPI.Webhook(
-                            content = createClassicMessage(),
+                            content = messageContent,
                             username = username.get(),
                             avatarUrl = avatarUrl.orNull,
                         ),
@@ -283,45 +283,27 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
          * Create the embeds used for the message
          * The list has the content and the links.
          *
-         * Depending on the message style, only the links may be present,
-         * or it may be empty
+         * Depending on the embed content, only the links may be present
          */
         fun createEmbeds(): List<DiscordAPI.Embed> {
             with(parameters) {
-                return when (MessageLook.valueOf(style.get().look.get())) {
-                    MessageLook.CLASSIC -> createLinkEmbeds()
-                    // Get the link embeds and the modern embed
-                    MessageLook.MODERN -> listOf(createModernEmbed()) + createLinkEmbeds()
+                return if (embedContent.get().isBlank()) {
+                    createLinkEmbeds()
+                } else {
+                    listOf(createModernEmbed()) + createLinkEmbeds()
                 }
             }
         }
 
         /**
-         * Create the message body for the classic style
-         *
-         * It may be null depending on the configured style
-         */
-        fun createClassicMessage(): String? {
-            with(parameters) {
-                if (MessageLook.valueOf(style.get().look.get()) != MessageLook.CLASSIC) {
-                    return null
-                }
-
-                return createMessageBody()
-            }
-        }
-
-        /**
-         * Create the message embed for the modern style
-         *
-         * It will never be null
+         * Create the message embed using embedContent as the description
          */
         fun createModernEmbed(): DiscordAPI.Embed {
             with(parameters) {
                 val style: MessageStyle = style.get()
                 return DiscordAPI.Embed(
                     thumbnail = style.thumbnailUrl.map { DiscordAPI.EmbedThumbnail(url = it) }.orNull,
-                    description = createMessageBody(),
+                    description = embedContent.get(),
                     color = style.color.map { parseColor(it) }.orNull,
                 )
             }
@@ -349,13 +331,12 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
         /**
          * Create the link embeds for the message
          *
-         * It may be an empty list depending on the configured style
+         * It may be an empty list depending on the link type
          */
         fun createLinkEmbeds(): List<DiscordAPI.Embed> {
             with(parameters) {
                 if (LinkType.valueOf(style.get().link.get()) != LinkType.EMBED) {
-                    // Return empty list as there is no link embed
-                    // Doing this helps keeping createEmbeds cleaner
+                    // Return empty list as the link type is not EMBED
                     return listOf()
                 }
 
@@ -384,13 +365,12 @@ abstract class DiscordWebhookTask : DefaultTask(), DiscordWebhookOptions {
         /**
          * Create the link buttons for the message
          *
-         * It may be an empty list depending on the configured style
+         * It may be an empty list depending on the link type
          */
         fun createComponents(): List<DiscordAPI.ActionRow> {
             with(parameters) {
                 if (LinkType.valueOf(style.get().link.get()) != LinkType.BUTTON) {
-                    // Return empty list as there is no button
-                    // Doing this helps keeping createEmbeds cleaner
+                    // Return empty list as the link type is not BUTTON
                     return listOf()
                 }
 
