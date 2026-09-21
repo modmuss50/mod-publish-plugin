@@ -206,10 +206,14 @@ constructor(
                     ),
                 )
 
+                val releaseUrl = requireNotNull(api.getReleaseLinks(projectId.get(), tagName.get()).links["self"]) {
+                    "Missing release url!"
+                }
+
                 return GitlabPublishResult(
                     projectId = projectId.get(),
                     tagName = tagName.get(),
-                    url = "https://gitlab.com/projects/${projectId.get()}/releases/${tagName.get()}",
+                    url = releaseUrl,
                     title = announcementTitle.getOrElse("Download from GitLab"),
                 )
             }
