@@ -264,7 +264,10 @@ abstract class ModPublishExtension(val project: Project) : PublishOptions {
     }
 
     fun codeberg(name: String, action: Action<Codeberg>): NamedDomainObjectProvider<Codeberg> {
-        return platforms.maybeRegister(name, action)
+        return platforms.maybeRegister(name) { it ->
+            it.hostType.set(GiteaCompatiblePlatform.CODEBERG)
+            action.execute(it)
+        }
     }
 
     fun codebergOptions(@DelegatesTo(value = Codeberg::class) closure: Closure<*>): Provider<GiteaCompatibleOptions> {

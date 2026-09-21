@@ -95,6 +95,47 @@ class GiteaTest : IntegrationTest {
     }
 
     @Test
+    fun uploadCodebergToParentRelease() {
+        val server = MockWebServer(MockGiteaApi())
+
+        val result = gradleTest()
+            .buildScript(
+                """
+                    publishMods {
+                        changelog = "Hello!"
+                        version = "1.0.0"
+                        type = STABLE
+                        codeberg {
+                            accessToken = "123"
+                            host(uri("${server.endpoint}"))
+                            repository = "test/example"
+                            commitish = "main"
+                            tagName = "release/1.0.0"
+                            allowEmptyFiles = true
+                        }
+                    }
+                """.trimIndent(),
+            )
+            .subProject(
+                "child",
+                """
+                    publishMods {
+                        codeberg {
+                            accessToken = "123"
+                            parent(project(":").tasks.named("publishCodeberg"))
+                            file = tasks.jar.flatMap { it.archiveFile }
+                        }
+                    }
+                """.trimIndent(),
+            )
+            .run("publishMods")
+        server.close()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishCodeberg")!!.outcome)
+        assertEquals(TaskOutcome.SUCCESS, result.task(":child:publishCodeberg")!!.outcome)
+    }
+
+    @Test
     fun noMainFile() {
         val server = MockWebServer(MockGiteaApi())
 
