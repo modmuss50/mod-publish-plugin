@@ -17,6 +17,30 @@ class CurseforgeVersionsTest {
     }
 
     @Test
+    fun minecraftVersionsPlugin1_8_3() {
+        val versions = createVersions()
+        assertEquals(568, versions.getMinecraftPluginVersion("1.8.3"))
+    }
+
+    @Test
+    fun minecraftVersionsPlugin1_8_8() {
+        val versions = createVersions()
+        assertEquals(531, versions.getMinecraftPluginVersion("1.8.8"))
+    }
+
+    @Test
+    fun minecraftVersionsPlugin1_12_2() {
+        val versions = createVersions()
+        assertEquals(6588, versions.getMinecraftPluginVersion("1.12.2"))
+    }
+
+    @Test
+    fun minecraftVersionsPlugin1_20_1() {
+        val versions = createVersions()
+        assertEquals(9994, versions.getMinecraftPluginVersion("1.20.1"))
+    }
+
+    @Test
     fun modLoader() {
         val versions = createVersions()
         assertEquals(7499, versions.getModLoaderVersion("fabric"))

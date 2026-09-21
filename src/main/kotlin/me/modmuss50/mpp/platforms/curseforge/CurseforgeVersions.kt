@@ -6,12 +6,24 @@ class CurseforgeVersions(
     private val versionTypes: List<CurseforgeApi.GameVersionType>,
     private val versions: List<CurseforgeApi.GameVersion>,
 ) {
+    companion object {
+        // Not documented anywhere, but Minecraft versions for plugins use game version type ID = 1.
+        // It's not returned in version-types either, so the only solution is to hard-code it.
+        @JvmStatic
+        val PLUGIN_MINECRAFT_VERSION_TYPE_ID = 1
+    }
 
     private fun getGameVersionTypes(name: String): List<Int> {
-        val versions = if (name == "minecraft") {
-            versionTypes.filter { it.slug.startsWith("minecraft") }
-        } else {
-            versionTypes.filter { it.slug == name }
+        val versions = when (name) {
+            "minecraft" -> {
+                versionTypes.filter { it.slug.startsWith("minecraft") }
+            }
+            "minecraftPlugin" -> {
+                return listOf(PLUGIN_MINECRAFT_VERSION_TYPE_ID)
+            }
+            else -> {
+                versionTypes.filter { it.slug == name }
+            }
         }.map { it.id }
 
         if (versions.isEmpty()) {
@@ -29,6 +41,17 @@ class CurseforgeVersions(
 
     fun getMinecraftVersion(name: String): Int {
         return getVersion(name, "minecraft")
+    }
+
+    fun getMinecraftPluginVersion(name: String): Int {
+        return try {
+            getVersion(name, "minecraftPlugin")
+        } catch (_: IllegalStateException) {
+            // Try major.minor (no patch)
+            val parts = name.split(".")
+            if (parts.size < 2) throw IllegalStateException("Failed to find version: $name")
+            getVersion("${parts[0]}.${parts[1]}", "minecraftPlugin")
+        }
     }
 
     fun getModLoaderVersion(name: String): Int {
