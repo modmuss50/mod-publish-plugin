@@ -9,14 +9,19 @@ import io.javalin.http.Context
 import me.modmuss50.mpp.test.MockWebServer
 
 // The very bare minimum to mock out the GitHub API.
-class MockGithubApi : MockWebServer.MockApi {
+class MockGithubApi(
+    private val existingTag: Boolean = false,
+) : MockWebServer.MockApi {
     val uploadedAssetNames = mutableListOf<String>()
+    var createdReleases = 0
+    var createReleaseBody: String? = null
 
     override fun routes(): EndpointGroup {
         return EndpointGroup {
             path("repos") {
                 path("{owner}/{name}") {
                     get(this::getRepo)
+                    get("git/ref/tags/{tag}", this::getTag)
                     path("releases") {
                         post(this::createRelease)
                         path("{id}/assets") {
@@ -43,6 +48,8 @@ class MockGithubApi : MockWebServer.MockApi {
 
     // https://docs.github.com/en/rest/releases/releases?apiVersion=2022-11-28#create-a-release
     private fun createRelease(context: Context) {
+        createdReleases++
+        createReleaseBody = context.body()
         context.result(
             """
             {
@@ -52,6 +59,14 @@ class MockGithubApi : MockWebServer.MockApi {
             }
             """.trimIndent(),
         )
+    }
+
+    private fun getTag(context: Context) {
+        if (existingTag) {
+            context.result("{}")
+        } else {
+            context.status(404)
+        }
     }
 
     // https://docs.github.com/en/rest/releases/assets?apiVersion=2022-11-28#upload-a-release-asset

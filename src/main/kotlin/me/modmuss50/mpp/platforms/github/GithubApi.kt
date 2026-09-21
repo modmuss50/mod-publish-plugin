@@ -2,9 +2,11 @@ package me.modmuss50.mpp.platforms.github
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonObject
 import me.modmuss50.mpp.networking.HttpApi.get
 import me.modmuss50.mpp.networking.HttpApi.patch
 import me.modmuss50.mpp.networking.HttpApi.post
+import me.modmuss50.mpp.networking.HttpException
 import me.modmuss50.mpp.networking.RequestContext
 import java.io.File
 import java.net.URLEncoder
@@ -43,7 +45,7 @@ class GithubApi(
         @SerialName("tag_name")
         val tagName: String,
         @SerialName("target_commitish")
-        val targetCommitish: String,
+        val targetCommitish: String? = null,
         val name: String,
         val body: String,
         val draft: Boolean,
@@ -70,6 +72,18 @@ class GithubApi(
     fun getRepository(repository: String): Repository {
         val url = "$apiEndpoint/repos/$repository"
         return httpContext.get(url, headers)
+    }
+
+    // https://docs.github.com/en/rest/git/refs?apiVersion=2022-11-28#get-a-reference
+    fun tagExists(repository: String, tagName: String): Boolean {
+        val encodedTag = URLEncoder.encode(tagName, Charsets.UTF_8).replace("+", "%20")
+        val url = "$apiEndpoint/repos/$repository/git/ref/tags/$encodedTag"
+        return try {
+            httpContext.get<JsonObject>(url, headers)
+            true
+        } catch (e: HttpException) {
+            if (e.statusCode == 404) false else throw e
+        }
     }
 
     // https://docs.github.com/en/rest/releases/releases?apiVersion=2022-11-28#create-a-release

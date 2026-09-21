@@ -190,7 +190,7 @@ abstract class Github @Inject constructor(name: String) : Platform(name), Github
                     repo.fullName,
                     GithubApi.CreateReleaseRequest(
                         tagName = tagName.get(),
-                        targetCommitish = commitish.get(),
+                        targetCommitish = if (api.tagExists(repo.fullName, tagName.get())) null else commitish.get(),
                         name = displayName.get(),
                         body = changelog.get(),
                         draft = true, // Create a draft to allow uploading assets before publishing.

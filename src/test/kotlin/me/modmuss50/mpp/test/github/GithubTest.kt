@@ -6,11 +6,13 @@ import org.gradle.testkit.runner.TaskOutcome
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 
 class GithubTest : IntegrationTest {
     @Test
     fun uploadGithub() {
-        val server = MockWebServer(MockGithubApi())
+        val api = MockGithubApi()
+        val server = MockWebServer(api)
 
         val result = gradleTest()
             .buildScript(
@@ -34,6 +36,8 @@ class GithubTest : IntegrationTest {
         server.close()
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishGithub")!!.outcome)
+        assertEquals(1, api.createdReleases)
+        assertContains(api.createReleaseBody!!, "\"target_commitish\":\"main\"")
     }
 
     @Test
@@ -126,6 +130,37 @@ class GithubTest : IntegrationTest {
         server.close()
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":publishGithubOther")!!.outcome)
+    }
+
+    @Test
+    fun createGithubReleaseForExistingTag() {
+        val api = MockGithubApi(existingTag = true)
+        val server = MockWebServer(api)
+
+        val result = gradleTest()
+            .buildScript(
+                """
+                    publishMods {
+                        file = tasks.jar.flatMap { it.archiveFile }
+                        changelog = "Hello!"
+                        version = "1.0.0"
+                        type = STABLE
+                        github {
+                            accessToken = "123"
+                            repository = "test/example"
+                            commitish = "main"
+                            apiEndpoint = "${server.endpoint}"
+                            tagName = "release/1.0.0"
+                        }
+                    }
+                """.trimIndent(),
+            )
+            .run("publishGithub")
+        server.close()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":publishGithub")!!.outcome)
+        assertEquals(1, api.createdReleases)
+        assertFalse(api.createReleaseBody!!.contains("target_commitish"))
     }
 
     @Test
