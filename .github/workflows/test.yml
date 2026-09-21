@@ -3,10 +3,6 @@ on: [push, pull_request]
 
 jobs:
   test:
-    strategy:
-      fail-fast: false
-      matrix:
-        gradle: [ "9.4.0", nightly ]
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -18,7 +14,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v3
         with:
           cache-disabled: true
-          gradle-version: ${{ matrix.gradle }}
+          gradle-version: "9.4.0"
       - name: Build
         run: gradle build --stacktrace --warning-mode fail
 
